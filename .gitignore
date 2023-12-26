@@ -1,3 +1,4 @@
 .vscode
 sonifybackend
 .env
+vendor
