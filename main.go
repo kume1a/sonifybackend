@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
@@ -13,9 +12,10 @@ import (
 func main() {
 	godotenv.Load(".env")
 
-	portStr := os.Getenv("PORT")
-	if portStr == "" {
-		log.Fatal("PORT is not found in the env")
+	envVars, err := parseEnv()
+	if err != nil {
+		log.Fatal("Coultn't parse env vars, returning")
+		return
 	}
 
 	router := chi.NewRouter()
@@ -36,10 +36,10 @@ func main() {
 
 	server := &http.Server{
 		Handler: router,
-		Addr:    ":" + portStr,
+		Addr:    ":" + envVars.Port,
 	}
 
-	log.Printf("Starting server on port %s", portStr)
+	log.Printf("Starting server on port %s", envVars.Port)
 
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatal(err)
