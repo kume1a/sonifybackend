@@ -1,13 +1,21 @@
 package main
 
 import (
+	"database/sql"
 	"log"
 	"net/http"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
+	"github.com/kume1a/sonifybackend/internal/database"
+
+	_ "github.com/lib/pq"
 )
+
+type apiConfg struct {
+	DB *database.Queries
+}
 
 func main() {
 	godotenv.Load(".env")
@@ -16,6 +24,15 @@ func main() {
 	if err != nil {
 		log.Fatal("Coultn't parse env vars, returning")
 		return
+	}
+
+	conn, err := sql.Open("postgres", envVars.DbUrl)
+	if err != nil {
+		log.Fatal("Couldn't connect to database", envVars.DbUrl)
+	}
+
+	apiCfg := apiConfg{
+		DB: database.New(conn),
 	}
 
 	router := chi.NewRouter()
@@ -29,8 +46,10 @@ func main() {
 	}))
 
 	v1Router := chi.NewRouter()
-	v1Router.Get("/healthcheck", healthcheck)
-	v1Router.Get("/err", handleErr)
+	v1Router.Get("/healthcheck", handlerHealthcheck)
+	v1Router.Get("/err", handlerErr)
+
+	v1Router.Post("/users", apiCfg.handlerCreateUser)
 
 	router.Mount("/v1", v1Router)
 

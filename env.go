@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"os"
 )
@@ -31,7 +32,7 @@ func parseEnv() (*EnvVariables, error) {
 func getEnvVariable(key string) (string, error) {
 	envVar := os.Getenv(key)
 	if envVar == "" {
-		msg := "PORT is not found in the env"
+		msg := fmt.Sprintf("%v is not found in the env", key)
 
 		log.Fatal(msg)
 		return "", errors.New(msg)
