@@ -9,18 +9,17 @@ import (
 	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
 	"github.com/kume1a/sonifybackend/internal/database"
+	"github.com/kume1a/sonifybackend/internal/modules"
+	"github.com/kume1a/sonifybackend/internal/modules/user"
+	"github.com/kume1a/sonifybackend/internal/shared"
 
 	_ "github.com/lib/pq"
 )
 
-type apiConfg struct {
-	DB *database.Queries
-}
-
 func main() {
 	godotenv.Load(".env")
 
-	envVars, err := parseEnv()
+	envVars, err := shared.ParseEnv()
 	if err != nil {
 		log.Fatal("Coultn't parse env vars, returning")
 		return
@@ -31,7 +30,7 @@ func main() {
 		log.Fatal("Couldn't connect to database", envVars.DbUrl)
 	}
 
-	apiCfg := apiConfg{
+	apiCfg := shared.ApiConfg{
 		DB: database.New(conn),
 	}
 
@@ -46,10 +45,9 @@ func main() {
 	}))
 
 	v1Router := chi.NewRouter()
-	v1Router.Get("/healthcheck", handlerHealthcheck)
-	v1Router.Get("/err", handlerErr)
+	v1Router.Get("/healthcheck", modules.HandlerHealthcheck)
 
-	v1Router.Post("/users", apiCfg.handlerCreateUser)
+	v1Router.Post("/users", user.HandlerCreateUser(&apiCfg))
 
 	router.Mount("/v1", v1Router)
 

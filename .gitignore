@@ -2,3 +2,4 @@
 sonifybackend
 .env
 vendor
+tmp

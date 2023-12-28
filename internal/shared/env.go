@@ -1,4 +1,4 @@
-package main
+package shared
 
 import (
 	"errors"
@@ -12,7 +12,7 @@ type EnvVariables struct {
 	DbUrl string
 }
 
-func parseEnv() (*EnvVariables, error) {
+func ParseEnv() (*EnvVariables, error) {
 	port, err := getEnvVariable("PORT")
 	if err != nil {
 		return nil, err
