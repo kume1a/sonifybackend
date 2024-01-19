@@ -9,13 +9,25 @@ import (
 
 func signInHandler(apiCfg *shared.ApiConfg) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Handle sign in logic here
+		body, err := shared.ValidateRequest[signInDTO](r)
+		if err != nil {
+			shared.ResError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		shared.ResJson(w, http.StatusOK, body)
 	}
 }
 
 func signUpHandler(apiCfg *shared.ApiConfg) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Handle sign up logic here
+		body, err := shared.ValidateRequest[signUpDTO](r)
+		if err != nil {
+			shared.ResError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		shared.ResJson(w, http.StatusOK, body)
 	}
 }
 

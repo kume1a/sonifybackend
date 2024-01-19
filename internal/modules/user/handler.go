@@ -2,7 +2,7 @@ package user
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -21,7 +21,7 @@ func handlerCreateUser(apiCfg *shared.ApiConfg) http.HandlerFunc {
 		decoder := json.NewDecoder(r.Body)
 		params := parameters{}
 		if err := decoder.Decode(&params); err != nil {
-			shared.RespondWithError(w, 400, fmt.Sprintf("Error parsing JSON: %v", err))
+			shared.ResError(w, 400, shared.ErrInvalidJSON)
 			return
 		}
 
@@ -32,12 +32,14 @@ func handlerCreateUser(apiCfg *shared.ApiConfg) http.HandlerFunc {
 			UpdatedAt: createdAt,
 			Name:      params.Name,
 		})
+
 		if err != nil {
-			shared.RespondWithError(w, 400, fmt.Sprintf("Couldn't create user %v", err))
+			log.Println(err)
+			shared.ResError(w, 400, shared.ErrInternal)
 			return
 		}
 
-		shared.RespondWithJSON(w, 200, databaseUserToUser(user))
+		shared.ResJson(w, 200, databaseUserToUser(user))
 	}
 }
 

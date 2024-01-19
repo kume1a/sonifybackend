@@ -2,15 +2,20 @@ package shared
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 )
 
-func RespondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
+func ResJson(w http.ResponseWriter, code int, payload interface{}) {
 	data, err := json.Marshal(payload)
 	if err != nil {
 		log.Printf("Failed to marshal JSON response: %v", payload)
-		w.WriteHeader(500)
+
+		responseBody := fmt.Sprintf("{message: %s, code: %d}", ErrInternal, http.StatusInternalServerError)
+
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(responseBody))
 		return
 	}
 
@@ -19,16 +24,13 @@ func RespondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	w.Write(data)
 }
 
-type ErrorResponse struct {
-	Error string `json:"error"`
-}
-
-func RespondWithError(w http.ResponseWriter, code int, msg string) {
+func ResError(w http.ResponseWriter, code int, msg string) {
 	if code > 499 {
 		log.Printf("Responsing with 500 error, code(%v) %v", code, msg)
 	}
 
-	RespondWithJSON(w, code, ErrorResponse{
-		Error: msg,
+	ResJson(w, code, HttpErrorDto{
+		Message: msg,
+		Code:    code,
 	})
 }

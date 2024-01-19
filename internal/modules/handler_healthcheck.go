@@ -11,5 +11,5 @@ type HealthcheckRes struct {
 }
 
 func HandlerHealthcheck(w http.ResponseWriter, r *http.Request) {
-	shared.RespondWithJSON(w, 200, HealthcheckRes{Ok: true})
+	shared.ResJson(w, 200, HealthcheckRes{Ok: true})
 }
