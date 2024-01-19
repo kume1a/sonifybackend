@@ -7,11 +7,12 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
-func HandlerCreateUser(apiCfg *shared.ApiConfg) http.HandlerFunc {
+func handlerCreateUser(apiCfg *shared.ApiConfg) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		type parameters struct {
 			Name string `json:"name"`
@@ -38,4 +39,12 @@ func HandlerCreateUser(apiCfg *shared.ApiConfg) http.HandlerFunc {
 
 		shared.RespondWithJSON(w, 200, databaseUserToUser(user))
 	}
+}
+
+func Router(apiCfg *shared.ApiConfg, router *mux.Router) *mux.Router {
+	r := router.PathPrefix("/users").Subrouter()
+
+	r.HandleFunc("", handlerCreateUser(apiCfg)).Methods("POST")
+
+	return r
 }

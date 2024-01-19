@@ -5,11 +5,10 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/go-chi/cors"
-	"github.com/gorilla/mux"
+	"github.com/asaskevich/govalidator"
 	"github.com/joho/godotenv"
 	"github.com/kume1a/sonifybackend/internal/database"
-	"github.com/kume1a/sonifybackend/internal/modules/user"
+	"github.com/kume1a/sonifybackend/internal/modules"
 	"github.com/kume1a/sonifybackend/internal/shared"
 
 	_ "github.com/lib/pq"
@@ -24,6 +23,8 @@ func main() {
 		return
 	}
 
+	govalidator.SetFieldsRequiredByDefault(true)
+
 	conn, err := sql.Open("postgres", envVars.DbUrl)
 	if err != nil {
 		log.Fatal("Couldn't connect to database", envVars.DbUrl)
@@ -33,22 +34,7 @@ func main() {
 		DB: database.New(conn),
 	}
 
-	router := mux.NewRouter()
-	router.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"https://*", "http://*"},
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"*"},
-		ExposedHeaders:   []string{"Link"},
-		AllowCredentials: false,
-		MaxAge:           300,
-	}))
-
-	v1Router := mux.NewRouter()
-	// v1Router.Handle("/healthcheck", modules.HandlerHealthcheck).Methods("GET")
-
-	v1Router.Handle("/users", user.HandlerCreateUser(&apiCfg)).Methods("POST")
-
-	router.Handle("/v1", v1Router)
+	router := modules.CreateRouter(&apiCfg)
 
 	server := &http.Server{
 		Handler: router,
