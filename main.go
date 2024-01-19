@@ -5,11 +5,10 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
+	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"github.com/kume1a/sonifybackend/internal/database"
-	"github.com/kume1a/sonifybackend/internal/modules"
 	"github.com/kume1a/sonifybackend/internal/modules/user"
 	"github.com/kume1a/sonifybackend/internal/shared"
 
@@ -34,7 +33,7 @@ func main() {
 		DB: database.New(conn),
 	}
 
-	router := chi.NewRouter()
+	router := mux.NewRouter()
 	router.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"https://*", "http://*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -44,12 +43,12 @@ func main() {
 		MaxAge:           300,
 	}))
 
-	v1Router := chi.NewRouter()
-	v1Router.Get("/healthcheck", modules.HandlerHealthcheck)
+	v1Router := mux.NewRouter()
+	// v1Router.Handle("/healthcheck", modules.HandlerHealthcheck).Methods("GET")
 
-	v1Router.Post("/users", user.HandlerCreateUser(&apiCfg))
+	v1Router.Handle("/users", user.HandlerCreateUser(&apiCfg)).Methods("POST")
 
-	router.Mount("/v1", v1Router)
+	router.Handle("/v1", v1Router)
 
 	server := &http.Server{
 		Handler: router,
