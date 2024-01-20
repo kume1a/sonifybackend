@@ -10,7 +10,7 @@ import (
 
 func handleGoogleSignIn(apiCfg *shared.ApiConfg) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		body, err := shared.ValidateRequest[googleSignInDTO](r)
+		body, err := shared.ValidateRequest[*googleSignInDTO](r)
 
 		if err != nil {
 			shared.ResBadRequest(w, err.Error())

@@ -5,10 +5,10 @@ import (
 )
 
 type googleSignInDTO struct {
-	Token string `json:"token"`
+	Token string `json:"token" valid:"required"`
 }
 
-func (dto googleSignInDTO) Validate() error {
+func (dto *googleSignInDTO) Validate() error {
 	_, err := govalidator.ValidateStruct(dto)
 	return err
 }
