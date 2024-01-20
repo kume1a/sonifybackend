@@ -5,8 +5,7 @@ import (
 )
 
 type googleSignInDTO struct {
-	Name     string `json:"name" valid:"stringlength(1|255)"`
-	Password string `json:"password" valid:"stringlength(6|255)"`
+	Token string `json:"token"`
 }
 
 func (dto googleSignInDTO) Validate() error {

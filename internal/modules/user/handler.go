@@ -21,7 +21,7 @@ func handlerCreateUser(apiCfg *shared.ApiConfg) http.HandlerFunc {
 		decoder := json.NewDecoder(r.Body)
 		params := parameters{}
 		if err := decoder.Decode(&params); err != nil {
-			shared.ResError(w, 400, shared.ErrInvalidJSON)
+			shared.ResBadRequest(w, shared.ErrInvalidJSON)
 			return
 		}
 
@@ -35,11 +35,11 @@ func handlerCreateUser(apiCfg *shared.ApiConfg) http.HandlerFunc {
 
 		if err != nil {
 			log.Println(err)
-			shared.ResError(w, 400, shared.ErrInternal)
+			shared.ResInternalServerErrorDef(w)
 			return
 		}
 
-		shared.ResJson(w, 200, databaseUserToUser(user))
+		shared.ResCreated(w, UserEntityToDto(user))
 	}
 }
 

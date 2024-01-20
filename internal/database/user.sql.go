@@ -7,6 +7,7 @@ package database
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
@@ -15,7 +16,7 @@ import (
 const createUser = `-- name: CreateUser :one
 INSERT INTO users(id, created_at, updated_at, name)
 VALUES ($1, $2, $3, $4)
-RETURNING id, created_at, updated_at, name
+RETURNING id, created_at, updated_at, name, email
 `
 
 type CreateUserParams struct {
@@ -38,12 +39,47 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Name,
+		&i.Email,
+	)
+	return i, err
+}
+
+const getUserByEmail = `-- name: GetUserByEmail :one
+SELECT id, created_at, updated_at, name, email FROM users WHERE email = $1
+`
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email sql.NullString) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByEmail, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Name,
+		&i.Email,
+	)
+	return i, err
+}
+
+const getUserById = `-- name: GetUserById :one
+SELECT id, created_at, updated_at, name, email FROM users WHERE id = $1
+`
+
+func (q *Queries) GetUserById(ctx context.Context, id uuid.UUID) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserById, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Name,
+		&i.Email,
 	)
 	return i, err
 }
 
 const getUsers = `-- name: GetUsers :exec
-select id, created_at, updated_at, name FROM "users"
+SELECT id, created_at, updated_at, name, email FROM "users"
 `
 
 func (q *Queries) GetUsers(ctx context.Context) error {
