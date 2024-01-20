@@ -12,6 +12,8 @@ type Validatable interface {
 }
 
 func ValidateRequest[T Validatable](r *http.Request) (T, error) {
+	defer r.Body.Close()
+
 	var body T
 
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {

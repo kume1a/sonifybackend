@@ -7,9 +7,9 @@ import (
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
-func signInHandler(apiCfg *shared.ApiConfg) http.HandlerFunc {
+func handleGoogleSignIn(apiCfg *shared.ApiConfg) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		body, err := shared.ValidateRequest[signInDTO](r)
+		body, err := shared.ValidateRequest[googleSignInDTO](r)
 		if err != nil {
 			shared.ResError(w, http.StatusBadRequest, err.Error())
 			return
@@ -22,7 +22,7 @@ func signInHandler(apiCfg *shared.ApiConfg) http.HandlerFunc {
 func Router(apiCfg *shared.ApiConfg, router *mux.Router) *mux.Router {
 	r := router.PathPrefix("/auth").Subrouter()
 
-	r.HandleFunc("/signIn", signInHandler(apiCfg)).Methods("POST")
+	r.HandleFunc("/googleSignIn", handleGoogleSignIn(apiCfg)).Methods("POST")
 
 	return r
 }
