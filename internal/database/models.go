@@ -11,6 +11,17 @@ import (
 	"github.com/google/uuid"
 )
 
+type Audio struct {
+	ID        uuid.UUID
+	Title     sql.NullString
+	Author    sql.NullString
+	Duration  sql.NullInt32
+	Path      sql.NullString
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	UserID    uuid.NullUUID
+}
+
 type User struct {
 	ID        uuid.UUID
 	CreatedAt time.Time
