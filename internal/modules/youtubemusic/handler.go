@@ -8,7 +8,7 @@ import (
 )
 
 func handleGetYoutubeMusicUrl(w http.ResponseWriter, r *http.Request) {
-	body, err := shared.ValidateRequest[*getYoutubeMusicDto](r)
+	body, err := shared.ValidateRequestBody[*getYoutubeMusicDto](r)
 	if err != nil {
 		shared.ResBadRequest(w, err.Error())
 		return
@@ -25,7 +25,7 @@ func handleGetYoutubeMusicUrl(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleGetYoutubeSearchSuggestions(w http.ResponseWriter, r *http.Request) {
-	body, err := shared.ValidateRequest[*shared.KeywordDto](r)
+	body, err := shared.ValidateRequestBody[*shared.KeywordDto](r)
 	if err != nil {
 		shared.ResBadRequest(w, err.Error())
 		return

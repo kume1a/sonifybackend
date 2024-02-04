@@ -11,7 +11,7 @@ type Validatable interface {
 	Validate() error
 }
 
-func ValidateRequest[T Validatable](r *http.Request) (T, error) {
+func ValidateRequestBody[T Validatable](r *http.Request) (T, error) {
 	defer r.Body.Close()
 
 	var body T
