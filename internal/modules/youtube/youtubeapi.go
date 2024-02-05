@@ -1,4 +1,4 @@
-package youtubemusic
+package youtube
 
 import (
 	"encoding/json"
@@ -6,11 +6,6 @@ import (
 	"log"
 	"net/http"
 )
-
-type youtubeSearchSuggestions struct {
-	Query       string   `json:"query"`
-	Suggestions []string `json:"suggestions"`
-}
 
 func GetYoutubeSearchSuggestions(keyword string) (*youtubeSearchSuggestions, error) {
 	link := "https://invidious.slipfox.xyz/api/v1/search/suggestions?q=" + keyword

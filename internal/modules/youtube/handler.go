@@ -1,14 +1,13 @@
-package youtubemusic
+package youtube
 
 import (
 	"net/http"
 
-	"github.com/gorilla/mux"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
 func handleGetYoutubeMusicUrl(w http.ResponseWriter, r *http.Request) {
-	query, err := shared.ValidateRequestQuery[*getYoutubeMusicDto](r)
+	query, err := shared.ValidateRequestQuery[*getYoutubeMusicUrlDto](r)
 	if err != nil {
 		shared.ResBadRequest(w, err.Error())
 		return
@@ -39,13 +38,4 @@ func handleGetYoutubeSearchSuggestions(w http.ResponseWriter, r *http.Request) {
 	}
 
 	shared.ResOK(w, res)
-}
-
-func Router(apiCfg *shared.ApiConfg, router *mux.Router) *mux.Router {
-	r := router.PathPrefix("/youtubeMusic").Subrouter()
-
-	r.HandleFunc("/musicUrl", handleGetYoutubeMusicUrl).Methods("GET")
-	r.HandleFunc("/searchSuggestions", handleGetYoutubeSearchSuggestions).Methods("GET")
-
-	return r
 }
