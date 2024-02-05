@@ -8,13 +8,13 @@ import (
 )
 
 func handleGetYoutubeMusicUrl(w http.ResponseWriter, r *http.Request) {
-	body, err := shared.ValidateRequestBody[*getYoutubeMusicDto](r)
+	query, err := shared.ValidateRequestQuery[*getYoutubeMusicDto](r)
 	if err != nil {
 		shared.ResBadRequest(w, err.Error())
 		return
 	}
 
-	url, err := GetYoutubeMusicUrl(body.VideoID)
+	url, err := GetYoutubeMusicUrl(query.VideoID[0])
 	if err != nil {
 		shared.ResInternalServerErrorDef(w)
 		return
@@ -25,13 +25,14 @@ func handleGetYoutubeMusicUrl(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleGetYoutubeSearchSuggestions(w http.ResponseWriter, r *http.Request) {
-	body, err := shared.ValidateRequestBody[*shared.KeywordDto](r)
+	query, err := shared.ValidateRequestQuery[*shared.KeywordDto](r)
+
 	if err != nil {
 		shared.ResBadRequest(w, err.Error())
 		return
 	}
 
-	res, err := GetYoutubeSearchSuggestions(body.Keyword)
+	res, err := GetYoutubeSearchSuggestions(query.Keyword[0])
 	if err != nil {
 		shared.ResInternalServerErrorDef(w)
 		return

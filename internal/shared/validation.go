@@ -27,3 +27,22 @@ func ValidateRequestBody[T Validatable](r *http.Request) (T, error) {
 
 	return body, nil
 }
+
+func ValidateRequestQuery[T Validatable](r *http.Request) (T, error) {
+	var q T
+
+	jsonbody, err := json.Marshal(r.URL.Query())
+	if err != nil {
+		return q, errors.New(ErrInvalidJSON)
+	}
+
+	if err := json.Unmarshal(jsonbody, &q); err != nil {
+		return q, errors.New(ErrInvalidJSON)
+	}
+
+	if err := q.Validate(); err != nil {
+		return q, err
+	}
+
+	return q, nil
+}

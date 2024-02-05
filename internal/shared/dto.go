@@ -1,6 +1,10 @@
 package shared
 
-import "github.com/asaskevich/govalidator"
+import (
+	"fmt"
+
+	"github.com/asaskevich/govalidator"
+)
 
 type HttpErrorDto struct {
 	Code    int    `json:"code"`
@@ -12,10 +16,14 @@ type UrlDto struct {
 }
 
 type KeywordDto struct {
-	Keyword string `json:"keyword" valid:"required"`
+	Keyword []string `json:"keyword" valid:"required"`
 }
 
 func (dto *KeywordDto) Validate() error {
+	if len(dto.Keyword) != 1 {
+		return fmt.Errorf("Keyword must have exactly one element")
+	}
+
 	_, err := govalidator.ValidateStruct(dto)
 	return err
 }

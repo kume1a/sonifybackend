@@ -7,4 +7,5 @@ const (
 	ErrInvalidJSON        = "INVALID_JSON"
 	ErrInvalidGoogleToken = "INVALID_GOOGLE_TOKEN"
 	ErrUserNotFound       = "USER_NOT_FOUND"
+	ErrInvalidQueryParams = "INVALID_QUERY_PARAMS"
 )
