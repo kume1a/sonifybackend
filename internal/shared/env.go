@@ -14,6 +14,7 @@ type EnvVariables struct {
 	GoogleClientKey   string
 	AccessTokenSecret string
 	AccessTokenExp    int64
+	PublicDIr         string
 }
 
 func ParseEnv() (*EnvVariables, error) {
@@ -42,12 +43,18 @@ func ParseEnv() (*EnvVariables, error) {
 		return nil, err
 	}
 
+	publicDir, err := getEnv("PUBLIC_DIR")
+	if err != nil {
+		return nil, err
+	}
+
 	return &EnvVariables{
 		Port:              port,
 		DbUrl:             dbUrl,
 		GoogleClientKey:   googleClientKey,
 		AccessTokenSecret: accessTokenSecret,
 		AccessTokenExp:    accessTokenExp,
+		PublicDIr:         publicDir,
 	}, nil
 }
 

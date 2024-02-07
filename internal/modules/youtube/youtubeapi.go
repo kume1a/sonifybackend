@@ -25,8 +25,7 @@ func GetYoutubeSearchSuggestions(keyword string) (*youtubeSearchSuggestions, err
 	}
 
 	var res youtubeSearchSuggestions
-	err = json.Unmarshal(body, &res)
-	if err != nil {
+	if err := json.Unmarshal(body, &res); err != nil {
 		return nil, err
 	}
 

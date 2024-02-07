@@ -3,10 +3,11 @@ package youtube
 import (
 	"log"
 	"os/exec"
+	"strconv"
 	"strings"
 )
 
-func GetYoutubeMusicUrl(videoID string) (string, error) {
+func GetYoutubeAudioUrl(videoID string) (string, error) {
 	cmd := exec.Command("yt-dlp", "-f", "bestaudio", "--get-url", "https://www.youtube.com/watch?v="+videoID)
 
 	output, err := cmd.Output()
@@ -17,4 +18,34 @@ func GetYoutubeMusicUrl(videoID string) (string, error) {
 
 	url := strings.TrimSpace(string(output))
 	return url, nil
+}
+
+func GetYoutubeAudioDurationInSeconds(videoID string) (int, error) {
+	cmd := exec.Command("yt-dlp", "--print", "%(duration>%s)s", "https://www.youtube.com/watch?v="+videoID)
+
+	output, err := cmd.Output()
+	if err != nil {
+		log.Println("Error getting youtube music duration:", err)
+		return 0, err
+	}
+
+	duration, err := strconv.Atoi(strings.TrimSpace(string(output)))
+	if err != nil {
+		log.Println("Error converting duration to int:", err)
+		return 0, err
+	}
+
+	return duration, nil
+}
+
+func GetYoutubeVideoTitle(videoID string) (string, error) {
+	cmd := exec.Command("yt-dlp", "--print", "%(title)s", "https://www.youtube.com/watch?v="+videoID)
+
+	output, err := cmd.Output()
+	if err != nil {
+		log.Println("Error getting youtube music duration:", err)
+		return "", err
+	}
+
+	return strings.TrimSpace(string(output)), nil
 }

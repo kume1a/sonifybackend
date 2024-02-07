@@ -13,7 +13,7 @@ func handleGetYoutubeMusicUrl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	url, err := GetYoutubeMusicUrl(query.VideoID[0])
+	url, err := GetYoutubeAudioUrl(query.VideoID[0])
 	if err != nil {
 		shared.ResInternalServerErrorDef(w)
 		return

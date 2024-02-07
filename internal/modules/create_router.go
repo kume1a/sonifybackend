@@ -3,6 +3,7 @@ package modules
 import (
 	"github.com/go-chi/cors"
 	"github.com/gorilla/mux"
+	"github.com/kume1a/sonifybackend/internal/modules/audio"
 	"github.com/kume1a/sonifybackend/internal/modules/auth"
 	"github.com/kume1a/sonifybackend/internal/modules/user"
 	"github.com/kume1a/sonifybackend/internal/modules/youtube"
@@ -25,6 +26,7 @@ func CreateRouter(apiCfg *shared.ApiConfg) *mux.Router {
 	v1Router.Handle("", auth.Router(apiCfg, v1Router))
 	v1Router.Handle("", user.Router(apiCfg, v1Router))
 	v1Router.Handle("", youtube.Router(apiCfg, v1Router))
+	v1Router.Handle("", audio.Router(apiCfg, v1Router))
 
 	router.Handle("", v1Router)
 	router.HandleFunc("/", HandlerHealthcheck).Methods("GET")
