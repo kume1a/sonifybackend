@@ -4,14 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
 )
 
-// GoogleClaims -
 type GoogleClaims struct {
 	Email         string `json:"email"`
 	EmailVerified bool   `json:"email_verified"`
@@ -25,7 +24,7 @@ func getGooglePublicKey(keyID string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	dat, err := ioutil.ReadAll(resp.Body)
+	dat, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
 	}

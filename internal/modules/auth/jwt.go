@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"errors"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -19,6 +20,49 @@ func GenerateAccessToken(tokenClaims *TokenClaims) (string, error) {
 	}
 
 	return generateJWT(tokenClaims, env.AccessTokenSecret)
+}
+
+func VerifyAccessToken(tokenString string) (*TokenClaims, error) {
+	env, err := shared.ParseEnv()
+	if err != nil {
+		return nil, err
+	}
+
+	return verifyJWT(tokenString, env.AccessTokenSecret)
+}
+
+func verifyJWT(tokenString string, secretKey string) (*TokenClaims, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return []byte(secretKey), nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if !token.Valid {
+		return nil, errors.New("invalid token")
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, errors.New("invalid claims")
+	}
+
+	userId, ok := claims["userId"].(string)
+	if !ok {
+		return nil, errors.New("invalid userId")
+	}
+
+	email, ok := claims["email"].(string)
+	if !ok {
+		return nil, errors.New("invalid email")
+	}
+
+	return &TokenClaims{
+		UserId: userId,
+		Email:  email,
+	}, nil
 }
 
 func generateJWT(tokenClaims *TokenClaims, secretKey string) (string, error) {

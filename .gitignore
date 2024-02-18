@@ -3,3 +3,4 @@ sonifybackend
 .env
 vendor
 tmp
+public
