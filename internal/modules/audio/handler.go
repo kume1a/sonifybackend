@@ -63,6 +63,7 @@ func handleDownloadYoutubeAudio(apiCfg *shared.ApiConfg) http.HandlerFunc {
 
 		log.Println("audio created: ", audio)
 
-		shared.ResCreated(w, audio)
+		res := audioEntityToDto(audio)
+		shared.ResCreated(w, res)
 	}
 }
