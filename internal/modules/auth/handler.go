@@ -37,10 +37,10 @@ func handleGoogleSignIn(apiCfg *shared.ApiConfg) http.HandlerFunc {
 			return
 		}
 
-		shared.ResOK(w, struct {
-			Token string `json:"token"`
-		}{
-			Token: tokenString,
-		})
+		res := tokenPayloadDTO{
+			AccessToken: tokenString,
+		}
+
+		shared.ResOK(w, res)
 	}
 }
