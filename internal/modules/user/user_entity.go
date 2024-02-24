@@ -28,3 +28,9 @@ func GetUserByEmail(db *database.Queries, ctx context.Context, email string) (*d
 
 	return &user, err
 }
+
+func UpdateUser(db *database.Queries, ctx context.Context, params *database.UpdateUserParams) (*database.User, error) {
+	user, err := db.UpdateUser(ctx, *params)
+
+	return &user, err
+}

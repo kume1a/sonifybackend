@@ -24,4 +24,5 @@ type UserDto struct {
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 	Name      string    `json:"name"`
+	Email     string    `json:"email"`
 }

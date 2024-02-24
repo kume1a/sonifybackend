@@ -5,10 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
 type GoogleClaims struct {
@@ -38,10 +40,16 @@ func getGooglePublicKey(keyID string) (string, error) {
 	if !ok {
 		return "", errors.New("key not found")
 	}
+
 	return key, nil
 }
 
-func ValidateGoogleJWT(tokenString string) (GoogleClaims, error) {
+func ValidateGoogleJWT(tokenString string) (*GoogleClaims, error) {
+	env, err := shared.ParseEnv()
+	if err != nil {
+		return nil, err
+	}
+
 	claimsStruct := GoogleClaims{}
 
 	token, err := jwt.ParseWithClaims(
@@ -50,35 +58,43 @@ func ValidateGoogleJWT(tokenString string) (GoogleClaims, error) {
 		func(token *jwt.Token) (interface{}, error) {
 			pem, err := getGooglePublicKey(fmt.Sprintf("%s", token.Header["kid"]))
 			if err != nil {
+				log.Println("Error getting google public key: ", err)
 				return nil, err
 			}
+
 			key, err := jwt.ParseRSAPublicKeyFromPEM([]byte(pem))
 			if err != nil {
+				log.Println("Error parsing google public key: ", err)
 				return nil, err
 			}
+
 			return key, nil
 		},
 	)
 	if err != nil {
-		return GoogleClaims{}, err
+		log.Println("Error parsing google JWT: ", err)
+		return nil, err
 	}
 
 	claims, ok := token.Claims.(*GoogleClaims)
 	if !ok {
-		return GoogleClaims{}, errors.New("Invalid Google JWT")
+		return nil, errors.New("Invalid Google JWT")
 	}
 
 	if claims.Issuer != "accounts.google.com" && claims.Issuer != "https://accounts.google.com" {
-		return GoogleClaims{}, errors.New("iss is invalid")
+		log.Println("iss is invalid, expected: accounts.google.com, got: ", claims.Issuer)
+		return nil, errors.New("iss is invalid")
 	}
 
-	if claims.Audience != "YOUR_CLIENT_ID_HERE" {
-		return GoogleClaims{}, errors.New("aud is invalid")
+	if claims.Audience != env.GoogleClientKey {
+		log.Println("aud is invalid, expected: ", env.GoogleClientKey, " got: ", claims.Audience)
+		return nil, errors.New("aud is invalid")
 	}
 
 	if claims.ExpiresAt < time.Now().UTC().Unix() {
-		return GoogleClaims{}, errors.New("JWT is expired")
+		log.Println("JWT is expired, exp: ", claims.ExpiresAt, " now: ", time.Now().UTC().Unix())
+		return nil, errors.New("JWT is expired")
 	}
 
-	return *claims, nil
+	return claims, nil
 }

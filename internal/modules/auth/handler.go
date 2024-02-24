@@ -50,7 +50,7 @@ func handleGoogleSignIn(apiCfg *shared.ApiConfg) http.HandlerFunc {
 
 		res := tokenPayloadDTO{
 			AccessToken: tokenString,
-			User:        user.UserEntityToDto(*authUser),
+			User:        user.UserEntityToDto(authUser),
 		}
 
 		shared.ResOK(w, res)

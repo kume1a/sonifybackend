@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gorilla/mux"
 	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
@@ -24,7 +23,7 @@ func handleUpdateUser(apiCfg *shared.ApiConfg) http.HandlerFunc {
 			return
 		}
 
-		user, err := apiCfg.DB.UpdateUser(r.Context(), database.UpdateUserParams{
+		user, err := UpdateUser(apiCfg.DB, r.Context(), &database.UpdateUserParams{
 			Name: sql.NullString{String: body.Name, Valid: body.Name != ""},
 			ID:   tokenPayload.UserId,
 		})
@@ -35,14 +34,24 @@ func handleUpdateUser(apiCfg *shared.ApiConfg) http.HandlerFunc {
 			return
 		}
 
-		shared.ResCreated(w, UserEntityToDto(user))
+		shared.ResOK(w, UserEntityToDto(user))
 	}
 }
 
-func Router(apiCfg *shared.ApiConfg, router *mux.Router) *mux.Router {
-	r := router.PathPrefix("/users").Subrouter()
+func handleGetAuthUser(apiCfg *shared.ApiConfg) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		tokenPayload, err := shared.GetAuthPayload(r)
+		if err != nil {
+			shared.ResUnauthorized(w, err.Error())
+			return
+		}
 
-	r.HandleFunc("", shared.AuthMW(handleUpdateUser(apiCfg))).Methods("POST")
+		user, err := GetUserByID(apiCfg.DB, r.Context(), tokenPayload.UserId)
+		if err != nil {
+			shared.ResNotFound(w, shared.ErrUserNotFound)
+			return
+		}
 
-	return r
+		shared.ResOK(w, UserEntityToDto(user))
+	}
 }
