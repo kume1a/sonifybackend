@@ -14,8 +14,8 @@ import (
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users(id, created_at, updated_at, name)
-VALUES ($1, $2, $3, $4)
+INSERT INTO users(id, created_at, updated_at, name, email)
+VALUES ($1, $2, $3, $4, $5)
 RETURNING id, created_at, updated_at, name, email
 `
 
@@ -23,7 +23,8 @@ type CreateUserParams struct {
 	ID        uuid.UUID
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	Name      string
+	Name      sql.NullString
+	Email     sql.NullString
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -32,6 +33,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		arg.CreatedAt,
 		arg.UpdatedAt,
 		arg.Name,
+		arg.Email,
 	)
 	var i User
 	err := row.Scan(
@@ -85,4 +87,29 @@ SELECT id, created_at, updated_at, name, email FROM "users"
 func (q *Queries) GetUsers(ctx context.Context) error {
 	_, err := q.db.ExecContext(ctx, getUsers)
 	return err
+}
+
+const updateUser = `-- name: UpdateUser :one
+UPDATE users
+SET name = COALESCE($1, name)
+WHERE id = $2
+RETURNING id, created_at, updated_at, name, email
+`
+
+type UpdateUserParams struct {
+	Name sql.NullString
+	ID   uuid.UUID
+}
+
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
+	row := q.db.QueryRowContext(ctx, updateUser, arg.Name, arg.ID)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Name,
+		&i.Email,
+	)
+	return i, err
 }

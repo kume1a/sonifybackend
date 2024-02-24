@@ -1,36 +1,32 @@
 package user
 
 import (
-	"encoding/json"
+	"database/sql"
 	"log"
 	"net/http"
-	"time"
 
-	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
-func handlerCreateUser(apiCfg *shared.ApiConfg) http.HandlerFunc {
+func handleUpdateUser(apiCfg *shared.ApiConfg) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		type parameters struct {
-			Name string `json:"name"`
-		}
-
-		decoder := json.NewDecoder(r.Body)
-		params := parameters{}
-		if err := decoder.Decode(&params); err != nil {
-			shared.ResBadRequest(w, shared.ErrInvalidJSON)
+		tokenPayload, err := shared.GetAuthPayload(r)
+		if err != nil {
+			shared.ResUnauthorized(w, err.Error())
 			return
 		}
 
-		createdAt := time.Now().UTC()
-		user, err := apiCfg.DB.CreateUser(r.Context(), database.CreateUserParams{
-			ID:        uuid.New(),
-			CreatedAt: createdAt,
-			UpdatedAt: createdAt,
-			Name:      params.Name,
+		body, err := shared.ValidateRequestBody[*updateUserDTO](r)
+		if err != nil {
+			shared.ResBadRequest(w, err.Error())
+			return
+		}
+
+		user, err := apiCfg.DB.UpdateUser(r.Context(), database.UpdateUserParams{
+			Name: sql.NullString{String: body.Name, Valid: body.Name != ""},
+			ID:   tokenPayload.UserId,
 		})
 
 		if err != nil {
@@ -46,7 +42,7 @@ func handlerCreateUser(apiCfg *shared.ApiConfg) http.HandlerFunc {
 func Router(apiCfg *shared.ApiConfg, router *mux.Router) *mux.Router {
 	r := router.PathPrefix("/users").Subrouter()
 
-	r.HandleFunc("", handlerCreateUser(apiCfg)).Methods("POST")
+	r.HandleFunc("", shared.AuthMW(handleUpdateUser(apiCfg))).Methods("POST")
 
 	return r
 }

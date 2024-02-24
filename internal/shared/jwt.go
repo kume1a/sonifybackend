@@ -1,20 +1,20 @@
-package auth
+package shared
 
 import (
 	"errors"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/kume1a/sonifybackend/internal/shared"
+	"github.com/google/uuid"
 )
 
 type TokenClaims struct {
-	UserId string
+	UserId uuid.UUID
 	Email  string
 }
 
 func GenerateAccessToken(tokenClaims *TokenClaims) (string, error) {
-	env, err := shared.ParseEnv()
+	env, err := ParseEnv()
 	if err != nil {
 		return "", err
 	}
@@ -23,7 +23,7 @@ func GenerateAccessToken(tokenClaims *TokenClaims) (string, error) {
 }
 
 func VerifyAccessToken(tokenString string) (*TokenClaims, error) {
-	env, err := shared.ParseEnv()
+	env, err := ParseEnv()
 	if err != nil {
 		return nil, err
 	}
@@ -41,32 +41,37 @@ func verifyJWT(tokenString string, secretKey string) (*TokenClaims, error) {
 	}
 
 	if !token.Valid {
-		return nil, errors.New("invalid token")
+		return nil, errors.New(ErrInvalidToken)
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return nil, errors.New("invalid claims")
+		return nil, errors.New(ErrInvalidToken)
 	}
 
 	userId, ok := claims["userId"].(string)
 	if !ok {
-		return nil, errors.New("invalid userId")
+		return nil, errors.New(ErrInvalidToken)
 	}
 
 	email, ok := claims["email"].(string)
 	if !ok {
-		return nil, errors.New("invalid email")
+		return nil, errors.New(ErrInvalidToken)
+	}
+
+	userIdUUID, err := uuid.Parse(userId)
+	if err != nil {
+		return nil, errors.New(ErrInvalidToken)
 	}
 
 	return &TokenClaims{
-		UserId: userId,
+		UserId: userIdUUID,
 		Email:  email,
 	}, nil
 }
 
 func generateJWT(tokenClaims *TokenClaims, secretKey string) (string, error) {
-	env, err := shared.ParseEnv()
+	env, err := ParseEnv()
 	if err != nil {
 		return "", err
 	}
@@ -74,7 +79,7 @@ func generateJWT(tokenClaims *TokenClaims, secretKey string) (string, error) {
 	expDuration := time.Millisecond * time.Duration(env.AccessTokenExp)
 
 	claims := jwt.MapClaims{
-		"userId": tokenClaims.UserId,
+		"userId": tokenClaims.UserId.String(),
 		"email":  tokenClaims.Email,
 		"exp":    time.Now().Add(expDuration).Unix(),
 	}

@@ -1,9 +1,9 @@
 package shared
 
 import (
-	"fmt"
+	"time"
 
-	"github.com/asaskevich/govalidator"
+	"github.com/google/uuid"
 )
 
 type HttpErrorDto struct {
@@ -19,11 +19,9 @@ type KeywordDto struct {
 	Keyword []string `json:"keyword" valid:"required"`
 }
 
-func (dto *KeywordDto) Validate() error {
-	if len(dto.Keyword) != 1 {
-		return fmt.Errorf("Keyword must have exactly one element")
-	}
-
-	_, err := govalidator.ValidateStruct(dto)
-	return err
+type UserDto struct {
+	ID        uuid.UUID `json:"id"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+	Name      string    `json:"name"`
 }
