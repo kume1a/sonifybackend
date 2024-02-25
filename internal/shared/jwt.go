@@ -2,6 +2,7 @@ package shared
 
 import (
 	"errors"
+	"log"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -37,30 +38,36 @@ func verifyJWT(tokenString string, secretKey string) (*TokenClaims, error) {
 	})
 
 	if err != nil {
+		log.Println("Error parsing token: ", err)
 		return nil, err
 	}
 
 	if !token.Valid {
+		log.Println("Token is invalid")
 		return nil, errors.New(ErrInvalidToken)
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
+		log.Println("Error parsing claims from token")
 		return nil, errors.New(ErrInvalidToken)
 	}
 
 	userId, ok := claims["userId"].(string)
 	if !ok {
+		log.Println("Error parsing userId from token")
 		return nil, errors.New(ErrInvalidToken)
 	}
 
 	email, ok := claims["email"].(string)
 	if !ok {
+		log.Println("Error parsing email from token")
 		return nil, errors.New(ErrInvalidToken)
 	}
 
 	userIdUUID, err := uuid.Parse(userId)
 	if err != nil {
+		log.Println("Error parsing userId to UUID: ", err)
 		return nil, errors.New(ErrInvalidToken)
 	}
 

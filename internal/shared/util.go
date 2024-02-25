@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/asaskevich/govalidator"
 )
@@ -26,6 +27,8 @@ func GetAccessTokenFromRequest(r *http.Request) (string, error) {
 	if len(accessToken) == 0 {
 		return "", errors.New(ErrInvalidToken)
 	}
+
+	accessToken[0] = strings.Replace(accessToken[0], "Bearer ", "", 1)
 
 	return accessToken[0], nil
 }

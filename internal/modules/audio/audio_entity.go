@@ -3,7 +3,6 @@ package audio
 import (
 	"context"
 	"database/sql"
-	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -32,10 +31,5 @@ func CreateAudio(
 		UserID:    uuid.NullUUID{UUID: userId, Valid: true},
 	})
 
-	if err != nil {
-		log.Println(err)
-		return nil, err
-	}
-
-	return &audio, nil
+	return &audio, err
 }

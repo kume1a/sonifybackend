@@ -3,13 +3,22 @@ package user
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/kume1a/sonifybackend/internal/database"
 )
 
 func CreateUser(db *database.Queries, ctx context.Context, params *database.CreateUserParams) (*database.User, error) {
-	user, err := db.CreateUser(ctx, *params)
+	createdAt := time.Now().UTC()
+
+	user, err := db.CreateUser(ctx, database.CreateUserParams{
+		ID:        uuid.New(),
+		CreatedAt: createdAt,
+		UpdatedAt: createdAt,
+		Name:      params.Name,
+		Email:     params.Email,
+	})
 
 	return &user, err
 }
