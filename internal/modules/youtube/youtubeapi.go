@@ -5,10 +5,15 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 )
 
 func GetYoutubeSearchSuggestions(keyword string) (*youtubeSearchSuggestions, error) {
-	link := "https://invidious.slipfox.xyz/api/v1/search/suggestions?q=" + keyword
+	query := url.Values{}
+
+	query.Add("q", keyword)
+
+	link := "https://invidious.slipfox.xyz/api/v1/search/suggestions?" + query.Encode()
 
 	response, err := http.Get(link)
 	if err != nil {
@@ -24,8 +29,12 @@ func GetYoutubeSearchSuggestions(keyword string) (*youtubeSearchSuggestions, err
 		return nil, err
 	}
 
+	log.Println("Youtube search suggestions link: ", link)
+	log.Println("Youtube search suggestions: ", string(body))
+
 	var res youtubeSearchSuggestions
 	if err := json.Unmarshal(body, &res); err != nil {
+		log.Printf("Error: unmarshal failed:  %v", err)
 		return nil, err
 	}
 
