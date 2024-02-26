@@ -25,10 +25,15 @@ func GetYoutubeAudioUrl(videoID string) (string, error) {
 func DownloadYoutubeAudio(videoID string) (string, error) {
 	outputLocation, err := shared.NewPublicFileLocation(".webm")
 	if err != nil {
+		log.Println("Error creating public file location: ", err)
 		return "", err
 	}
 
+	log.Println("Downloading youtube audio to: ", outputLocation)
+
 	exec.Command("yt-dlp", "-f", "bestaudio", "-o", outputLocation, "https://www.youtube.com/watch?v="+videoID)
+
+	log.Println("Downloaded youtube audio to: ", outputLocation)
 
 	return outputLocation, nil
 }
