@@ -5,6 +5,8 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+
+	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
 func GetYoutubeAudioUrl(videoID string) (string, error) {
@@ -18,6 +20,17 @@ func GetYoutubeAudioUrl(videoID string) (string, error) {
 
 	url := strings.TrimSpace(string(output))
 	return url, nil
+}
+
+func DownloadYoutubeAudio(videoID string) (string, error) {
+	outputLocation, err := shared.NewPublicFileLocation(".webm")
+	if err != nil {
+		return "", err
+	}
+
+	exec.Command("yt-dlp", "-f", "bestaudio", "-o", outputLocation, "https://www.youtube.com/watch?v="+videoID)
+
+	return outputLocation, nil
 }
 
 func GetYoutubeAudioDurationInSeconds(videoID string) (int, error) {

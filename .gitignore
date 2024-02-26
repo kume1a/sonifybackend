@@ -4,3 +4,4 @@ sonifybackend
 vendor
 tmp
 public
+.DS_STORE

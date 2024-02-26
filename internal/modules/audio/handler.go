@@ -18,12 +18,6 @@ func handleDownloadYoutubeAudio(apiCfg *shared.ApiConfg) http.HandlerFunc {
 			return
 		}
 
-		audioUrl, err := youtube.GetYoutubeAudioUrl(body.VideoId)
-		if err != nil {
-			shared.ResInternalServerErrorDef(w)
-			return
-		}
-
 		videoTitle, err := youtube.GetYoutubeVideoTitle(body.VideoId)
 		if err != nil {
 			shared.ResInternalServerErrorDef(w)
@@ -36,13 +30,8 @@ func handleDownloadYoutubeAudio(apiCfg *shared.ApiConfg) http.HandlerFunc {
 			return
 		}
 
-		fileLocation, err := shared.NewPublicFileLocation(".mp3")
+		fileLocation, err := youtube.DownloadYoutubeAudio(body.VideoId)
 		if err != nil {
-			shared.ResInternalServerErrorDef(w)
-			return
-		}
-
-		if err := shared.DownloadFile(fileLocation, audioUrl); err != nil {
 			shared.ResInternalServerErrorDef(w)
 			return
 		}
