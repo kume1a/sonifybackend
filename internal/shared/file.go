@@ -11,6 +11,12 @@ import (
 	"github.com/google/uuid"
 )
 
+type FileSize struct {
+	Bytes     int64
+	KiloBytes float64
+	MegaBytes float64
+}
+
 func NewPublicFileLocation(extension string) (string, error) {
 	envVars, err := ParseEnv()
 	if err != nil {
@@ -50,6 +56,20 @@ func DownloadFile(filepath string, url string) error {
 	}
 
 	return nil
+}
+
+func GetFileSize(filepath string) (*FileSize, error) {
+	fileInfo, err := os.Stat(filepath)
+	if err != nil {
+		log.Printf("error getting file info: %v", err)
+		return nil, err
+	}
+
+	return &FileSize{
+		Bytes:     fileInfo.Size(),
+		KiloBytes: float64(fileInfo.Size()) / 1024,
+		MegaBytes: float64(fileInfo.Size()) / (1024 * 1024),
+	}, nil
 }
 
 func ensureDir(dirName string) error {

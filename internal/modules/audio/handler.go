@@ -23,6 +23,12 @@ func handleDownloadYoutubeAudio(apiCfg *shared.ApiConfg) http.HandlerFunc {
 			return
 		}
 
+		// check if the user already has the audio
+		if _, err := GetUserAudioByYoutubeVideoId(apiCfg.DB, r.Context(), authPayload.UserId, body.VideoId); err == nil {
+			shared.ResConflict(w, shared.ErrAudioAlreadyExists)
+			return
+		}
+
 		videoTitle, err := youtube.GetYoutubeVideoTitle(body.VideoId)
 		if err != nil {
 			shared.ResInternalServerErrorDef(w)
@@ -41,7 +47,13 @@ func handleDownloadYoutubeAudio(apiCfg *shared.ApiConfg) http.HandlerFunc {
 			return
 		}
 
-		audio, err := CreateAudio(
+		fileSize, err := shared.GetFileSize(fileLocation)
+		if err != nil {
+			shared.ResInternalServerErrorDef(w)
+			return
+		}
+
+		newAudio, err := CreateAudio(
 			apiCfg.DB,
 			r.Context(),
 			sql.NullString{String: videoTitle, Valid: true},
@@ -49,6 +61,8 @@ func handleDownloadYoutubeAudio(apiCfg *shared.ApiConfg) http.HandlerFunc {
 			sql.NullInt32{Int32: int32(audioDurationInSeconds), Valid: true},
 			fileLocation,
 			authPayload.UserId,
+			sql.NullInt64{Int64: fileSize.Bytes, Valid: true},
+			sql.NullString{String: body.VideoId, Valid: true},
 		)
 		if err != nil {
 			log.Println("Error creating audio: ", err)
@@ -56,9 +70,7 @@ func handleDownloadYoutubeAudio(apiCfg *shared.ApiConfg) http.HandlerFunc {
 			return
 		}
 
-		log.Println("audio created: ", audio)
-
-		res := audioEntityToDto(audio)
+		res := audioEntityToDto(newAudio)
 		shared.ResCreated(w, res)
 	}
 }

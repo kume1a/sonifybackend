@@ -75,6 +75,14 @@ func ResMethodNotAllowed(w http.ResponseWriter, msg string) {
 	resError(w, http.StatusMethodNotAllowed, msg)
 }
 
+func ResNotAcceptable(w http.ResponseWriter, msg string) {
+	resError(w, http.StatusNotAcceptable, msg)
+}
+
+func ResConflict(w http.ResponseWriter, msg string) {
+	resError(w, http.StatusConflict, msg)
+}
+
 func ResInternalServerError(w http.ResponseWriter, msg string) {
 	resError(w, http.StatusInternalServerError, msg)
 }

@@ -35,6 +35,7 @@ func main() {
 	}
 
 	router := modules.CreateRouter(&apiCfg)
+	router.PathPrefix("/").Handler(http.StripPrefix("/public", http.FileServer(http.Dir("public/"))))
 
 	server := &http.Server{
 		Handler: router,

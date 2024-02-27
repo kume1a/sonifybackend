@@ -12,14 +12,16 @@ import (
 )
 
 type Audio struct {
-	ID        uuid.UUID
-	Title     sql.NullString
-	Author    sql.NullString
-	Duration  sql.NullInt32
-	Path      sql.NullString
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	UserID    uuid.NullUUID
+	ID             uuid.UUID
+	Title          sql.NullString
+	Author         sql.NullString
+	Duration       sql.NullInt32
+	Path           sql.NullString
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+	UserID         uuid.NullUUID
+	SizeBytes      sql.NullInt64
+	YoutubeVideoID sql.NullString
 }
 
 type User struct {

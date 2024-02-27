@@ -12,13 +12,15 @@ func (dto downloadYoutubeAudioDto) Validate() error {
 
 func audioEntityToDto(e *database.Audio) *AudioDto {
 	return &AudioDto{
-		ID:        e.ID,
-		CreatedAt: e.CreatedAt,
-		UpdatedAt: e.UpdatedAt,
-		Title:     e.Title.String,
-		Duration:  e.Duration.Int32,
-		Path:      e.Path.String,
-		Author:    e.Author.String,
-		UserID:    e.UserID.UUID,
+		ID:             e.ID,
+		CreatedAt:      e.CreatedAt,
+		UpdatedAt:      e.UpdatedAt,
+		Title:          e.Title.String,
+		Duration:       e.Duration.Int32,
+		Path:           e.Path.String,
+		Author:         e.Author.String,
+		UserID:         e.UserID.UUID,
+		SizeBytes:      e.SizeBytes.Int64,
+		YoutubeVideoID: e.YoutubeVideoID.String,
 	}
 }

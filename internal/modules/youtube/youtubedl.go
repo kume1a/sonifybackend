@@ -29,11 +29,12 @@ func DownloadYoutubeAudio(videoID string) (string, error) {
 		return "", err
 	}
 
-	log.Println("Downloading youtube audio to: ", outputLocation)
+	cmd := exec.Command("yt-dlp", "-f", "bestaudio", "-o", outputLocation, "https://www.youtube.com/watch?v="+videoID)
 
-	exec.Command("yt-dlp", "-f", "bestaudio", "-o", outputLocation, "https://www.youtube.com/watch?v="+videoID)
-
-	log.Println("Downloaded youtube audio to: ", outputLocation)
+	if err := cmd.Run(); err != nil {
+		log.Println("Error downloading youtube audio: ", err)
+		return "", err
+	}
 
 	return outputLocation, nil
 }

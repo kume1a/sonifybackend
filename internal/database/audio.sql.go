@@ -22,19 +22,23 @@ INSERT INTO audio(
   author,
   duration,
   path,
-  user_id
-) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id, title, author, duration, path, created_at, updated_at, user_id
+  user_id,
+  size_bytes,
+  youtube_video_id
+) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id, title, author, duration, path, created_at, updated_at, user_id, size_bytes, youtube_video_id
 `
 
 type CreateAudioParams struct {
-	ID        uuid.UUID
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Title     sql.NullString
-	Author    sql.NullString
-	Duration  sql.NullInt32
-	Path      sql.NullString
-	UserID    uuid.NullUUID
+	ID             uuid.UUID
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+	Title          sql.NullString
+	Author         sql.NullString
+	Duration       sql.NullInt32
+	Path           sql.NullString
+	UserID         uuid.NullUUID
+	SizeBytes      sql.NullInt64
+	YoutubeVideoID sql.NullString
 }
 
 func (q *Queries) CreateAudio(ctx context.Context, arg CreateAudioParams) (Audio, error) {
@@ -47,6 +51,8 @@ func (q *Queries) CreateAudio(ctx context.Context, arg CreateAudioParams) (Audio
 		arg.Duration,
 		arg.Path,
 		arg.UserID,
+		arg.SizeBytes,
+		arg.YoutubeVideoID,
 	)
 	var i Audio
 	err := row.Scan(
@@ -58,6 +64,8 @@ func (q *Queries) CreateAudio(ctx context.Context, arg CreateAudioParams) (Audio
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.UserID,
+		&i.SizeBytes,
+		&i.YoutubeVideoID,
 	)
 	return i, err
 }
@@ -72,7 +80,7 @@ func (q *Queries) DeleteAudioById(ctx context.Context, id uuid.UUID) error {
 }
 
 const getAudioById = `-- name: GetAudioById :one
-SELECT id, title, author, duration, path, created_at, updated_at, user_id FROM audio WHERE id = $1
+SELECT id, title, author, duration, path, created_at, updated_at, user_id, size_bytes, youtube_video_id FROM audio WHERE id = $1
 `
 
 func (q *Queries) GetAudioById(ctx context.Context, id uuid.UUID) (Audio, error) {
@@ -87,12 +95,14 @@ func (q *Queries) GetAudioById(ctx context.Context, id uuid.UUID) (Audio, error)
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.UserID,
+		&i.SizeBytes,
+		&i.YoutubeVideoID,
 	)
 	return i, err
 }
 
 const getAudiosByUserId = `-- name: GetAudiosByUserId :many
-SELECT id, title, author, duration, path, created_at, updated_at, user_id FROM audio WHERE user_id = $1
+SELECT id, title, author, duration, path, created_at, updated_at, user_id, size_bytes, youtube_video_id FROM audio WHERE user_id = $1
 `
 
 func (q *Queries) GetAudiosByUserId(ctx context.Context, userID uuid.NullUUID) ([]Audio, error) {
@@ -113,6 +123,8 @@ func (q *Queries) GetAudiosByUserId(ctx context.Context, userID uuid.NullUUID) (
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.UserID,
+			&i.SizeBytes,
+			&i.YoutubeVideoID,
 		); err != nil {
 			return nil, err
 		}
@@ -127,8 +139,35 @@ func (q *Queries) GetAudiosByUserId(ctx context.Context, userID uuid.NullUUID) (
 	return items, nil
 }
 
+const getUserAudioByVideoId = `-- name: GetUserAudioByVideoId :one
+SELECT id, title, author, duration, path, created_at, updated_at, user_id, size_bytes, youtube_video_id FROM audio WHERE user_id = $1 AND youtube_video_id = $2
+`
+
+type GetUserAudioByVideoIdParams struct {
+	UserID         uuid.NullUUID
+	YoutubeVideoID sql.NullString
+}
+
+func (q *Queries) GetUserAudioByVideoId(ctx context.Context, arg GetUserAudioByVideoIdParams) (Audio, error) {
+	row := q.db.QueryRowContext(ctx, getUserAudioByVideoId, arg.UserID, arg.YoutubeVideoID)
+	var i Audio
+	err := row.Scan(
+		&i.ID,
+		&i.Title,
+		&i.Author,
+		&i.Duration,
+		&i.Path,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.UserID,
+		&i.SizeBytes,
+		&i.YoutubeVideoID,
+	)
+	return i, err
+}
+
 const updateAudio = `-- name: UpdateAudio :one
-UPDATE audio SET title = $1, author = $2, duration = $3, path = $4 WHERE id = $5 RETURNING id, title, author, duration, path, created_at, updated_at, user_id
+UPDATE audio SET title = $1, author = $2, duration = $3, path = $4 WHERE id = $5 RETURNING id, title, author, duration, path, created_at, updated_at, user_id, size_bytes, youtube_video_id
 `
 
 type UpdateAudioParams struct {
@@ -157,6 +196,8 @@ func (q *Queries) UpdateAudio(ctx context.Context, arg UpdateAudioParams) (Audio
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.UserID,
+		&i.SizeBytes,
+		&i.YoutubeVideoID,
 	)
 	return i, err
 }

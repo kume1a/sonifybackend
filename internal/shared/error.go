@@ -10,4 +10,5 @@ const (
 	ErrInvalidQueryParams = "INVALID_QUERY_PARAMS"
 	ErrMissingToken       = "MISSING_TOKEN"
 	ErrInvalidToken       = "INVALID_TOKEN"
+	ErrAudioAlreadyExists = "AUDIO_ALREADY_EXISTS"
 )
