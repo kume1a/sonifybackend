@@ -8,10 +8,10 @@ run:
 	air
 
 migrate:
-	goose -dir sql/schema postgres "user=postgres dbname=sonify sslmode=disable password=12345" up
+	goose -dir sql/schema postgres "user=postgres dbname=sonify sslmode=disable password=123456" up
 
 migration-status:
-	goose -dir sql/schema postgres "user=postgres dbname=sonify sslmode=disable password=12345" status
+	goose -dir sql/schema postgres "user=postgres dbname=sonify sslmode=disable password=123456" status
 
 sqlgen:
 	sqlc generate
