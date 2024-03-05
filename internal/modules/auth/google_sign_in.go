@@ -24,15 +24,18 @@ type GoogleClaims struct {
 func getGooglePublicKey(keyID string) (string, error) {
 	resp, err := http.Get("https://www.googleapis.com/oauth2/v1/certs")
 	if err != nil {
+		log.Println("Error getting google public key: ", err)
 		return "", err
 	}
 	dat, err := io.ReadAll(resp.Body)
 	if err != nil {
+		log.Println("Error reading google public key: ", err)
 		return "", err
 	}
 
 	myResp := map[string]string{}
 	if err := json.Unmarshal(dat, &myResp); err != nil {
+		log.Println("Error unmarshalling google public key: ", err)
 		return "", err
 	}
 

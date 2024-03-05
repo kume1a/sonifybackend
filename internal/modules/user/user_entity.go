@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"database/sql"
+	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -19,6 +20,10 @@ func CreateUser(db *database.Queries, ctx context.Context, params *database.Crea
 		Name:      params.Name,
 		Email:     params.Email,
 	})
+
+	if err != nil {
+		log.Println("Error creating user: ", err)
+	}
 
 	return &user, err
 }
