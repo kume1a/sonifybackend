@@ -62,7 +62,7 @@ func GetYoutubeVideoTitle(videoID string) (string, error) {
 
 	output, err := cmd.Output()
 	if err != nil {
-		log.Println("Error getting youtube music duration:", err)
+		log.Println("Error getting youtube video title:", err)
 		return "", err
 	}
 
