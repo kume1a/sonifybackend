@@ -19,6 +19,7 @@ func CreateAudio(
 	userId uuid.UUID,
 	sizeBytes sql.NullInt64,
 	youtubeVideoId sql.NullString,
+	thumbnailPath sql.NullString,
 ) (*database.Audio, error) {
 	createdAt := time.Now().UTC()
 
@@ -33,6 +34,7 @@ func CreateAudio(
 		UserID:         uuid.NullUUID{UUID: userId, Valid: true},
 		SizeBytes:      sizeBytes,
 		YoutubeVideoID: youtubeVideoId,
+		ThumbnailPath:  thumbnailPath,
 	})
 
 	return &audio, err

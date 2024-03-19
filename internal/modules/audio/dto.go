@@ -21,4 +21,5 @@ type AudioDto struct {
 	UserID         uuid.UUID `json:"userId"`
 	SizeBytes      int64     `json:"sizeBytes"`
 	YoutubeVideoID string    `json:"youtubeVideoId"`
+	ThumbnailPath  string    `json:"thumbnailPath"`
 }

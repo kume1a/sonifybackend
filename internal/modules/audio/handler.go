@@ -41,13 +41,13 @@ func handleDownloadYoutubeAudio(apiCfg *shared.ApiConfg) http.HandlerFunc {
 			return
 		}
 
-		fileLocation, err := youtube.DownloadYoutubeAudio(body.VideoId)
+		filePath, thumbnailPath, err := youtube.DownloadYoutubeAudio(body.VideoId)
 		if err != nil {
 			shared.ResInternalServerErrorDef(w)
 			return
 		}
 
-		fileSize, err := shared.GetFileSize(fileLocation)
+		fileSize, err := shared.GetFileSize(filePath)
 		if err != nil {
 			shared.ResInternalServerErrorDef(w)
 			return
@@ -59,10 +59,11 @@ func handleDownloadYoutubeAudio(apiCfg *shared.ApiConfg) http.HandlerFunc {
 			sql.NullString{String: videoTitle, Valid: true},
 			sql.NullString{},
 			sql.NullInt32{Int32: int32(audioDurationInSeconds), Valid: true},
-			fileLocation,
+			filePath,
 			authPayload.UserId,
 			sql.NullInt64{Int64: fileSize.Bytes, Valid: true},
 			sql.NullString{String: body.VideoId, Valid: true},
+			sql.NullString{String: thumbnailPath, Valid: true},
 		)
 		if err != nil {
 			log.Println("Error creating audio: ", err)

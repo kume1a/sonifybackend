@@ -3,6 +3,7 @@ package youtube
 import (
 	"log"
 	"os/exec"
+	"path"
 	"strconv"
 	"strings"
 
@@ -22,21 +23,23 @@ func GetYoutubeAudioUrl(videoID string) (string, error) {
 	return url, nil
 }
 
-func DownloadYoutubeAudio(videoID string) (string, error) {
+func DownloadYoutubeAudio(videoID string) (outputPath string, thumbnailPath string, err error) {
 	outputLocation, err := shared.NewPublicFileLocation(".webm")
 	if err != nil {
 		log.Println("Error creating public file location: ", err)
-		return "", err
+		return "", "", err
 	}
 
-	cmd := exec.Command("yt-dlp", "-f", "bestaudio", "-o", outputLocation, "https://www.youtube.com/watch?v="+videoID)
+	thumbnailLocation := strings.TrimSuffix(outputLocation, path.Ext(outputLocation)) + ".webp"
+
+	cmd := exec.Command("yt-dlp", "-f", "bestaudio", "--write-thumbnail", "--embed-thumbnail", "-o", outputLocation, "https://www.youtube.com/watch?v="+videoID)
 
 	if err := cmd.Run(); err != nil {
 		log.Println("Error downloading youtube audio: ", err)
-		return "", err
+		return "", "", err
 	}
 
-	return outputLocation, nil
+	return outputLocation, thumbnailLocation, nil
 }
 
 func GetYoutubeAudioDurationInSeconds(videoID string) (int, error) {
