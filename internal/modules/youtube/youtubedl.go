@@ -32,7 +32,7 @@ func DownloadYoutubeAudio(videoID string) (outputPath string, thumbnailPath stri
 
 	thumbnailLocation := strings.TrimSuffix(outputLocation, path.Ext(outputLocation)) + ".webp"
 
-	cmd := exec.Command("yt-dlp", "-f", "bestaudio", "--write-thumbnail", "--embed-thumbnail", "-o", outputLocation, "https://www.youtube.com/watch?v="+videoID)
+	cmd := exec.Command("yt-dlp", "-f", "bestaudio", "--write-thumbnail", "-o", outputLocation, "https://www.youtube.com/watch?v="+videoID)
 
 	if err := cmd.Run(); err != nil {
 		log.Println("Error downloading youtube audio: ", err)
