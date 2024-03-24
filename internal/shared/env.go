@@ -6,7 +6,27 @@ import (
 	"log"
 	"os"
 	"strconv"
+
+	"github.com/joho/godotenv"
 )
+
+func LoadEnv() {
+	env := os.Getenv("SONIFY_ENV")
+	if env == "" {
+		env = "development"
+	}
+
+	// godotenv.Load(".env." + env + ".local")
+	// if "test" != env {
+	//   godotenv.Load(".env.local")
+	// }
+
+	envPath := ".env." + env
+
+	log.Println("Loading env file: " + envPath)
+
+	godotenv.Load(envPath)
+}
 
 type EnvVariables struct {
 	Port              string

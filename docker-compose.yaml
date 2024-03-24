@@ -1,0 +1,26 @@
+version: "3"
+
+volumes:
+  sonify_postgres_data:
+
+services:
+  sonify:
+    build: ./
+    ports:
+      - "8000:8000"
+    depends_on:
+      - sonifydb
+    # volumes:
+    #   - /action-runners/sonifypublic:/app/public
+
+  sonifydb:
+    image: postgres:14.5-alpine
+    ports:
+      - "5435:5432"
+    environment:
+      - POSTGRES_PASSWORD=dwagrw21321d2d1d
+      - POSTGRES_USERNAME=postgres
+      - POSTGRES_DB=sonify
+    volumes:
+      - sonify_postgres_data:/var/lib/postgresql/data
+

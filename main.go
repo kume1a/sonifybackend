@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/asaskevich/govalidator"
-	"github.com/joho/godotenv"
 	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/modules"
 	"github.com/kume1a/sonifybackend/internal/shared"
@@ -15,7 +14,7 @@ import (
 )
 
 func main() {
-	godotenv.Load(".env")
+	shared.LoadEnv()
 
 	envVars, err := shared.ParseEnv()
 	if err != nil {

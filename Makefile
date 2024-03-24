@@ -15,3 +15,6 @@ migration-status:
 
 sqlgen:
 	sqlc generate
+
+migrate-prod:
+	goose -dir sql/schema postgres "postgresql://postgres:dwagrw21321d2d1d@sonifydb:5432/sonify?sslmode=disable" up
