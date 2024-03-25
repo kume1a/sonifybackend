@@ -34,6 +34,6 @@ EXPOSE 8000
 
 ENV SONIFY_ENV=production
 
-CMD ["make migrate-prod", "&&", "/sonifybin"]
-
 # ENTRYPOINT ["tail", "-f", "/dev/null"]
+
+CMD ["/bin/bash", "-c", "make migrate-prod;/sonifybin"]
