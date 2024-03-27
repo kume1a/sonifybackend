@@ -48,3 +48,9 @@ func UpdateUser(db *database.Queries, ctx context.Context, params *database.Upda
 
 	return &user, err
 }
+
+func UserExistsByEmail(db *database.Queries, ctx context.Context, email string) (bool, error) {
+	count, err := db.CountUsersByEmail(ctx, sql.NullString{String: email, Valid: true})
+
+	return count > 0, err
+}

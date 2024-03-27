@@ -13,18 +13,31 @@ import (
 	"github.com/google/uuid"
 )
 
+const countUsersByEmail = `-- name: CountUsersByEmail :one
+SELECT COUNT(*) FROM users WHERE email = $1
+`
+
+func (q *Queries) CountUsersByEmail(ctx context.Context, email sql.NullString) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countUsersByEmail, email)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createUser = `-- name: CreateUser :one
-INSERT INTO users(id, created_at, updated_at, name, email)
-VALUES ($1, $2, $3, $4, $5)
-RETURNING id, created_at, updated_at, name, email
+INSERT INTO users(id, created_at, updated_at, name, email, auth_provider, password_hash)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
+RETURNING id, created_at, updated_at, name, email, auth_provider, password_hash
 `
 
 type CreateUserParams struct {
-	ID        uuid.UUID
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Name      sql.NullString
-	Email     sql.NullString
+	ID           uuid.UUID
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+	Name         sql.NullString
+	Email        sql.NullString
+	AuthProvider AuthProvider
+	PasswordHash sql.NullString
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -34,6 +47,8 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		arg.UpdatedAt,
 		arg.Name,
 		arg.Email,
+		arg.AuthProvider,
+		arg.PasswordHash,
 	)
 	var i User
 	err := row.Scan(
@@ -42,12 +57,14 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.UpdatedAt,
 		&i.Name,
 		&i.Email,
+		&i.AuthProvider,
+		&i.PasswordHash,
 	)
 	return i, err
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, created_at, updated_at, name, email FROM users WHERE email = $1
+SELECT id, created_at, updated_at, name, email, auth_provider, password_hash FROM users WHERE email = $1
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email sql.NullString) (User, error) {
@@ -59,12 +76,14 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email sql.NullString) (Use
 		&i.UpdatedAt,
 		&i.Name,
 		&i.Email,
+		&i.AuthProvider,
+		&i.PasswordHash,
 	)
 	return i, err
 }
 
 const getUserById = `-- name: GetUserById :one
-SELECT id, created_at, updated_at, name, email FROM users WHERE id = $1
+SELECT id, created_at, updated_at, name, email, auth_provider, password_hash FROM users WHERE id = $1
 `
 
 func (q *Queries) GetUserById(ctx context.Context, id uuid.UUID) (User, error) {
@@ -76,12 +95,14 @@ func (q *Queries) GetUserById(ctx context.Context, id uuid.UUID) (User, error) {
 		&i.UpdatedAt,
 		&i.Name,
 		&i.Email,
+		&i.AuthProvider,
+		&i.PasswordHash,
 	)
 	return i, err
 }
 
 const getUsers = `-- name: GetUsers :exec
-SELECT id, created_at, updated_at, name, email FROM "users"
+SELECT id, created_at, updated_at, name, email, auth_provider, password_hash FROM "users"
 `
 
 func (q *Queries) GetUsers(ctx context.Context) error {
@@ -93,7 +114,7 @@ const updateUser = `-- name: UpdateUser :one
 UPDATE users
 SET name = COALESCE($1, name)
 WHERE id = $2
-RETURNING id, created_at, updated_at, name, email
+RETURNING id, created_at, updated_at, name, email, auth_provider, password_hash
 `
 
 type UpdateUserParams struct {
@@ -110,6 +131,8 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		&i.UpdatedAt,
 		&i.Name,
 		&i.Email,
+		&i.AuthProvider,
+		&i.PasswordHash,
 	)
 	return i, err
 }
