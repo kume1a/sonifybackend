@@ -1,6 +1,8 @@
 package shared
 
-import "net/http"
+import (
+	"net/http"
+)
 
 type HttpError struct {
 	Message string
@@ -11,50 +13,50 @@ func (e HttpError) Error() string {
 	return e.Message
 }
 
-func ErrBadRequest(msg string) HttpError {
-	return HttpError{
+func HttpErrBadRequest(msg string) *HttpError {
+	return &HttpError{
 		Message: msg,
 		Code:    http.StatusBadRequest,
 	}
 }
 
-func StatusUnauthorized(msg string) HttpError {
-	return HttpError{
+func HttpErrUnauthorized(msg string) *HttpError {
+	return &HttpError{
 		Message: msg,
 		Code:    http.StatusUnauthorized,
 	}
 }
 
-func StatusForbidden(msg string) HttpError {
-	return HttpError{
+func HttpErrForbidden(msg string) *HttpError {
+	return &HttpError{
 		Message: msg,
 		Code:    http.StatusForbidden,
 	}
 }
 
-func StatusNotFound(msg string) HttpError {
-	return HttpError{
+func HttpErrNotFound(msg string) *HttpError {
+	return &HttpError{
 		Message: msg,
 		Code:    http.StatusNotFound,
 	}
 }
 
-func StatusMethodNotAllowed(msg string) HttpError {
-	return HttpError{
+func HttpErrMethodNotAllowed(msg string) *HttpError {
+	return &HttpError{
 		Message: msg,
 		Code:    http.StatusMethodNotAllowed,
 	}
 }
 
-func StatusInternalServerError(msg string) HttpError {
-	return HttpError{
-		Message: msg,
+func HttpErrInternalServerError() *HttpError {
+	return &HttpError{
+		Message: ErrInternal,
 		Code:    http.StatusInternalServerError,
 	}
 }
 
-func StatusNotImplemented(msg string) HttpError {
-	return HttpError{
+func HttpErrNotImplemented(msg string) *HttpError {
+	return &HttpError{
 		Message: msg,
 		Code:    http.StatusNotImplemented,
 	}

@@ -2,8 +2,8 @@
 SELECT * FROM "users";
 
 -- name: CreateUser :one
-INSERT INTO users(id, created_at, updated_at, name, email)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO users(id, created_at, updated_at, name, email, auth_provider, password_hash)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
 RETURNING *; 
 
 -- name: GetUserById :one
@@ -17,3 +17,6 @@ UPDATE users
 SET name = COALESCE(@name, name)
 WHERE id = @id
 RETURNING *;
+
+-- name: CountUsersByEmail :one
+SELECT COUNT(*) FROM users WHERE email = $1;

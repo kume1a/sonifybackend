@@ -8,7 +8,8 @@ import (
 func Router(apiCfg *shared.ApiConfg, router *mux.Router) *mux.Router {
 	r := router.PathPrefix("/auth").Subrouter()
 
-	r.HandleFunc("/googleSignIn", handleGoogleSignIn(apiCfg)).Methods("POST")
+	r.HandleFunc("/googleSignIn", handleGoogleAuth(apiCfg)).Methods("POST")
+	r.HandleFunc("/emailSignIn", handleEmailAuth(apiCfg)).Methods("POST")
 
 	return r
 }

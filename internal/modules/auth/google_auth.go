@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"context"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,6 +12,8 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/kume1a/sonifybackend/internal/database"
+	"github.com/kume1a/sonifybackend/internal/modules/user"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
@@ -19,6 +23,36 @@ type GoogleClaims struct {
 	FirstName     string `json:"given_name"`
 	LastName      string `json:"family_name"`
 	jwt.StandardClaims
+}
+
+func AuthWithGoogle(apiCfg shared.ApiConfg, ctx context.Context, token string) (*tokenPayloadDTO, *shared.HttpError) {
+	claims, err := validateGoogleJWT(token)
+	if err != nil {
+		return nil, shared.HttpErrUnauthorized(shared.ErrInvalidGoogleToken)
+	}
+
+	authUser, err := user.GetUserByEmail(apiCfg.DB, ctx, claims.Email)
+	if err != nil {
+		newUser, err := user.CreateUser(apiCfg.DB, ctx, &database.CreateUserParams{
+			Name:         sql.NullString{},
+			Email:        sql.NullString{String: claims.Email, Valid: true},
+			AuthProvider: database.AuthProviderEMAIL,
+			PasswordHash: sql.NullString{},
+		})
+
+		if err != nil {
+			return nil, shared.HttpErrInternalServerError()
+		}
+
+		authUser = newUser
+	}
+
+	tokenPayload, err := getTokenPayloadDtoFromUserEntity(authUser)
+	if err != nil {
+		return nil, shared.HttpErrInternalServerError()
+	}
+
+	return tokenPayload, nil
 }
 
 func getGooglePublicKey(keyID string) (string, error) {
@@ -47,7 +81,7 @@ func getGooglePublicKey(keyID string) (string, error) {
 	return key, nil
 }
 
-func ValidateGoogleJWT(tokenString string) (*GoogleClaims, error) {
+func validateGoogleJWT(tokenString string) (*GoogleClaims, error) {
 	env, err := shared.ParseEnv()
 	if err != nil {
 		return nil, err

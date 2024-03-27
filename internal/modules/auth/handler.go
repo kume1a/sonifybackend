@@ -1,15 +1,12 @@
 package auth
 
 import (
-	"database/sql"
 	"net/http"
 
-	"github.com/kume1a/sonifybackend/internal/database"
-	"github.com/kume1a/sonifybackend/internal/modules/user"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
-func handleGoogleSignIn(apiCfg *shared.ApiConfg) http.HandlerFunc {
+func handleGoogleAuth(apiCfg *shared.ApiConfg) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		body, err := shared.ValidateRequestBody[*googleSignInDTO](r)
 
@@ -18,41 +15,31 @@ func handleGoogleSignIn(apiCfg *shared.ApiConfg) http.HandlerFunc {
 			return
 		}
 
-		claims, err := ValidateGoogleJWT(body.Token)
-		if err != nil {
-			shared.ResUnauthorized(w, shared.ErrInvalidGoogleToken)
+		tokenPayload, httpErr := AuthWithGoogle(*apiCfg, r.Context(), body.Token)
+		if httpErr != nil {
+			shared.ResHttpError(w, *httpErr)
 			return
 		}
 
-		authUser, err := user.GetUserByEmail(apiCfg.DB, r.Context(), claims.Email)
+		shared.ResOK(w, tokenPayload)
+	}
+}
+
+func handleEmailAuth(apiCfg *shared.ApiConfg) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		body, err := shared.ValidateRequestBody[*emailSignInDTO](r)
+
 		if err != nil {
-			newUser, err := user.CreateUser(apiCfg.DB, r.Context(), &database.CreateUserParams{
-				Name:  sql.NullString{},
-				Email: sql.NullString{String: claims.Email, Valid: true},
-			})
-
-			if err != nil {
-				shared.ResInternalServerErrorDef(w)
-				return
-			}
-
-			authUser = newUser
-		}
-
-		tokenString, err := shared.GenerateAccessToken(&shared.TokenClaims{
-			UserId: authUser.ID,
-			Email:  authUser.Email.String,
-		})
-		if err != nil {
-			shared.ResInternalServerErrorDef(w)
+			shared.ResBadRequest(w, err.Error())
 			return
 		}
 
-		res := tokenPayloadDTO{
-			AccessToken: tokenString,
-			User:        user.UserEntityToDto(authUser),
+		tokenPayload, httpErr := AuthWithEmail(*apiCfg, r.Context(), body.Email, body.Password)
+		if httpErr != nil {
+			shared.ResHttpError(w, *httpErr)
+			return
 		}
 
-		shared.ResOK(w, res)
+		shared.ResOK(w, tokenPayload)
 	}
 }

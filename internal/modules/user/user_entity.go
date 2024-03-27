@@ -14,11 +14,13 @@ func CreateUser(db *database.Queries, ctx context.Context, params *database.Crea
 	createdAt := time.Now().UTC()
 
 	user, err := db.CreateUser(ctx, database.CreateUserParams{
-		ID:        uuid.New(),
-		CreatedAt: createdAt,
-		UpdatedAt: createdAt,
-		Name:      params.Name,
-		Email:     params.Email,
+		ID:           uuid.New(),
+		CreatedAt:    createdAt,
+		UpdatedAt:    createdAt,
+		Name:         params.Name,
+		Email:        params.Email,
+		AuthProvider: params.AuthProvider,
+		PasswordHash: params.PasswordHash,
 	})
 
 	if err != nil {
@@ -47,4 +49,10 @@ func UpdateUser(db *database.Queries, ctx context.Context, params *database.Upda
 	user, err := db.UpdateUser(ctx, *params)
 
 	return &user, err
+}
+
+func UserExistsByEmail(db *database.Queries, ctx context.Context, email string) (bool, error) {
+	count, err := db.CountUsersByEmail(ctx, sql.NullString{String: email, Valid: true})
+
+	return count > 0, err
 }

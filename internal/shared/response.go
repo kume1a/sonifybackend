@@ -55,6 +55,10 @@ func ResNoContent(w http.ResponseWriter, payload interface{}) {
 	resJson(w, http.StatusNoContent, payload)
 }
 
+func ResHttpError(w http.ResponseWriter, httpError HttpError) {
+	resError(w, httpError.Code, httpError.Message)
+}
+
 func ResBadRequest(w http.ResponseWriter, msg string) {
 	resError(w, http.StatusBadRequest, msg)
 }
