@@ -29,13 +29,7 @@ func handleDownloadYoutubeAudio(apiCfg *shared.ApiConfg) http.HandlerFunc {
 			return
 		}
 
-		videoTitle, err := youtube.GetYoutubeVideoTitle(body.VideoId)
-		if err != nil {
-			shared.ResInternalServerErrorDef(w)
-			return
-		}
-
-		audioDurationInSeconds, err := youtube.GetYoutubeAudioDurationInSeconds(body.VideoId)
+		videoInfo, err := youtube.GetYoutubeVideoInfo(body.VideoId)
 		if err != nil {
 			shared.ResInternalServerErrorDef(w)
 			return
@@ -56,9 +50,9 @@ func handleDownloadYoutubeAudio(apiCfg *shared.ApiConfg) http.HandlerFunc {
 		newAudio, err := CreateAudio(
 			apiCfg.DB,
 			r.Context(),
-			sql.NullString{String: videoTitle, Valid: true},
-			sql.NullString{},
-			sql.NullInt32{Int32: int32(audioDurationInSeconds), Valid: true},
+			sql.NullString{String: videoInfo.Title, Valid: true},
+			sql.NullString{String: videoInfo.Uploader, Valid: true},
+			sql.NullInt32{Int32: int32(videoInfo.DurationInSeconds), Valid: true},
 			filePath,
 			authPayload.UserId,
 			sql.NullInt64{Int64: fileSize.Bytes, Valid: true},
