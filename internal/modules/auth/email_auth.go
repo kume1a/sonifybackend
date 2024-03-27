@@ -37,6 +37,7 @@ func AuthWithEmail(apiCfg shared.ApiConfg, ctx context.Context, email string, pa
 
 func signInWithEmail(apiCfg shared.ApiConfg, ctx context.Context, email string, password string) (*database.User, *shared.HttpError) {
 	authUser, err := user.GetUserByEmail(apiCfg.DB, ctx, email)
+
 	if err != nil {
 		return nil, shared.HttpErrUnauthorized(shared.ErrInvalidEmailOrPassword)
 	}
@@ -45,7 +46,7 @@ func signInWithEmail(apiCfg shared.ApiConfg, ctx context.Context, email string, 
 		return nil, shared.HttpErrBadRequest(shared.ErrInvalidAuthMethod)
 	}
 
-	if !ComparePasswordHash(authUser.PasswordHash.String, password) {
+	if !ComparePasswordHash(password, authUser.PasswordHash.String) {
 		return nil, shared.HttpErrUnauthorized(shared.ErrInvalidEmailOrPassword)
 	}
 
