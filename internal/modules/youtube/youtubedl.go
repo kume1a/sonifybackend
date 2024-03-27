@@ -24,6 +24,11 @@ func GetYoutubeAudioUrl(videoID string) (string, error) {
 }
 
 func DownloadYoutubeAudio(videoID string) (outputPath string, thumbnailPath string, err error) {
+	env, err := shared.ParseEnv()
+	if err != nil {
+		return "", "", err
+	}
+
 	outputLocation, err := shared.NewPublicFileLocation(".webm")
 	if err != nil {
 		log.Println("Error creating public file location: ", err)
@@ -32,7 +37,12 @@ func DownloadYoutubeAudio(videoID string) (outputPath string, thumbnailPath stri
 
 	thumbnailLocation := strings.TrimSuffix(outputLocation, path.Ext(outputLocation)) + ".webp"
 
-	cmd := exec.Command("yt-dlp", "-f", "bestaudio", "--write-thumbnail", "-o", outputLocation, "https://www.youtube.com/watch?v="+videoID)
+	commandPrefix := ""
+	if env.IsProduction {
+		commandPrefix = "sudo"
+	}
+
+	cmd := exec.Command(commandPrefix, "yt-dlp", "-f", "bestaudio", "--write-thumbnail", "-o", outputLocation, "https://www.youtube.com/watch?v="+videoID)
 
 	if err := cmd.Run(); err != nil {
 		log.Println("Error downloading youtube audio: ", err)

@@ -29,6 +29,8 @@ func LoadEnv() {
 }
 
 type EnvVariables struct {
+	IsDevelopment     bool
+	IsProduction      bool
 	Port              string
 	DbUrl             string
 	GoogleClientKey   string
@@ -38,6 +40,11 @@ type EnvVariables struct {
 }
 
 func ParseEnv() (*EnvVariables, error) {
+	environment, err := getEnv("ENVIRONMENT")
+	if err != nil {
+		return nil, err
+	}
+
 	port, err := getEnv("PORT")
 	if err != nil {
 		return nil, err
@@ -69,6 +76,8 @@ func ParseEnv() (*EnvVariables, error) {
 	}
 
 	return &EnvVariables{
+		IsDevelopment:     environment == "development",
+		IsProduction:      environment == "production",
 		Port:              port,
 		DbUrl:             dbUrl,
 		GoogleClientKey:   googleClientKey,
