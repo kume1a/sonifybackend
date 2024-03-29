@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/kume1a/sonifybackend/internal/modules/youtube"
 	"github.com/kume1a/sonifybackend/internal/shared"
@@ -50,8 +51,8 @@ func handleDownloadYoutubeAudio(apiCfg *shared.ApiConfg) http.HandlerFunc {
 		newAudio, err := CreateAudio(
 			apiCfg.DB,
 			r.Context(),
-			sql.NullString{String: videoInfo.Title, Valid: true},
-			sql.NullString{String: videoInfo.Uploader, Valid: true},
+			sql.NullString{String: strings.TrimSpace(videoInfo.Title), Valid: true},
+			sql.NullString{String: strings.TrimSpace(videoInfo.Uploader), Valid: true},
 			sql.NullInt32{Int32: int32(videoInfo.DurationInSeconds), Valid: true},
 			filePath,
 			authPayload.UserId,
