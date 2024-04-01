@@ -9,6 +9,7 @@ import (
 	"github.com/kume1a/sonifybackend/internal/modules/audio"
 	"github.com/kume1a/sonifybackend/internal/modules/auth"
 	"github.com/kume1a/sonifybackend/internal/modules/playlist"
+	"github.com/kume1a/sonifybackend/internal/modules/spotify"
 	"github.com/kume1a/sonifybackend/internal/modules/user"
 	"github.com/kume1a/sonifybackend/internal/modules/youtube"
 	"github.com/kume1a/sonifybackend/internal/shared"
@@ -52,6 +53,7 @@ func CreateRouter(apiCfg *shared.ApiConfg) *mux.Router {
 	v1Router.Handle("", youtube.Router(apiCfg, v1Router))
 	v1Router.Handle("", audio.Router(apiCfg, v1Router))
 	v1Router.Handle("", playlist.Router(apiCfg, v1Router))
+	v1Router.Handle("", spotify.Router(apiCfg, v1Router))
 
 	router.Handle("", v1Router)
 	router.HandleFunc("/", HandlerHealthcheck).Methods("GET")

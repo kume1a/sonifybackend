@@ -27,26 +27,6 @@ func handleCreatePlaylist(apiCfg *shared.ApiConfg) http.HandlerFunc {
 	}
 }
 
-func handleCreatePlaylistAudio(apiCfg *shared.ApiConfg) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		body, err := shared.ValidateRequestBody[*createPlaylistAudioDto](r)
-		if err != nil {
-			shared.ResBadRequest(w, err.Error())
-			return
-		}
-
-		playlistAudio, err := CreatePlaylistAudio(r.Context(), apiCfg.DB, body.PlaylistID, body.AudioID)
-		if err != nil {
-			shared.ResInternalServerErrorDef(w)
-			return
-		}
-
-		dto := playlistAudioEntityToDto(playlistAudio)
-
-		shared.ResCreated(w, dto)
-	}
-}
-
 func handleGetPlaylists(apiCfg *shared.ApiConfg) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		query, err := shared.ValidateRequestQuery[*shared.LastCreatedAtPageParamsDto](r)
@@ -64,5 +44,25 @@ func handleGetPlaylists(apiCfg *shared.ApiConfg) http.HandlerFunc {
 		dtos := shared.MapList(playlists, playlistEntityToDto)
 
 		shared.ResOK(w, dtos)
+	}
+}
+
+func handleCreatePlaylistAudio(apiCfg *shared.ApiConfg) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		body, err := shared.ValidateRequestBody[*createPlaylistAudioDto](r)
+		if err != nil {
+			shared.ResBadRequest(w, err.Error())
+			return
+		}
+
+		playlistAudio, err := CreatePlaylistAudio(r.Context(), apiCfg.DB, body.PlaylistID, body.AudioID)
+		if err != nil {
+			shared.ResInternalServerErrorDef(w)
+			return
+		}
+
+		dto := playlistAudioEntityToDto(playlistAudio)
+
+		shared.ResCreated(w, dto)
 	}
 }

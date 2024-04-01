@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 )
 
-func HandleUploadFile(w http.ResponseWriter, r *http.Request, fieldName string, allowedMimeTypes []string) (string, *HttpError) {
+func HandleUploadFile(w http.ResponseWriter, r *http.Request, fieldName string, dir string, allowedMimeTypes []string) (string, *HttpError) {
 	env, err := ParseEnv()
 	if err != nil {
 		return "", HttpErrInternalServerError()
@@ -38,7 +38,10 @@ func HandleUploadFile(w http.ResponseWriter, r *http.Request, fieldName string, 
 	}
 
 	extension := filepath.Ext(fileHeader.Filename)
-	location, err := NewPublicFileLocation(extension)
+	location, err := NewPublicFileLocation(PublicFileLocationArgs{
+		Dir:       dir,
+		Extension: extension,
+	})
 	if err != nil {
 		return "", HttpErrInternalServerError()
 	}

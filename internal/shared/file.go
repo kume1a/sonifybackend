@@ -17,17 +17,17 @@ type FileSize struct {
 	MegaBytes float64
 }
 
-func NewPublicFileLocation(extension string) (string, error) {
-	envVars, err := ParseEnv()
-	if err != nil {
+type PublicFileLocationArgs struct {
+	Extension string
+	Dir       string
+}
+
+func NewPublicFileLocation(args PublicFileLocationArgs) (string, error) {
+	if err := ensureDir(args.Dir); err != nil {
 		return "", err
 	}
 
-	if err := ensureDir(envVars.PublicDIr); err != nil {
-		return "", err
-	}
-
-	return fmt.Sprintf("./public/%s%s", uuid.New(), extension), nil
+	return fmt.Sprintf("%s/%s%s", args.Dir, uuid.New(), args.Extension), nil
 }
 
 func DownloadFile(filepath string, url string) error {

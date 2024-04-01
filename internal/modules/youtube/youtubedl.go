@@ -24,7 +24,10 @@ func GetYoutubeAudioUrl(videoID string) (string, error) {
 }
 
 func DownloadYoutubeAudio(videoID string) (outputPath string, thumbnailPath string, err error) {
-	outputLocation, err := shared.NewPublicFileLocation(".webm")
+	outputLocation, err := shared.NewPublicFileLocation(shared.PublicFileLocationArgs{
+		Dir:       shared.DirPublic,
+		Extension: ".mp3",
+	})
 	if err != nil {
 		log.Println("Error creating public file location: ", err)
 		return "", "", err

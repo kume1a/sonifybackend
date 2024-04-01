@@ -1,0 +1,57 @@
+package spotify
+
+import (
+	"log"
+	"net/http"
+
+	"github.com/kume1a/sonifybackend/internal/shared"
+)
+
+func handleDownloadPlaylist(apiCfg *shared.ApiConfg) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		body, err := shared.ValidateRequestBody[*downloadSpotifyPlaylist](r)
+		if err != nil {
+			shared.ResBadRequest(w, err.Error())
+			return
+		}
+
+		spotifyPlaylistDTO, err := GetSpotifyPlaylist(body.SpotifyAccessToken, body.PlaylistID)
+		if err != nil {
+			shared.ResInternalServerError(w, shared.ErrFailedToGetSpotifyPlaylist)
+			return
+		}
+
+		spotifyPlaylist := spotifyPlaylistDtoToModel(spotifyPlaylistDTO)
+
+		trackDownloadMetas := []*downloadSpotifyTrackMetaDTO{}
+		for _, track := range spotifyPlaylist.Tracks[:shared.Min(10, len(spotifyPlaylist.Tracks)-1)] {
+			log.Println("Getting download meta for track: ", track.ID)
+
+			downloadMeta, err := GetSpotifyAudioDownloadMeta(track.ID)
+			if err != nil || !downloadMeta.Success {
+				log.Println("failed to get download meta for track: ", track.ID)
+				break
+			}
+
+			trackDownloadMetas = append(trackDownloadMetas, downloadMeta)
+		}
+
+		for _, downloadMeta := range trackDownloadMetas {
+			log.Println("Downloading track: ", downloadMeta.Metadata.Title, " from: ", downloadMeta.Link)
+
+			fileLocation, err := shared.NewPublicFileLocation(shared.PublicFileLocationArgs{
+				Extension: ".mp3",
+				Dir:       shared.DirSpotifyAudios,
+			})
+			if err != nil {
+				log.Println("error creating file location: ", err)
+				break
+			}
+
+			if err := shared.DownloadFile(fileLocation, downloadMeta.Link); err != nil {
+				log.Println("error downloading file: ", err)
+				break
+			}
+		}
+	}
+}
