@@ -14,7 +14,7 @@ type playlistDto struct {
 }
 
 type createPlaylistAudioDto struct {
-	PlaylistID uuid.UUID `json:"playlistId valid:"required"`
+	PlaylistID uuid.UUID `json:"playlistId" valid:"required"`
 	AudioID    uuid.UUID `json:"audioId" valid:"required"`
 }
 

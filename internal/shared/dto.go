@@ -26,3 +26,8 @@ type UserDto struct {
 	Name      string    `json:"name"`
 	Email     string    `json:"email"`
 }
+
+type LastCreatedAtPageParamsDto struct {
+	LastCreatedAt time.Time `json:"lastCreatedAt"`
+	Limit         int32     `json:"limit" valid:"required,max(200)"`
+}

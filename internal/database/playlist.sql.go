@@ -159,11 +159,19 @@ func (q *Queries) GetPlaylistById(ctx context.Context, id uuid.UUID) (Playlist, 
 }
 
 const getPlaylists = `-- name: GetPlaylists :many
-SELECT id, name, thumbnail_path, created_at FROM playlists LIMIT $1
+SELECT id, name, thumbnail_path, created_at FROM playlists 
+  WHERE created_at > $1
+  ORDER BY created_at DESC
+  LIMIT $2
 `
 
-func (q *Queries) GetPlaylists(ctx context.Context, limit int32) ([]Playlist, error) {
-	rows, err := q.db.QueryContext(ctx, getPlaylists, limit)
+type GetPlaylistsParams struct {
+	CreatedAt time.Time
+	Limit     int32
+}
+
+func (q *Queries) GetPlaylists(ctx context.Context, arg GetPlaylistsParams) ([]Playlist, error) {
+	rows, err := q.db.QueryContext(ctx, getPlaylists, arg.CreatedAt, arg.Limit)
 	if err != nil {
 		return nil, err
 	}

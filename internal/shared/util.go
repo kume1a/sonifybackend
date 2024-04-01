@@ -11,9 +11,14 @@ import (
 
 func (dto *KeywordDto) Validate() error {
 	if len(dto.Keyword) != 1 {
-		return fmt.Errorf("Keyword must have exactly one element")
+		return fmt.Errorf("keyword must have exactly one element")
 	}
 
+	_, err := govalidator.ValidateStruct(dto)
+	return err
+}
+
+func (dto *LastCreatedAtPageParamsDto) Validate() error {
 	_, err := govalidator.ValidateStruct(dto)
 	return err
 }

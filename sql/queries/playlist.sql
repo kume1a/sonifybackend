@@ -7,7 +7,10 @@ INSERT INTO playlists(
 ) VALUES ($1,$2,$3,$4) RETURNING *;
 
 -- name: GetPlaylists :many
-SELECT * FROM playlists LIMIT $1;
+SELECT * FROM playlists 
+  WHERE created_at > $1
+  ORDER BY created_at DESC
+  LIMIT $2;
 
 -- name: UpdatePlaylistById :one
 UPDATE playlists

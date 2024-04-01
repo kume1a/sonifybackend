@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"log"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/kume1a/sonifybackend/internal/database"
@@ -36,8 +37,11 @@ func CreatePlaylistAudio(ctx context.Context, db *database.Queries, playlistID u
 	return &entity, err
 }
 
-func GetPlaylists(ctx context.Context, db *database.Queries, limit int32) ([]database.Playlist, error) {
-	playlists, err := db.GetPlaylists(ctx, limit)
+func GetPlaylists(ctx context.Context, db *database.Queries, lastCreatedAt time.Time, limit int32) ([]database.Playlist, error) {
+	playlists, err := db.GetPlaylists(ctx, database.GetPlaylistsParams{
+		CreatedAt: lastCreatedAt,
+		Limit:     limit,
+	})
 
 	if err != nil {
 		log.Println("Error getting playlists:", err)
