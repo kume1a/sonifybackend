@@ -13,4 +13,7 @@ const (
 	ErrAudioAlreadyExists     = "AUDIO_ALREADY_EXISTS"
 	ErrInvalidAuthMethod      = "INVALID_AUTH_METHOD"
 	ErrInvalidEmailOrPassword = "INVALID_EMAIL_OR_PASSWORD"
+	ErrMethodNotAllowed       = "METHOD_NOT_ALLOWED"
+	ErrExceededMaxUploadSize  = "EXCEEDED_MAX_UPLOAD_SIZE"
+	ErrInvalidMimeType        = "INVALID_MIME_TYPE"
 )

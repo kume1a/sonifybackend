@@ -29,14 +29,15 @@ func LoadEnv() {
 }
 
 type EnvVariables struct {
-	IsDevelopment     bool
-	IsProduction      bool
-	Port              string
-	DbUrl             string
-	GoogleClientKey   string
-	AccessTokenSecret string
-	AccessTokenExp    int64
-	PublicDIr         string
+	IsDevelopment      bool
+	IsProduction       bool
+	Port               string
+	DbUrl              string
+	GoogleClientKey    string
+	AccessTokenSecret  string
+	AccessTokenExp     int64
+	PublicDIr          string
+	MaxUploadSizeBytes int64
 }
 
 func ParseEnv() (*EnvVariables, error) {
@@ -75,15 +76,21 @@ func ParseEnv() (*EnvVariables, error) {
 		return nil, err
 	}
 
+	maxUploadSizeBytes, err := getEnvInt("MAX_UPLOAD_SIZE_BYTES")
+	if err != nil {
+		return nil, err
+	}
+
 	return &EnvVariables{
-		IsDevelopment:     environment == "development",
-		IsProduction:      environment == "production",
-		Port:              port,
-		DbUrl:             dbUrl,
-		GoogleClientKey:   googleClientKey,
-		AccessTokenSecret: accessTokenSecret,
-		AccessTokenExp:    accessTokenExp,
-		PublicDIr:         publicDir,
+		IsDevelopment:      environment == "development",
+		IsProduction:       environment == "production",
+		Port:               port,
+		DbUrl:              dbUrl,
+		GoogleClientKey:    googleClientKey,
+		AccessTokenSecret:  accessTokenSecret,
+		AccessTokenExp:     accessTokenExp,
+		PublicDIr:          publicDir,
+		MaxUploadSizeBytes: maxUploadSizeBytes,
 	}, nil
 }
 
