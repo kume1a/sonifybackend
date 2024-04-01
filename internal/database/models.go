@@ -57,6 +57,17 @@ func (ns NullAuthProvider) Value() (driver.Value, error) {
 	return string(ns.AuthProvider), nil
 }
 
+type Artist struct {
+	ID        uuid.UUID
+	Name      string
+	ImagePath string
+}
+
+type ArtistAudio struct {
+	ArtistID uuid.UUID
+	AudioID  uuid.UUID
+}
+
 type Audio struct {
 	ID             uuid.UUID
 	Title          sql.NullString
@@ -65,10 +76,20 @@ type Audio struct {
 	Path           sql.NullString
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
-	UserID         uuid.NullUUID
 	SizeBytes      sql.NullInt64
 	YoutubeVideoID sql.NullString
 	ThumbnailPath  sql.NullString
+}
+
+type Playlist struct {
+	ID            uuid.UUID
+	Name          string
+	ThumbnailPath sql.NullString
+}
+
+type PlaylistAudio struct {
+	PlaylistID uuid.UUID
+	AudioID    uuid.UUID
 }
 
 type User struct {
@@ -79,4 +100,14 @@ type User struct {
 	Email        sql.NullString
 	AuthProvider AuthProvider
 	PasswordHash sql.NullString
+}
+
+type UserAudio struct {
+	UserID  uuid.UUID
+	AudioID uuid.UUID
+}
+
+type UserPlaylist struct {
+	UserID     uuid.UUID
+	PlaylistID uuid.UUID
 }

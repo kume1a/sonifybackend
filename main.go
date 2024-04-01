@@ -27,10 +27,12 @@ func main() {
 	conn, err := sql.Open("postgres", envVars.DbUrl)
 	if err != nil {
 		log.Fatal("Couldn't connect to database", envVars.DbUrl)
+		return
 	}
 
 	apiCfg := shared.ApiConfg{
-		DB: database.New(conn),
+		DB:    database.New(conn),
+		SqlDB: conn,
 	}
 
 	router := modules.CreateRouter(&apiCfg)

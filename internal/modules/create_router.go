@@ -1,6 +1,9 @@
 package modules
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/go-chi/cors"
 	"github.com/gorilla/mux"
 	"github.com/kume1a/sonifybackend/internal/modules/audio"
@@ -11,6 +14,26 @@ import (
 )
 
 func CreateRouter(apiCfg *shared.ApiConfg) *mux.Router {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in f", r)
+
+			var err error
+			switch x := r.(type) {
+			case string:
+				err = errors.New(x)
+			case error:
+				err = x
+			default:
+				err = errors.New("unknown panic")
+			}
+			if err != nil {
+				// sendMeMail(err)
+				fmt.Println("sendMeMail")
+			}
+		}
+	}()
+
 	router := mux.NewRouter()
 	router.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"https://*", "http://*"},

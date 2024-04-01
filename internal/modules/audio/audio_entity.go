@@ -3,6 +3,7 @@ package audio
 import (
 	"context"
 	"database/sql"
+	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -23,7 +24,7 @@ func CreateAudio(
 ) (*database.Audio, error) {
 	createdAt := time.Now().UTC()
 
-	audio, err := db.CreateAudio(ctx, database.CreateAudioParams{
+	entity, err := db.CreateAudio(ctx, database.CreateAudioParams{
 		ID:             uuid.New(),
 		CreatedAt:      createdAt,
 		UpdatedAt:      createdAt,
@@ -31,13 +32,29 @@ func CreateAudio(
 		Duration:       duration,
 		Path:           sql.NullString{String: path, Valid: true},
 		Author:         author,
-		UserID:         uuid.NullUUID{UUID: userId, Valid: true},
 		SizeBytes:      sizeBytes,
 		YoutubeVideoID: youtubeVideoId,
 		ThumbnailPath:  thumbnailPath,
 	})
 
-	return &audio, err
+	if err != nil {
+		log.Println("Error creating audio:", err)
+	}
+
+	return &entity, err
+}
+
+func CreateUserAudio(db *database.Queries, ctx context.Context, userId uuid.UUID, audioId uuid.UUID) (*database.UserAudio, error) {
+	entity, err := db.CreateUserAudio(ctx, database.CreateUserAudioParams{
+		UserID:  userId,
+		AudioID: audioId,
+	})
+
+	if err != nil {
+		log.Println("Error creating user audio:", err)
+	}
+
+	return &entity, err
 }
 
 func GetUserAudioByYoutubeVideoId(
@@ -45,9 +62,9 @@ func GetUserAudioByYoutubeVideoId(
 	ctx context.Context,
 	userId uuid.UUID,
 	youtubeVideoId string,
-) (*database.Audio, error) {
+) (*database.GetUserAudioByVideoIdRow, error) {
 	audio, err := db.GetUserAudioByVideoId(ctx, database.GetUserAudioByVideoIdParams{
-		UserID:         uuid.NullUUID{UUID: userId, Valid: true},
+		UserID:         userId,
 		YoutubeVideoID: sql.NullString{String: youtubeVideoId, Valid: true},
 	})
 

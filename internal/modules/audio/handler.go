@@ -2,7 +2,6 @@ package audio
 
 import (
 	"database/sql"
-	"log"
 	"net/http"
 	"strings"
 
@@ -61,12 +60,24 @@ func handleDownloadYoutubeAudio(apiCfg *shared.ApiConfg) http.HandlerFunc {
 			sql.NullString{String: thumbnailPath, Valid: true},
 		)
 		if err != nil {
-			log.Println("Error creating audio: ", err)
 			shared.ResInternalServerErrorDef(w)
 			return
 		}
 
-		res := audioEntityToDto(newAudio)
+		userAudio, err := CreateUserAudio(apiCfg.DB, r.Context(), authPayload.UserId, newAudio.ID)
+		if err != nil {
+			shared.ResInternalServerErrorDef(w)
+			return
+		}
+
+		res := struct {
+			*UserAudioDto
+			Audio *AudioDto `json:"audio"`
+		}{
+			UserAudioDto: userAudioEntityToDto(userAudio),
+			Audio:        audioEntityToDto(newAudio),
+		}
+
 		shared.ResCreated(w, res)
 	}
 }

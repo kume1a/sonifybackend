@@ -19,9 +19,15 @@ func audioEntityToDto(e *database.Audio) *AudioDto {
 		Duration:       e.Duration.Int32,
 		Path:           e.Path.String,
 		Author:         e.Author.String,
-		UserID:         e.UserID.UUID,
 		SizeBytes:      e.SizeBytes.Int64,
 		YoutubeVideoID: e.YoutubeVideoID.String,
 		ThumbnailPath:  e.ThumbnailPath.String,
+	}
+}
+
+func userAudioEntityToDto(e *database.UserAudio) *UserAudioDto {
+	return &UserAudioDto{
+		UserId:  e.UserID,
+		AudioId: e.AudioID,
 	}
 }

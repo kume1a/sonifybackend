@@ -1,7 +1,12 @@
 package shared
 
-import "github.com/kume1a/sonifybackend/internal/database"
+import (
+	"database/sql"
+
+	"github.com/kume1a/sonifybackend/internal/database"
+)
 
 type ApiConfg struct {
-	DB *database.Queries
+	DB    *database.Queries
+	SqlDB *sql.DB
 }
