@@ -26,3 +26,23 @@ func handleCreatePlaylist(apiCfg *shared.ApiConfg) http.HandlerFunc {
 		shared.ResCreated(w, dto)
 	}
 }
+
+func handleCreatePlaylistAudio(apiCfg *shared.ApiConfg) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		body, err := shared.ValidateRequestBody[*createPlaylistAudioDto](r)
+		if err != nil {
+			shared.ResBadRequest(w, err.Error())
+			return
+		}
+
+		playlistAudio, err := CreatePlaylistAudio(r.Context(), apiCfg.DB, body.PlaylistID, body.AudioID)
+		if err != nil {
+			shared.ResInternalServerErrorDef(w)
+			return
+		}
+
+		dto := playlistAudioEntityToDto(playlistAudio)
+
+		shared.ResCreated(w, dto)
+	}
+}

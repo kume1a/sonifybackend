@@ -9,6 +9,7 @@ func Router(apiCfg *shared.ApiConfg, router *mux.Router) *mux.Router {
 	r := router.PathPrefix("/playlist").Subrouter()
 
 	r.HandleFunc("", shared.AuthMW(handleCreatePlaylist(apiCfg))).Methods("POST")
+	r.HandleFunc("/audio", shared.AuthMW(handleCreatePlaylistAudio(apiCfg))).Methods("POST")
 
 	return r
 }

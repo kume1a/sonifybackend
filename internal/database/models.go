@@ -61,11 +61,13 @@ type Artist struct {
 	ID        uuid.UUID
 	Name      string
 	ImagePath string
+	CreatedAt time.Time
 }
 
 type ArtistAudio struct {
-	ArtistID uuid.UUID
-	AudioID  uuid.UUID
+	ArtistID  uuid.UUID
+	AudioID   uuid.UUID
+	CreatedAt time.Time
 }
 
 type Audio struct {
@@ -85,11 +87,13 @@ type Playlist struct {
 	ID            uuid.UUID
 	Name          string
 	ThumbnailPath sql.NullString
+	CreatedAt     time.Time
 }
 
 type PlaylistAudio struct {
 	PlaylistID uuid.UUID
 	AudioID    uuid.UUID
+	CreatedAt  time.Time
 }
 
 type User struct {
@@ -103,11 +107,13 @@ type User struct {
 }
 
 type UserAudio struct {
-	UserID  uuid.UUID
-	AudioID uuid.UUID
+	UserID    uuid.UUID
+	AudioID   uuid.UUID
+	CreatedAt time.Time
 }
 
 type UserPlaylist struct {
 	UserID     uuid.UUID
 	PlaylistID uuid.UUID
+	CreatedAt  time.Time
 }

@@ -8,6 +8,7 @@ package database
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -15,38 +16,119 @@ import (
 const createPlaylist = `-- name: CreatePlaylist :one
 INSERT INTO playlists(
   id,
+  created_at,
   name,
   thumbnail_path
-) VALUES ($1,$2,$3) RETURNING id, name, thumbnail_path
+) VALUES ($1,$2,$3,$4) RETURNING id, name, thumbnail_path, created_at
 `
 
 type CreatePlaylistParams struct {
 	ID            uuid.UUID
+	CreatedAt     time.Time
 	Name          string
 	ThumbnailPath sql.NullString
 }
 
 func (q *Queries) CreatePlaylist(ctx context.Context, arg CreatePlaylistParams) (Playlist, error) {
-	row := q.db.QueryRowContext(ctx, createPlaylist, arg.ID, arg.Name, arg.ThumbnailPath)
+	row := q.db.QueryRowContext(ctx, createPlaylist,
+		arg.ID,
+		arg.CreatedAt,
+		arg.Name,
+		arg.ThumbnailPath,
+	)
 	var i Playlist
-	err := row.Scan(&i.ID, &i.Name, &i.ThumbnailPath)
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.ThumbnailPath,
+		&i.CreatedAt,
+	)
 	return i, err
 }
 
-const getPlaylists = `-- name: GetPlaylists :many
-SELECT id, name, thumbnail_path FROM playlists LIMIT $1
+const createPlaylistAudio = `-- name: CreatePlaylistAudio :one
+INSERT INTO playlist_audios(
+  playlist_id,
+  audio_id
+) VALUES ($1,$2) RETURNING playlist_id, audio_id, created_at
 `
 
-func (q *Queries) GetPlaylists(ctx context.Context, limit int32) ([]Playlist, error) {
-	rows, err := q.db.QueryContext(ctx, getPlaylists, limit)
+type CreatePlaylistAudioParams struct {
+	PlaylistID uuid.UUID
+	AudioID    uuid.UUID
+}
+
+func (q *Queries) CreatePlaylistAudio(ctx context.Context, arg CreatePlaylistAudioParams) (PlaylistAudio, error) {
+	row := q.db.QueryRowContext(ctx, createPlaylistAudio, arg.PlaylistID, arg.AudioID)
+	var i PlaylistAudio
+	err := row.Scan(&i.PlaylistID, &i.AudioID, &i.CreatedAt)
+	return i, err
+}
+
+const deletePlaylistById = `-- name: DeletePlaylistById :exec
+DELETE FROM playlists WHERE id = $1
+`
+
+func (q *Queries) DeletePlaylistById(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deletePlaylistById, id)
+	return err
+}
+
+const getPlaylistAudios = `-- name: GetPlaylistAudios :many
+SELECT playlist_id, audio_id, playlist_audios.created_at, id, title, author, duration, path, audio.created_at, updated_at, size_bytes, youtube_video_id, thumbnail_path FROM playlist_audios
+  INNER JOIN audio ON playlist_audios.audio_id = audio.id
+WHERE (playlist_id = $1 or $1 IS NULL) 
+  AND playlist_audios.created_at > $2
+ORDER BY playlist_audios.created_at DESC
+  LIMIT $3
+`
+
+type GetPlaylistAudiosParams struct {
+	PlaylistID uuid.UUID
+	CreatedAt  time.Time
+	Limit      int32
+}
+
+type GetPlaylistAudiosRow struct {
+	PlaylistID     uuid.UUID
+	AudioID        uuid.UUID
+	CreatedAt      time.Time
+	ID             uuid.UUID
+	Title          sql.NullString
+	Author         sql.NullString
+	Duration       sql.NullInt32
+	Path           sql.NullString
+	CreatedAt_2    time.Time
+	UpdatedAt      time.Time
+	SizeBytes      sql.NullInt64
+	YoutubeVideoID sql.NullString
+	ThumbnailPath  sql.NullString
+}
+
+func (q *Queries) GetPlaylistAudios(ctx context.Context, arg GetPlaylistAudiosParams) ([]GetPlaylistAudiosRow, error) {
+	rows, err := q.db.QueryContext(ctx, getPlaylistAudios, arg.PlaylistID, arg.CreatedAt, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Playlist
+	var items []GetPlaylistAudiosRow
 	for rows.Next() {
-		var i Playlist
-		if err := rows.Scan(&i.ID, &i.Name, &i.ThumbnailPath); err != nil {
+		var i GetPlaylistAudiosRow
+		if err := rows.Scan(
+			&i.PlaylistID,
+			&i.AudioID,
+			&i.CreatedAt,
+			&i.ID,
+			&i.Title,
+			&i.Author,
+			&i.Duration,
+			&i.Path,
+			&i.CreatedAt_2,
+			&i.UpdatedAt,
+			&i.SizeBytes,
+			&i.YoutubeVideoID,
+			&i.ThumbnailPath,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -58,4 +140,78 @@ func (q *Queries) GetPlaylists(ctx context.Context, limit int32) ([]Playlist, er
 		return nil, err
 	}
 	return items, nil
+}
+
+const getPlaylistById = `-- name: GetPlaylistById :one
+SELECT id, name, thumbnail_path, created_at FROM playlists WHERE id = $1
+`
+
+func (q *Queries) GetPlaylistById(ctx context.Context, id uuid.UUID) (Playlist, error) {
+	row := q.db.QueryRowContext(ctx, getPlaylistById, id)
+	var i Playlist
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.ThumbnailPath,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const getPlaylists = `-- name: GetPlaylists :many
+SELECT id, name, thumbnail_path, created_at FROM playlists LIMIT $1
+`
+
+func (q *Queries) GetPlaylists(ctx context.Context, limit int32) ([]Playlist, error) {
+	rows, err := q.db.QueryContext(ctx, getPlaylists, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Playlist
+	for rows.Next() {
+		var i Playlist
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.ThumbnailPath,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updatePlaylistById = `-- name: UpdatePlaylistById :one
+UPDATE playlists
+  SET name = COALESCE($1, name),
+      thumbnail_path = COALESCE($2, thumbnail_path)
+  WHERE id = $3
+  RETURNING id, name, thumbnail_path, created_at
+`
+
+type UpdatePlaylistByIdParams struct {
+	Name          string
+	ThumbnailPath sql.NullString
+	ID            uuid.UUID
+}
+
+func (q *Queries) UpdatePlaylistById(ctx context.Context, arg UpdatePlaylistByIdParams) (Playlist, error) {
+	row := q.db.QueryRowContext(ctx, updatePlaylistById, arg.Name, arg.ThumbnailPath, arg.ID)
+	var i Playlist
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.ThumbnailPath,
+		&i.CreatedAt,
+	)
+	return i, err
 }

@@ -71,7 +71,7 @@ func (q *Queries) CreateAudio(ctx context.Context, arg CreateAudioParams) (Audio
 }
 
 const createUserAudio = `-- name: CreateUserAudio :one
-INSERT INTO user_audios(user_id, audio_id) VALUES ($1, $2) RETURNING user_id, audio_id
+INSERT INTO user_audios(user_id, audio_id) VALUES ($1, $2) RETURNING user_id, audio_id, created_at
 `
 
 type CreateUserAudioParams struct {
@@ -82,7 +82,7 @@ type CreateUserAudioParams struct {
 func (q *Queries) CreateUserAudio(ctx context.Context, arg CreateUserAudioParams) (UserAudio, error) {
 	row := q.db.QueryRowContext(ctx, createUserAudio, arg.UserID, arg.AudioID)
 	var i UserAudio
-	err := row.Scan(&i.UserID, &i.AudioID)
+	err := row.Scan(&i.UserID, &i.AudioID, &i.CreatedAt)
 	return i, err
 }
 
@@ -176,7 +176,7 @@ func (q *Queries) GetAudiosByUserId(ctx context.Context, userID uuid.UUID) ([]Ge
 }
 
 const getUserAudioByVideoId = `-- name: GetUserAudioByVideoId :one
-SELECT user_id, audio_id, id, title, author, duration, path, created_at, updated_at, size_bytes, youtube_video_id, thumbnail_path FROM user_audios
+SELECT user_id, audio_id, user_audios.created_at, id, title, author, duration, path, audio.created_at, updated_at, size_bytes, youtube_video_id, thumbnail_path FROM user_audios
   INNER JOIN audio ON user_audios.audio_id = audio.id
   WHERE user_audios.user_id = $1 AND audio.youtube_video_id = $2
 `
@@ -189,12 +189,13 @@ type GetUserAudioByVideoIdParams struct {
 type GetUserAudioByVideoIdRow struct {
 	UserID         uuid.UUID
 	AudioID        uuid.UUID
+	CreatedAt      time.Time
 	ID             uuid.UUID
 	Title          sql.NullString
 	Author         sql.NullString
 	Duration       sql.NullInt32
 	Path           sql.NullString
-	CreatedAt      time.Time
+	CreatedAt_2    time.Time
 	UpdatedAt      time.Time
 	SizeBytes      sql.NullInt64
 	YoutubeVideoID sql.NullString
@@ -207,12 +208,13 @@ func (q *Queries) GetUserAudioByVideoId(ctx context.Context, arg GetUserAudioByV
 	err := row.Scan(
 		&i.UserID,
 		&i.AudioID,
+		&i.CreatedAt,
 		&i.ID,
 		&i.Title,
 		&i.Author,
 		&i.Duration,
 		&i.Path,
-		&i.CreatedAt,
+		&i.CreatedAt_2,
 		&i.UpdatedAt,
 		&i.SizeBytes,
 		&i.YoutubeVideoID,
