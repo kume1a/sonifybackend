@@ -9,7 +9,7 @@ import (
 
 func handleDownloadPlaylist(apiCfg *shared.ApiConfg) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		body, err := shared.ValidateRequestBody[*downloadSpotifyPlaylist](r)
+		body, err := shared.ValidateRequestBody[*downloadSpotifyPlaylistDTO](r)
 		if err != nil {
 			shared.ResBadRequest(w, err.Error())
 			return
@@ -54,4 +54,28 @@ func handleDownloadPlaylist(apiCfg *shared.ApiConfg) http.HandlerFunc {
 			}
 		}
 	}
+}
+
+func handleAuthorizeSpotify(w http.ResponseWriter, r *http.Request) {
+	body, err := shared.ValidateRequestBody[*authorizeSpotifyDTO](r)
+	if err != nil {
+		shared.ResBadRequest(w, err.Error())
+		return
+	}
+
+	tokenPayload, err := GetAuthorizationCodeSpotifyTokenPayload(body.Code)
+	if err != nil {
+		shared.ResInternalServerError(w, shared.ErrFailedToGetSpotifyAccessToken)
+		return
+	}
+
+	dto := spotifyTokenPayloadDTO{
+		AccessToken:  tokenPayload.AccessToken,
+		RefreshToken: tokenPayload.RefreshToken,
+		Scope:        tokenPayload.Scope,
+		ExpiresIn:    tokenPayload.ExpiresIn,
+		TokenType:    tokenPayload.TokenType,
+	}
+
+	shared.ResOK(w, dto)
 }

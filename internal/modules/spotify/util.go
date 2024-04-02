@@ -2,7 +2,12 @@ package spotify
 
 import "github.com/asaskevich/govalidator"
 
-func (dto *downloadSpotifyPlaylist) Validate() error {
+func (dto *downloadSpotifyPlaylistDTO) Validate() error {
+	_, err := govalidator.ValidateStruct(dto)
+	return err
+}
+
+func (dto *authorizeSpotifyDTO) Validate() error {
 	_, err := govalidator.ValidateStruct(dto)
 	return err
 }

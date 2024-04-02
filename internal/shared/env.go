@@ -29,15 +29,18 @@ func LoadEnv() {
 }
 
 type EnvVariables struct {
-	IsDevelopment      bool
-	IsProduction       bool
-	Port               string
-	DbUrl              string
-	GoogleClientKey    string
-	AccessTokenSecret  string
-	AccessTokenExp     int64
-	PublicDIr          string
-	MaxUploadSizeBytes int64
+	IsDevelopment       bool
+	IsProduction        bool
+	Port                string
+	DbUrl               string
+	GoogleClientKey     string
+	AccessTokenSecret   string
+	AccessTokenExp      int64
+	PublicDIr           string
+	MaxUploadSizeBytes  int64
+	SpotifyClientID     string
+	SpotifyClientSecret string
+	SpotifyRedirectURI  string
 }
 
 func ParseEnv() (*EnvVariables, error) {
@@ -81,16 +84,34 @@ func ParseEnv() (*EnvVariables, error) {
 		return nil, err
 	}
 
+	spotifyClientID, err := getEnv("SPOTIFY_CLIENT_ID")
+	if err != nil {
+		return nil, err
+	}
+
+	spotifyClientSecret, err := getEnv("SPOTIFY_CLIENT_SECRET")
+	if err != nil {
+		return nil, err
+	}
+
+	spotifyRedirectURI, err := getEnv("SPOTIFY_REDIRECT_URI")
+	if err != nil {
+		return nil, err
+	}
+
 	return &EnvVariables{
-		IsDevelopment:      environment == "development",
-		IsProduction:       environment == "production",
-		Port:               port,
-		DbUrl:              dbUrl,
-		GoogleClientKey:    googleClientKey,
-		AccessTokenSecret:  accessTokenSecret,
-		AccessTokenExp:     accessTokenExp,
-		PublicDIr:          publicDir,
-		MaxUploadSizeBytes: maxUploadSizeBytes,
+		IsDevelopment:       environment == "development",
+		IsProduction:        environment == "production",
+		Port:                port,
+		DbUrl:               dbUrl,
+		GoogleClientKey:     googleClientKey,
+		AccessTokenSecret:   accessTokenSecret,
+		AccessTokenExp:      accessTokenExp,
+		PublicDIr:           publicDir,
+		MaxUploadSizeBytes:  maxUploadSizeBytes,
+		SpotifyClientID:     spotifyClientID,
+		SpotifyClientSecret: spotifyClientSecret,
+		SpotifyRedirectURI:  spotifyRedirectURI,
 	}, nil
 }
 

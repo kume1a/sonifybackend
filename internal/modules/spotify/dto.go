@@ -1,8 +1,33 @@
 package spotify
 
-type downloadSpotifyPlaylist struct {
+type downloadSpotifyPlaylistDTO struct {
 	SpotifyAccessToken string `json:"spotifyAccessToken" valid:"required"`
 	PlaylistID         string `json:"playlistId" valid:"required"`
+}
+
+type authorizeSpotifyDTO struct {
+	Code string `json:"code" valid:"required"`
+}
+
+type getSpotifyGeneralTokenDTO struct {
+	AccessToken string `json:"access_token"`
+	TokenType   string `json:"token_type"`
+	ExpiresIn   int    `json:"expires_in"`
+}
+
+type getAuthorizationCodeSpotifyTokenPayloadDTO struct {
+	getSpotifyGeneralTokenDTO
+	RefreshToken string `json:"refresh_token"`
+	Scope        string `json:"scope"`
+	TokenType    string `json:"token_type"`
+}
+
+type spotifyTokenPayloadDTO struct {
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
+	Scope        string `json:"scope"`
+	ExpiresIn    int    `json:"expiresIn"`
+	TokenType    string `json:"tokenType"`
 }
 
 type spotifyPlaylistDTO struct {
@@ -142,4 +167,14 @@ type downloadSpotifyTrackMetaDTO struct {
 		ReleaseDate string `json:"releaseDate"`
 	} `json:"metadata"`
 	Link string `json:"link"`
+}
+
+type getSpotifyPlaylistsDTO struct {
+	Href     string               `json:"href"`
+	Limit    int                  `json:"limit"`
+	Next     string               `json:"next"`
+	Offset   int                  `json:"offset"`
+	Previous string               `json:"previous"`
+	Total    int                  `json:"total"`
+	Items    []spotifyPlaylistDTO `json:"items"`
 }

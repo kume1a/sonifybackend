@@ -7,13 +7,6 @@ import (
 	"net/http"
 )
 
-func GetSpotifyPlaylist(accessToken, playlistID string) (*spotifyPlaylistDTO, error) {
-	return getSpotifyEndpoint[spotifyPlaylistDTO](
-		"/v1/playlists/"+playlistID,
-		accessToken,
-	)
-}
-
 func GetSpotifyAudioDownloadMeta(trackID string) (*downloadSpotifyTrackMetaDTO, error) {
 	req, err := http.NewRequest("GET", "https://api.spotifydown.com/download/"+trackID, nil)
 	if err != nil {
@@ -54,37 +47,6 @@ func GetSpotifyAudioDownloadMeta(trackID string) (*downloadSpotifyTrackMetaDTO, 
 	err = json.Unmarshal(body, &dto)
 	if err != nil {
 		log.Println("error unmarshalling response: ", err)
-		return nil, err
-	}
-
-	return &dto, nil
-}
-
-func getSpotifyEndpoint[DTO interface{}](endpoint, accessToken string) (*DTO, error) {
-	url := "https://api.spotify.com" + endpoint
-
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Set("Authorization", "Bearer "+accessToken)
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	var dto DTO
-	err = json.Unmarshal(body, &dto)
-	if err != nil {
 		return nil, err
 	}
 
