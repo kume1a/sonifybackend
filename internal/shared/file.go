@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
 
 	"github.com/google/uuid"
 )
@@ -30,7 +29,7 @@ func NewPublicFileLocation(args PublicFileLocationArgs) (string, error) {
 
 	fileName := fmt.Sprintf("%s.%s", uuid.New(), args.Extension)
 
-	return filepath.Join(args.Dir, fileName), nil
+	return args.Dir + "/" + fileName, nil
 }
 
 func DownloadFile(filepath string, url string) error {
