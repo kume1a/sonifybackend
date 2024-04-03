@@ -4,7 +4,7 @@ INSERT INTO audio(
   created_at,
   title,
   author,
-  duration,
+  duration_ms,
   path,
   size_bytes,
   youtube_video_id,
@@ -31,7 +31,7 @@ SELECT * FROM audio WHERE id = $1;
 UPDATE audio SET 
   title = $1, 
   author = $2, 
-  duration = $3, 
+  duration_ms = $3, 
   path = $4, 
   thumbnail_path=$5 
 WHERE id = $6 

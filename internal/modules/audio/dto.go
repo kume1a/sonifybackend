@@ -14,7 +14,7 @@ type AudioDto struct {
 	ID             uuid.UUID `json:"id"`
 	CreatedAt      time.Time `json:"createdAt"`
 	Title          string    `json:"title"`
-	Duration       int32     `json:"duration"`
+	DurationMs     int32     `json:"durationMs"`
 	Path           string    `json:"path"`
 	Author         string    `json:"author"`
 	SizeBytes      int64     `json:"sizeBytes"`

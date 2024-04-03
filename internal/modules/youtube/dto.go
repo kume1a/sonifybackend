@@ -23,3 +23,9 @@ type youtubeSearchSuggestions struct {
 	Query       string   `json:"query"`
 	Suggestions []string `json:"suggestions"`
 }
+
+type youtubeVideoInfoDTO struct {
+	Title           string `json:"title"`
+	Uploader        string `json:"uploader"`
+	DurationSeconds int    `json:"durationSeconds"`
+}

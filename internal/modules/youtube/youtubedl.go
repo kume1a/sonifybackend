@@ -50,11 +50,11 @@ func DownloadYoutubeAudio(videoID string) (outputPath string, thumbnailPath stri
 	return outputLocation, thumbnailLocation, nil
 }
 
-func GetYoutubeVideoInfo(videoID string) (*YoutubeVideoInfo, error) {
+func GetYoutubeVideoInfo(videoID string) (*youtubeVideoInfoDTO, error) {
 	cmd := exec.Command(
 		"yt-dlp",
 		"--print",
-		"{\"title\": \"%(title)s\", \"uploader\": \"%(uploader)s\", \"duration\": %(duration)s}",
+		"{\"title\": \"%(title)s\", \"uploader\": \"%(uploader)s\", \"durationSeconds\": %(duration)s}",
 		"https://www.youtube.com/watch?v="+videoID,
 	)
 
@@ -64,7 +64,7 @@ func GetYoutubeVideoInfo(videoID string) (*YoutubeVideoInfo, error) {
 		return nil, err
 	}
 
-	var info YoutubeVideoInfo
+	var info youtubeVideoInfoDTO
 	if err := json.Unmarshal(output, &info); err != nil {
 		log.Println("Error parsing youtube video info: ", err)
 		return nil, err

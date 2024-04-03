@@ -76,7 +76,7 @@ type Audio struct {
 	ID             uuid.UUID
 	Title          sql.NullString
 	Author         sql.NullString
-	Duration       sql.NullInt32
+	DurationMs     sql.NullInt32
 	Path           sql.NullString
 	CreatedAt      time.Time
 	SizeBytes      sql.NullInt64

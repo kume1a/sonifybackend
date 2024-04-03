@@ -285,7 +285,7 @@ func playlistItemWithDownloadMetaToCreateAudioParams(
 			return database.CreateAudioParams{
 				ID:           uuid.New(),
 				Author:       sql.NullString{String: artistName, Valid: true},
-				Duration:     sql.NullInt32{Int32: int32(itemWithDownloadMeta.playlistItem.Track.DurationMS / 1000), Valid: true},
+				DurationMs:   sql.NullInt32{Int32: int32(itemWithDownloadMeta.playlistItem.Track.DurationMS), Valid: true},
 				Title:        sql.NullString{String: itemWithDownloadMeta.downloadMeta.Metadata.Title, Valid: true},
 				SpotifyID:    sql.NullString{String: itemWithDownloadMeta.playlistItem.Track.ID, Valid: true},
 				Path:         sql.NullString{String: itemWithDownloadMeta.downloadedAudioPath, Valid: true},

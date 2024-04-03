@@ -15,7 +15,7 @@ func audioEntityToDto(e *database.Audio) *AudioDto {
 		ID:             e.ID,
 		CreatedAt:      e.CreatedAt,
 		Title:          e.Title.String,
-		Duration:       e.Duration.Int32,
+		DurationMs:     e.DurationMs.Int32,
 		Path:           e.Path.String,
 		Author:         e.Author.String,
 		SizeBytes:      e.SizeBytes.Int64,

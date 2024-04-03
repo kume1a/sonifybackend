@@ -17,8 +17,6 @@ require (
 )
 
 require (
-	github.com/gorilla/schema v1.3.0
-	github.com/mcuadros/go-defaults v1.2.0
-	golang.org/x/crypto v0.21.0 // indirect
+	golang.org/x/crypto v0.21.0
 	golang.org/x/exp v0.0.0-20240325151524-a685a6edb6d8
 )

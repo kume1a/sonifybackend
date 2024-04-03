@@ -119,7 +119,7 @@ func (q *Queries) DeletePlaylistById(ctx context.Context, id uuid.UUID) error {
 }
 
 const getPlaylistAudios = `-- name: GetPlaylistAudios :many
-SELECT playlist_id, audio_id, playlist_audios.created_at, id, title, author, duration, path, audio.created_at, size_bytes, youtube_video_id, thumbnail_path, spotify_id, thumbnail_url FROM playlist_audios
+SELECT playlist_id, audio_id, playlist_audios.created_at, id, title, author, duration_ms, path, audio.created_at, size_bytes, youtube_video_id, thumbnail_path, spotify_id, thumbnail_url FROM playlist_audios
   INNER JOIN audio ON playlist_audios.audio_id = audio.id
 WHERE (playlist_id = $1 or $1 IS NULL) 
   AND playlist_audios.created_at > $2
@@ -140,7 +140,7 @@ type GetPlaylistAudiosRow struct {
 	ID             uuid.UUID
 	Title          sql.NullString
 	Author         sql.NullString
-	Duration       sql.NullInt32
+	DurationMs     sql.NullInt32
 	Path           sql.NullString
 	CreatedAt_2    time.Time
 	SizeBytes      sql.NullInt64
@@ -166,7 +166,7 @@ func (q *Queries) GetPlaylistAudios(ctx context.Context, arg GetPlaylistAudiosPa
 			&i.ID,
 			&i.Title,
 			&i.Author,
-			&i.Duration,
+			&i.DurationMs,
 			&i.Path,
 			&i.CreatedAt_2,
 			&i.SizeBytes,
