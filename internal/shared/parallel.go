@@ -30,6 +30,10 @@ func ExecuteParallel[DATA interface{}, INPUT interface{}](
 	inputs []INPUT,
 	call func(input *INPUT) (DATA, error),
 ) ([]DATA, error) {
+	if len(inputs) == 0 {
+		return []DATA{}, nil
+	}
+
 	done := make(chan struct{})
 	defer close(done)
 

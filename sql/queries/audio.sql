@@ -44,3 +44,10 @@ SELECT * FROM user_audios
 
 -- name: CreateUserAudio :one
 INSERT INTO user_audios(user_id, audio_id) VALUES ($1, $2) RETURNING *;
+
+-- name: GetPlaylistAudiosBySpotifyIds :many
+SELECT 
+  audio.*
+  FROM playlist_audios
+  INNER JOIN audio ON playlist_audios.audio_id = audio.id
+  WHERE playlist_audios.playlist_id = sqlc.arg(playlist_id) AND audio.spotify_id = ANY(sqlc.arg(spotify_ids)::text[]);

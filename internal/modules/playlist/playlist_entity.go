@@ -70,3 +70,23 @@ func CreateUserPlaylist(ctx context.Context, db *database.Queries, params databa
 
 	return &entity, err
 }
+
+func GetUserPlaylistsBySpotifyIds(ctx context.Context, db *database.Queries, params database.GetUserPlaylistsBySpotifyIdsParams) ([]database.Playlist, error) {
+	playlists, err := db.GetUserPlaylistsBySpotifyIds(ctx, params)
+
+	if err != nil {
+		log.Println("Error getting user playlists by spotify ids:", err)
+	}
+
+	return playlists, err
+}
+
+func DeletePlaylistAudiosByIds(ctx context.Context, db *database.Queries, params database.DeletePlaylistAudiosByIdsParams) error {
+	err := db.DeletePlaylistAudiosByIds(ctx, params)
+
+	if err != nil {
+		log.Println("Error deleting playlist audios by ids:", err)
+	}
+
+	return err
+}

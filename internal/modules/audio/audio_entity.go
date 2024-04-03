@@ -57,5 +57,23 @@ func GetUserAudioByYoutubeVideoId(
 		YoutubeVideoID: sql.NullString{String: youtubeVideoId, Valid: true},
 	})
 
+	if err != nil {
+		log.Println("Error getting user audio by youtube video id: ", err)
+	}
+
 	return &audio, err
+}
+
+func GetPlaylistAudiosBySpotifyIds(
+	ctx context.Context,
+	db *database.Queries,
+	params database.GetPlaylistAudiosBySpotifyIdsParams,
+) ([]database.Audio, error) {
+	audios, err := db.GetPlaylistAudiosBySpotifyIds(ctx, params)
+
+	if err != nil {
+		log.Println("Error getting playlist audios by spotify ids: ", err)
+	}
+
+	return audios, err
 }

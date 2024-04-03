@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 )
 
 const createAudio = `-- name: CreateAudio :one
@@ -168,6 +169,54 @@ func (q *Queries) GetAudiosByUserId(ctx context.Context, userID uuid.UUID) ([]Ge
 			&i.SpotifyID,
 			&i.ThumbnailUrl,
 			&i.UserID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getPlaylistAudiosBySpotifyIds = `-- name: GetPlaylistAudiosBySpotifyIds :many
+SELECT 
+  audio.id, audio.title, audio.author, audio.duration, audio.path, audio.created_at, audio.size_bytes, audio.youtube_video_id, audio.thumbnail_path, audio.spotify_id, audio.thumbnail_url
+  FROM playlist_audios
+  INNER JOIN audio ON playlist_audios.audio_id = audio.id
+  WHERE playlist_audios.playlist_id = $1 AND audio.spotify_id = ANY($2::text[])
+`
+
+type GetPlaylistAudiosBySpotifyIdsParams struct {
+	PlaylistID uuid.UUID
+	SpotifyIds []string
+}
+
+func (q *Queries) GetPlaylistAudiosBySpotifyIds(ctx context.Context, arg GetPlaylistAudiosBySpotifyIdsParams) ([]Audio, error) {
+	rows, err := q.db.QueryContext(ctx, getPlaylistAudiosBySpotifyIds, arg.PlaylistID, pq.Array(arg.SpotifyIds))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Audio
+	for rows.Next() {
+		var i Audio
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Author,
+			&i.Duration,
+			&i.Path,
+			&i.CreatedAt,
+			&i.SizeBytes,
+			&i.YoutubeVideoID,
+			&i.ThumbnailPath,
+			&i.SpotifyID,
+			&i.ThumbnailUrl,
 		); err != nil {
 			return nil, err
 		}
