@@ -62,6 +62,8 @@ type Artist struct {
 	Name      string
 	ImagePath string
 	CreatedAt time.Time
+	SpotifyID sql.NullString
+	ImageUrl  sql.NullString
 }
 
 type ArtistAudio struct {
@@ -81,6 +83,7 @@ type Audio struct {
 	SizeBytes      sql.NullInt64
 	YoutubeVideoID sql.NullString
 	ThumbnailPath  sql.NullString
+	SpotifyID      sql.NullString
 }
 
 type Playlist struct {
@@ -88,6 +91,8 @@ type Playlist struct {
 	Name          string
 	ThumbnailPath sql.NullString
 	CreatedAt     time.Time
+	SpotifyID     sql.NullString
+	ThumbnailUrl  sql.NullString
 }
 
 type PlaylistAudio struct {

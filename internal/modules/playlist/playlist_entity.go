@@ -2,7 +2,6 @@ package playlist
 
 import (
 	"context"
-	"database/sql"
 	"log"
 	"time"
 
@@ -10,12 +9,15 @@ import (
 	"github.com/kume1a/sonifybackend/internal/database"
 )
 
-func CreatePlaylist(ctx context.Context, db *database.Queries, name string, thumbnailPath sql.NullString) (*database.Playlist, error) {
-	entity, err := db.CreatePlaylist(ctx, database.CreatePlaylistParams{
-		ID:            uuid.New(),
-		Name:          name,
-		ThumbnailPath: thumbnailPath,
-	})
+func CreatePlaylist(ctx context.Context, db *database.Queries, params database.CreatePlaylistParams) (*database.Playlist, error) {
+	if params.ID == uuid.Nil {
+		params.ID = uuid.New()
+	}
+	if params.CreatedAt.IsZero() {
+		params.CreatedAt = time.Now().UTC()
+	}
+
+	entity, err := db.CreatePlaylist(ctx, params)
 
 	if err != nil {
 		log.Println("Error creating playlist:", err)
@@ -24,11 +26,8 @@ func CreatePlaylist(ctx context.Context, db *database.Queries, name string, thum
 	return &entity, err
 }
 
-func CreatePlaylistAudio(ctx context.Context, db *database.Queries, playlistID uuid.UUID, audioID uuid.UUID) (*database.PlaylistAudio, error) {
-	entity, err := db.CreatePlaylistAudio(ctx, database.CreatePlaylistAudioParams{
-		PlaylistID: playlistID,
-		AudioID:    audioID,
-	})
+func CreatePlaylistAudio(ctx context.Context, db *database.Queries, params database.CreatePlaylistAudioParams) (*database.PlaylistAudio, error) {
+	entity, err := db.CreatePlaylistAudio(ctx, params)
 
 	if err != nil {
 		log.Println("Error creating playlist audio:", err)
@@ -60,4 +59,14 @@ func GetPlaylistAudios(ctx context.Context, db *database.Queries, playlistID uui
 	}
 
 	return audios, err
+}
+
+func CreateUserPlaylist(ctx context.Context, db *database.Queries, params database.CreateUserPlaylistParams) (*database.UserPlaylist, error) {
+	entity, err := db.CreateUserPlaylist(ctx, params)
+
+	if err != nil {
+		log.Println("Error creating user playlist:", err)
+	}
+
+	return &entity, err
 }

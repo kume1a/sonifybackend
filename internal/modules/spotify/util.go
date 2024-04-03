@@ -12,6 +12,11 @@ func (dto *authorizeSpotifyDTO) Validate() error {
 	return err
 }
 
+func (dto *spotifyAccessTokenDTO) Validate() error {
+	_, err := govalidator.ValidateStruct(dto)
+	return err
+}
+
 func spotifyPlaylistDtoToModel(dto *spotifyPlaylistDTO) *spotifyPlaylist {
 	model := &spotifyPlaylist{
 		ID:     dto.ID,

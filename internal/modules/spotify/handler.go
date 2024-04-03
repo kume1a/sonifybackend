@@ -79,3 +79,27 @@ func handleAuthorizeSpotify(w http.ResponseWriter, r *http.Request) {
 
 	shared.ResOK(w, dto)
 }
+
+func handleGetSpotifyUserPlaylists(apiCfg *shared.ApiConfg) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		authPayload, err := shared.GetAuthPayload(r)
+		if err != nil {
+			shared.ResUnauthorized(w, shared.ErrUnauthorized)
+			return
+		}
+
+		body, err := shared.ValidateRequestQuery[*spotifyAccessTokenDTO](r)
+		if err != nil {
+			log.Println("error validating request query: ", err)
+			shared.ResBadRequest(w, err.Error())
+			return
+		}
+
+		if err := downloadSpotifyPlaylist(apiCfg, r.Context(), authPayload.UserId, body.SpotifyAccessToken[0]); err != nil {
+			shared.ResInternalServerErrorDef(w)
+			return
+		}
+
+		shared.ResOK(w, struct{}{})
+	}
+}

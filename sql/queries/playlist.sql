@@ -3,8 +3,10 @@ INSERT INTO playlists(
   id,
   created_at,
   name,
-  thumbnail_path
-) VALUES ($1,$2,$3,$4) RETURNING *;
+  thumbnail_path,
+  spotify_id,
+  thumbnail_url
+) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *;
 
 -- name: GetPlaylists :many
 SELECT * FROM playlists 
@@ -38,3 +40,9 @@ WHERE (playlist_id = $1 or $1 IS NULL)
   AND playlist_audios.created_at > $2
 ORDER BY playlist_audios.created_at DESC
   LIMIT $3;
+
+-- name: CreateUserPlaylist :one
+INSERT INTO user_playlists(
+  user_id,
+  playlist_id
+) VALUES ($1,$2) RETURNING *;

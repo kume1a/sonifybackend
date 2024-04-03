@@ -1,5 +1,9 @@
 package spotify
 
+type spotifyAccessTokenDTO struct {
+	SpotifyAccessToken []string `json:"spotifyAccessToken" valid:"required"`
+}
+
 type downloadSpotifyPlaylistDTO struct {
 	SpotifyAccessToken string `json:"spotifyAccessToken" valid:"required"`
 	PlaylistID         string `json:"playlistId" valid:"required"`
@@ -8,6 +12,16 @@ type downloadSpotifyPlaylistDTO struct {
 type authorizeSpotifyDTO struct {
 	Code string `json:"code" valid:"required"`
 }
+
+type spotifyTokenPayloadDTO struct {
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
+	Scope        string `json:"scope"`
+	ExpiresIn    int    `json:"expiresIn"`
+	TokenType    string `json:"tokenType"`
+}
+
+// --------- Spotify API DTOs ---------
 
 type getSpotifyGeneralTokenDTO struct {
 	AccessToken string `json:"access_token"`
@@ -20,14 +34,6 @@ type getAuthorizationCodeSpotifyTokenPayloadDTO struct {
 	RefreshToken string `json:"refresh_token"`
 	Scope        string `json:"scope"`
 	TokenType    string `json:"token_type"`
-}
-
-type spotifyTokenPayloadDTO struct {
-	AccessToken  string `json:"accessToken"`
-	RefreshToken string `json:"refreshToken"`
-	Scope        string `json:"scope"`
-	ExpiresIn    int    `json:"expiresIn"`
-	TokenType    string `json:"tokenType"`
 }
 
 type spotifyPlaylistDTO struct {
@@ -177,4 +183,39 @@ type getSpotifyPlaylistsDTO struct {
 	Previous string               `json:"previous"`
 	Total    int                  `json:"total"`
 	Items    []spotifyPlaylistDTO `json:"items"`
+}
+
+type spotifyPlaylistItemDTO struct {
+	Track struct {
+		Album struct {
+			Images []struct {
+				Height int    `json:"height"`
+				URL    string `json:"url"`
+				Width  int    `json:"width"`
+			} `json:"images"`
+			Name string `json:"name"`
+			ID   string `json:"id"`
+		} `json:"album"`
+		Artists []struct {
+			Name string `json:"name"`
+			ID   string `json:"id"`
+		} `json:"artists"`
+		DurationMS int    `json:"duration_ms"`
+		Name       string `json:"name"`
+		PreviewURL string `json:"preview_url"`
+		ID         string `json:"id"`
+	} `json:"track"`
+	AddedBy struct {
+		Type string `json:"type"`
+		ID   string `json:"id"`
+	} `json:"added_by"`
+	AddedAt string `json:"added_at"`
+}
+
+type spotifyPlaylistItemsDTO struct {
+	Limit    int                      `json:"limit"`
+	Items    []spotifyPlaylistItemDTO `json:"items"`
+	Next     string                   `json:"next"`
+	Total    int                      `json:"total"`
+	Previous string                   `json:"previous"`
 }

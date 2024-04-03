@@ -41,7 +41,7 @@ func AuthWithGoogle(apiCfg shared.ApiConfg, ctx context.Context, token string) (
 		})
 
 		if err != nil {
-			return nil, shared.HttpErrInternalServerError()
+			return nil, shared.HttpErrInternalServerErrorDef()
 		}
 
 		authUser = newUser
@@ -49,7 +49,7 @@ func AuthWithGoogle(apiCfg shared.ApiConfg, ctx context.Context, token string) (
 
 	tokenPayload, err := getTokenPayloadDtoFromUserEntity(authUser)
 	if err != nil {
-		return nil, shared.HttpErrInternalServerError()
+		return nil, shared.HttpErrInternalServerErrorDef()
 	}
 
 	return tokenPayload, nil

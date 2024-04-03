@@ -18,4 +18,5 @@ const (
 	ErrInvalidMimeType               = "INVALID_MIME_TYPE"
 	ErrFailedToGetSpotifyPlaylist    = "FAILED_TO_GET_SPOTIFY_PLAYLIST"
 	ErrFailedToGetSpotifyAccessToken = "FAILED_TO_GET_SPOTIFY_ACCESS_TOKEN"
+	ErrFailedToGetSpotifyPlaylists   = "FAILED_TO_GET_SPOTIFY_PLAYLISTS"
 )

@@ -36,7 +36,7 @@ func ValidateCreatePlaylistDto(w http.ResponseWriter, r *http.Request) (*createP
 	}, nil
 }
 
-func playlistEntityToDto(e *database.Playlist) playlistDto {
+func playlistEntityToDto(e database.Playlist) playlistDto {
 	return playlistDto{
 		ID:            e.ID,
 		Name:          e.Name,

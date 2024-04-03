@@ -24,8 +24,9 @@ INSERT INTO audio(
   path,
   size_bytes,
   youtube_video_id,
-  thumbnail_path
-) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id, title, author, duration, path, created_at, updated_at, size_bytes, youtube_video_id, thumbnail_path
+  thumbnail_path,
+  spotify_id
+) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id, title, author, duration, path, created_at, updated_at, size_bytes, youtube_video_id, thumbnail_path, spotify_id
 `
 
 type CreateAudioParams struct {
@@ -39,6 +40,7 @@ type CreateAudioParams struct {
 	SizeBytes      sql.NullInt64
 	YoutubeVideoID sql.NullString
 	ThumbnailPath  sql.NullString
+	SpotifyID      sql.NullString
 }
 
 func (q *Queries) CreateAudio(ctx context.Context, arg CreateAudioParams) (Audio, error) {
@@ -53,6 +55,7 @@ func (q *Queries) CreateAudio(ctx context.Context, arg CreateAudioParams) (Audio
 		arg.SizeBytes,
 		arg.YoutubeVideoID,
 		arg.ThumbnailPath,
+		arg.SpotifyID,
 	)
 	var i Audio
 	err := row.Scan(
@@ -66,6 +69,7 @@ func (q *Queries) CreateAudio(ctx context.Context, arg CreateAudioParams) (Audio
 		&i.SizeBytes,
 		&i.YoutubeVideoID,
 		&i.ThumbnailPath,
+		&i.SpotifyID,
 	)
 	return i, err
 }
@@ -96,7 +100,7 @@ func (q *Queries) DeleteAudioById(ctx context.Context, id uuid.UUID) error {
 }
 
 const getAudioById = `-- name: GetAudioById :one
-SELECT id, title, author, duration, path, created_at, updated_at, size_bytes, youtube_video_id, thumbnail_path FROM audio WHERE id = $1
+SELECT id, title, author, duration, path, created_at, updated_at, size_bytes, youtube_video_id, thumbnail_path, spotify_id FROM audio WHERE id = $1
 `
 
 func (q *Queries) GetAudioById(ctx context.Context, id uuid.UUID) (Audio, error) {
@@ -113,13 +117,14 @@ func (q *Queries) GetAudioById(ctx context.Context, id uuid.UUID) (Audio, error)
 		&i.SizeBytes,
 		&i.YoutubeVideoID,
 		&i.ThumbnailPath,
+		&i.SpotifyID,
 	)
 	return i, err
 }
 
 const getAudiosByUserId = `-- name: GetAudiosByUserId :many
 SELECT 
-  audio.id, audio.title, audio.author, audio.duration, audio.path, audio.created_at, audio.updated_at, audio.size_bytes, audio.youtube_video_id, audio.thumbnail_path,
+  audio.id, audio.title, audio.author, audio.duration, audio.path, audio.created_at, audio.updated_at, audio.size_bytes, audio.youtube_video_id, audio.thumbnail_path, audio.spotify_id,
   user_audios.user_id AS user_id
   FROM user_audios
   INNER JOIN audio ON user_audios.audio_id = audio.id
@@ -137,6 +142,7 @@ type GetAudiosByUserIdRow struct {
 	SizeBytes      sql.NullInt64
 	YoutubeVideoID sql.NullString
 	ThumbnailPath  sql.NullString
+	SpotifyID      sql.NullString
 	UserID         uuid.UUID
 }
 
@@ -160,6 +166,7 @@ func (q *Queries) GetAudiosByUserId(ctx context.Context, userID uuid.UUID) ([]Ge
 			&i.SizeBytes,
 			&i.YoutubeVideoID,
 			&i.ThumbnailPath,
+			&i.SpotifyID,
 			&i.UserID,
 		); err != nil {
 			return nil, err
@@ -176,7 +183,7 @@ func (q *Queries) GetAudiosByUserId(ctx context.Context, userID uuid.UUID) ([]Ge
 }
 
 const getUserAudioByVideoId = `-- name: GetUserAudioByVideoId :one
-SELECT user_id, audio_id, user_audios.created_at, id, title, author, duration, path, audio.created_at, updated_at, size_bytes, youtube_video_id, thumbnail_path FROM user_audios
+SELECT user_id, audio_id, user_audios.created_at, id, title, author, duration, path, audio.created_at, updated_at, size_bytes, youtube_video_id, thumbnail_path, spotify_id FROM user_audios
   INNER JOIN audio ON user_audios.audio_id = audio.id
   WHERE user_audios.user_id = $1 AND audio.youtube_video_id = $2
 `
@@ -200,6 +207,7 @@ type GetUserAudioByVideoIdRow struct {
 	SizeBytes      sql.NullInt64
 	YoutubeVideoID sql.NullString
 	ThumbnailPath  sql.NullString
+	SpotifyID      sql.NullString
 }
 
 func (q *Queries) GetUserAudioByVideoId(ctx context.Context, arg GetUserAudioByVideoIdParams) (GetUserAudioByVideoIdRow, error) {
@@ -219,6 +227,7 @@ func (q *Queries) GetUserAudioByVideoId(ctx context.Context, arg GetUserAudioByV
 		&i.SizeBytes,
 		&i.YoutubeVideoID,
 		&i.ThumbnailPath,
+		&i.SpotifyID,
 	)
 	return i, err
 }
@@ -231,7 +240,7 @@ UPDATE audio SET
   path = $4, 
   thumbnail_path=$5 
 WHERE id = $6 
-RETURNING id, title, author, duration, path, created_at, updated_at, size_bytes, youtube_video_id, thumbnail_path
+RETURNING id, title, author, duration, path, created_at, updated_at, size_bytes, youtube_video_id, thumbnail_path, spotify_id
 `
 
 type UpdateAudioParams struct {
@@ -264,6 +273,7 @@ func (q *Queries) UpdateAudio(ctx context.Context, arg UpdateAudioParams) (Audio
 		&i.SizeBytes,
 		&i.YoutubeVideoID,
 		&i.ThumbnailPath,
+		&i.SpotifyID,
 	)
 	return i, err
 }

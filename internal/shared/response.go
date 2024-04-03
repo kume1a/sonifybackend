@@ -143,7 +143,14 @@ func HttpErrMethodNotAllowed(msg string) *HttpError {
 	}
 }
 
-func HttpErrInternalServerError() *HttpError {
+func HttpErrInternalServerError(msg string) *HttpError {
+	return &HttpError{
+		Message: msg,
+		Code:    http.StatusInternalServerError,
+	}
+}
+
+func HttpErrInternalServerErrorDef() *HttpError {
 	return &HttpError{
 		Message: ErrInternal,
 		Code:    http.StatusInternalServerError,

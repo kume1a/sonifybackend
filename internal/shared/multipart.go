@@ -12,7 +12,7 @@ import (
 func HandleUploadFile(w http.ResponseWriter, r *http.Request, fieldName string, dir string, allowedMimeTypes []string) (string, *HttpError) {
 	env, err := ParseEnv()
 	if err != nil {
-		return "", HttpErrInternalServerError()
+		return "", HttpErrInternalServerErrorDef()
 	}
 
 	if r.Method != "POST" {
@@ -43,19 +43,19 @@ func HandleUploadFile(w http.ResponseWriter, r *http.Request, fieldName string, 
 		Extension: extension,
 	})
 	if err != nil {
-		return "", HttpErrInternalServerError()
+		return "", HttpErrInternalServerErrorDef()
 	}
 
 	dst, err := os.Create(location)
 	if err != nil {
-		return "", HttpErrInternalServerError()
+		return "", HttpErrInternalServerErrorDef()
 	}
 
 	defer dst.Close()
 
 	_, err = io.Copy(dst, file)
 	if err != nil {
-		return "", HttpErrInternalServerError()
+		return "", HttpErrInternalServerErrorDef()
 	}
 
 	return location, nil
@@ -64,7 +64,7 @@ func HandleUploadFile(w http.ResponseWriter, r *http.Request, fieldName string, 
 func validateMimeType(file multipart.File, allowedMimeTypes []string) *HttpError {
 	buff := make([]byte, 512)
 	if _, err := file.Read(buff); err != nil {
-		return HttpErrInternalServerError()
+		return HttpErrInternalServerErrorDef()
 	}
 
 	filetype := http.DetectContentType(buff)
@@ -73,7 +73,7 @@ func validateMimeType(file multipart.File, allowedMimeTypes []string) *HttpError
 	}
 
 	if _, err := file.Seek(0, io.SeekStart); err != nil {
-		return HttpErrInternalServerError()
+		return HttpErrInternalServerErrorDef()
 	}
 
 	return nil

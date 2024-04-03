@@ -17,13 +17,28 @@ func GetSpotifyPlaylist(accessToken, playlistID string) (*spotifyPlaylistDTO, er
 	return getSpotifyEndpoint[spotifyPlaylistDTO](
 		"/v1/playlists/"+playlistID,
 		accessToken,
+		nil,
 	)
 }
 
-func GetUserPlaylists(accessToken string) (*getSpotifyPlaylistsDTO, error) {
+func GetSavedSpotifyPlaylists(accessToken string) (*getSpotifyPlaylistsDTO, error) {
 	return getSpotifyEndpoint[getSpotifyPlaylistsDTO](
 		"/v1/me/playlists",
 		accessToken,
+		url.Values{
+			"limit": {"50"},
+		},
+	)
+}
+
+func GetSpotifyPlaylistItems(accessToken, playlistID string) (*spotifyPlaylistItemsDTO, error) {
+	return getSpotifyEndpoint[spotifyPlaylistItemsDTO](
+		"/v1/playlists/"+playlistID+"/tracks",
+		accessToken,
+		url.Values{
+			"limit":  {"50"},
+			"fields": {"next,previous,limit,total,items(added_at,added_by(id,type),track(id,preview_url,name,duration_ms,artists(id,name),album(name,images,id)))"},
+		},
 	)
 }
 
@@ -101,8 +116,6 @@ func GetAuthorizationCodeSpotifyTokenPayload(code string) (*getAuthorizationCode
 		return nil, fmt.Errorf("status code: %d", resp.StatusCode)
 	}
 
-	log.Println("body: ", string(body))
-
 	dto := getAuthorizationCodeSpotifyTokenPayloadDTO{}
 	if err := json.Unmarshal(body, &dto); err != nil {
 		return nil, err
@@ -111,7 +124,7 @@ func GetAuthorizationCodeSpotifyTokenPayload(code string) (*getAuthorizationCode
 	return &dto, nil
 }
 
-func getSpotifyEndpoint[DTO interface{}](endpoint, accessToken string) (*DTO, error) {
+func getSpotifyEndpoint[DTO interface{}](endpoint, accessToken string, queryParams url.Values) (*DTO, error) {
 	url := "https://api.spotify.com" + endpoint
 
 	req, err := http.NewRequest("GET", url, nil)
@@ -120,6 +133,8 @@ func getSpotifyEndpoint[DTO interface{}](endpoint, accessToken string) (*DTO, er
 	}
 
 	req.Header.Set("Authorization", "Bearer "+accessToken)
+
+	req.URL.RawQuery = queryParams.Encode()
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {

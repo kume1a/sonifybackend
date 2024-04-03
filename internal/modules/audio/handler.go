@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/modules/youtube"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
@@ -24,7 +25,7 @@ func handleDownloadYoutubeAudio(apiCfg *shared.ApiConfg) http.HandlerFunc {
 		}
 
 		// check if the user already has the audio
-		if _, err := GetUserAudioByYoutubeVideoId(apiCfg.DB, r.Context(), authPayload.UserId, body.VideoId); err == nil {
+		if _, err := GetUserAudioByYoutubeVideoId(r.Context(), apiCfg.DB, authPayload.UserId, body.VideoId); err == nil {
 			shared.ResConflict(w, shared.ErrAudioAlreadyExists)
 			return
 		}
@@ -48,23 +49,24 @@ func handleDownloadYoutubeAudio(apiCfg *shared.ApiConfg) http.HandlerFunc {
 		}
 
 		newAudio, err := CreateAudio(
-			apiCfg.DB,
 			r.Context(),
-			sql.NullString{String: strings.TrimSpace(videoInfo.Title), Valid: true},
-			sql.NullString{String: strings.TrimSpace(videoInfo.Uploader), Valid: true},
-			sql.NullInt32{Int32: int32(videoInfo.DurationInSeconds), Valid: true},
-			filePath,
-			authPayload.UserId,
-			sql.NullInt64{Int64: fileSize.Bytes, Valid: true},
-			sql.NullString{String: body.VideoId, Valid: true},
-			sql.NullString{String: thumbnailPath, Valid: true},
+			apiCfg.DB,
+			database.CreateAudioParams{
+				Title:          sql.NullString{String: strings.TrimSpace(videoInfo.Title), Valid: true},
+				Author:         sql.NullString{String: strings.TrimSpace(videoInfo.Uploader), Valid: true},
+				Duration:       sql.NullInt32{Int32: int32(videoInfo.DurationInSeconds), Valid: true},
+				Path:           sql.NullString{String: filePath, Valid: true},
+				SizeBytes:      sql.NullInt64{Int64: fileSize.Bytes, Valid: true},
+				YoutubeVideoID: sql.NullString{String: body.VideoId, Valid: true},
+				ThumbnailPath:  sql.NullString{String: thumbnailPath, Valid: true},
+			},
 		)
 		if err != nil {
 			shared.ResInternalServerErrorDef(w)
 			return
 		}
 
-		userAudio, err := CreateUserAudio(apiCfg.DB, r.Context(), authPayload.UserId, newAudio.ID)
+		userAudio, err := CreateUserAudio(r.Context(), apiCfg.DB, authPayload.UserId, newAudio.ID)
 		if err != nil {
 			shared.ResInternalServerErrorDef(w)
 			return

@@ -9,12 +9,10 @@ func Contains[T comparable](elems []T, v T) bool {
 	return false
 }
 
-func MapList[T interface{}, DTO interface{}](entities []T, mapper func(*T) DTO) *[]DTO {
-	dtos := make([]DTO, 0, len(entities))
-
-	for _, v := range entities {
-		dtos = append(dtos, mapper(&v))
+func Map[T, U any](ts []T, f func(T) U) []U {
+	us := make([]U, len(ts))
+	for i := range ts {
+		us[i] = f(ts[i])
 	}
-
-	return &dtos
+	return us
 }

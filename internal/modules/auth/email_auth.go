@@ -12,7 +12,7 @@ import (
 func AuthWithEmail(apiCfg shared.ApiConfg, ctx context.Context, email string, password string) (*tokenPayloadDTO, *shared.HttpError) {
 	userExistsByEmail, err := user.UserExistsByEmail(apiCfg.DB, ctx, email)
 	if err != nil {
-		return nil, shared.HttpErrInternalServerError()
+		return nil, shared.HttpErrInternalServerErrorDef()
 	}
 
 	var authUser *database.User
@@ -29,7 +29,7 @@ func AuthWithEmail(apiCfg shared.ApiConfg, ctx context.Context, email string, pa
 
 	tokenPayload, err := getTokenPayloadDtoFromUserEntity(authUser)
 	if err != nil {
-		return nil, shared.HttpErrInternalServerError()
+		return nil, shared.HttpErrInternalServerErrorDef()
 	}
 
 	return tokenPayload, nil
@@ -56,7 +56,7 @@ func signInWithEmail(apiCfg shared.ApiConfg, ctx context.Context, email string, 
 func signUpWithEmail(apiCfg shared.ApiConfg, ctx context.Context, email string, password string) (*database.User, *shared.HttpError) {
 	passwordHash, err := HashPassword(password)
 	if err != nil {
-		return nil, shared.HttpErrInternalServerError()
+		return nil, shared.HttpErrInternalServerErrorDef()
 	}
 
 	newUser, err := user.CreateUser(apiCfg.DB, ctx, &database.CreateUserParams{
@@ -66,7 +66,7 @@ func signUpWithEmail(apiCfg shared.ApiConfg, ctx context.Context, email string, 
 		AuthProvider: database.AuthProviderEMAIL,
 	})
 	if err != nil {
-		return nil, shared.HttpErrInternalServerError()
+		return nil, shared.HttpErrInternalServerErrorDef()
 	}
 
 	return newUser, nil

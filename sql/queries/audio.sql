@@ -9,8 +9,9 @@ INSERT INTO audio(
   path,
   size_bytes,
   youtube_video_id,
-  thumbnail_path
-) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *;
+  thumbnail_path,
+  spotify_id
+) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *;
 
 -- name: GetAudiosByUserId :many
 SELECT 

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"net/http"
 
+	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
@@ -15,13 +16,16 @@ func handleCreatePlaylist(apiCfg *shared.ApiConfg) http.HandlerFunc {
 			return
 		}
 
-		playlist, err := CreatePlaylist(r.Context(), apiCfg.DB, body.Name, sql.NullString{String: body.ThumbnailPath, Valid: true})
+		playlist, err := CreatePlaylist(r.Context(), apiCfg.DB, database.CreatePlaylistParams{
+			Name:          body.Name,
+			ThumbnailPath: sql.NullString{String: body.ThumbnailPath, Valid: true},
+		})
 		if err != nil {
 			shared.ResInternalServerErrorDef(w)
 			return
 		}
 
-		dto := playlistEntityToDto(playlist)
+		dto := playlistEntityToDto(*playlist)
 
 		shared.ResCreated(w, dto)
 	}
@@ -41,7 +45,7 @@ func handleGetPlaylists(apiCfg *shared.ApiConfg) http.HandlerFunc {
 			return
 		}
 
-		dtos := shared.MapList(playlists, playlistEntityToDto)
+		dtos := shared.Map(playlists, playlistEntityToDto)
 
 		shared.ResOK(w, dtos)
 	}
@@ -55,7 +59,10 @@ func handleCreatePlaylistAudio(apiCfg *shared.ApiConfg) http.HandlerFunc {
 			return
 		}
 
-		playlistAudio, err := CreatePlaylistAudio(r.Context(), apiCfg.DB, body.PlaylistID, body.AudioID)
+		playlistAudio, err := CreatePlaylistAudio(r.Context(), apiCfg.DB, database.CreatePlaylistAudioParams{
+			PlaylistID: body.PlaylistID,
+			AudioID:    body.AudioID,
+		})
 		if err != nil {
 			shared.ResInternalServerErrorDef(w)
 			return
