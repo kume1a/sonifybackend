@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 
 	"github.com/google/uuid"
 )
@@ -27,7 +28,9 @@ func NewPublicFileLocation(args PublicFileLocationArgs) (string, error) {
 		return "", err
 	}
 
-	return fmt.Sprintf("%s/%s%s", args.Dir, uuid.New(), args.Extension), nil
+	fileName := fmt.Sprintf("%s.%s", uuid.New(), args.Extension)
+
+	return filepath.Join(args.Dir, fileName), nil
 }
 
 func DownloadFile(filepath string, url string) error {
@@ -73,7 +76,7 @@ func GetFileSize(filepath string) (*FileSize, error) {
 }
 
 func ensureDir(dirName string) error {
-	err := os.Mkdir(dirName, os.ModePerm)
+	err := os.MkdirAll(dirName, os.ModePerm)
 	if err == nil {
 		return nil
 	}

@@ -26,7 +26,7 @@ func streamInputs[INPUT interface{}](done <-chan struct{}, inputs []INPUT) <-cha
 	return inputCh
 }
 
-func ParallelTasks[DATA interface{}, INPUT interface{}](
+func ExecuteParallel[DATA interface{}, INPUT interface{}](
 	inputs []INPUT,
 	call func(input *INPUT) (DATA, error),
 ) ([]DATA, error) {

@@ -3,6 +3,7 @@ package spotify
 import (
 	"context"
 	"database/sql"
+	"log"
 
 	"github.com/google/uuid"
 	"github.com/kume1a/sonifybackend/internal/database"
@@ -12,8 +13,10 @@ import (
 )
 
 type playlistItemWithDownloadMeta struct {
-	downloadMeta *downloadSpotifyTrackMetaDTO
-	playlistItem *spotifyPlaylistItemDTO
+	downloadMeta        *downloadSpotifyTrackMetaDTO
+	playlistItem        *spotifyPlaylistItemDTO
+	downloadedAudioPath string
+	downloadedAudioSize *shared.FileSize
 }
 
 func downloadSpotifyPlaylist(
@@ -38,7 +41,7 @@ func downloadSpotifyPlaylist(
 			return shared.HttpErrInternalServerError(shared.ErrFailedToGetSpotifyPlaylist)
 		}
 
-		trackMetas, err := shared.ParallelTasks(
+		trackMetas, err := shared.ExecuteParallel(
 			playlistItems.Items,
 			func(input *spotifyPlaylistItemDTO) (*playlistItemWithDownloadMeta, error) {
 				downloadMeta, err := GetSpotifyAudioDownloadMeta(input.Track.ID)
@@ -46,13 +49,34 @@ func downloadSpotifyPlaylist(
 					return nil, err
 				}
 
+				downloadedAudioPath, err := shared.NewPublicFileLocation(shared.PublicFileLocationArgs{
+					Extension: "mp3",
+					Dir:       shared.DirSpotifyAudios,
+				})
+				if err != nil {
+					return nil, err
+				}
+
+				err = shared.DownloadFile(downloadedAudioPath, downloadMeta.Link)
+				if err != nil {
+					return nil, err
+				}
+
+				audioFileSize, err := shared.GetFileSize(downloadedAudioPath)
+				if err != nil {
+					return nil, err
+				}
+
 				return &playlistItemWithDownloadMeta{
-					downloadMeta: downloadMeta,
-					playlistItem: input,
+					downloadMeta:        downloadMeta,
+					playlistItem:        input,
+					downloadedAudioPath: downloadedAudioPath,
+					downloadedAudioSize: audioFileSize,
 				}, nil
 			},
 		)
 		if err != nil {
+			log.Println("Error downloading playlist items: ", err)
 			return err
 		}
 
@@ -140,13 +164,20 @@ func mapToCreateAudioEntityParams(playlistItemWithDownloadMetas []*playlistItemW
 				artistName = itemWithDownloadMeta.playlistItem.Track.Artists[0].Name
 			}
 
+			thumbnailUrl := ""
+			if len(itemWithDownloadMeta.playlistItem.Track.Album.Images) > 0 {
+				thumbnailUrl = itemWithDownloadMeta.playlistItem.Track.Album.Images[0].URL
+			}
+
 			return database.CreateAudioParams{
-				ID:        uuid.New(),
-				Author:    sql.NullString{String: artistName, Valid: true},
-				Duration:  sql.NullInt32{Int32: int32(itemWithDownloadMeta.playlistItem.Track.DurationMS / 1000), Valid: true},
-				Title:     sql.NullString{String: itemWithDownloadMeta.downloadMeta.Metadata.Title, Valid: true},
-				SpotifyID: sql.NullString{String: itemWithDownloadMeta.playlistItem.Track.ID, Valid: true},
-				// RemoteUrl: sql.NullString{String: itemWithDownloadMeta.downloadMeta.Link, Valid: true},
+				ID:           uuid.New(),
+				Author:       sql.NullString{String: artistName, Valid: true},
+				Duration:     sql.NullInt32{Int32: int32(itemWithDownloadMeta.playlistItem.Track.DurationMS / 1000), Valid: true},
+				Title:        sql.NullString{String: itemWithDownloadMeta.downloadMeta.Metadata.Title, Valid: true},
+				SpotifyID:    sql.NullString{String: itemWithDownloadMeta.playlistItem.Track.ID, Valid: true},
+				Path:         sql.NullString{String: itemWithDownloadMeta.downloadedAudioPath, Valid: true},
+				SizeBytes:    sql.NullInt64{Int64: int64(itemWithDownloadMeta.downloadedAudioSize.Bytes), Valid: true},
+				ThumbnailUrl: sql.NullString{String: thumbnailUrl, Valid: true},
 			}
 		},
 	)

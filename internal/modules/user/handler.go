@@ -23,7 +23,7 @@ func handleUpdateUser(apiCfg *shared.ApiConfg) http.HandlerFunc {
 			return
 		}
 
-		user, err := UpdateUser(apiCfg.DB, r.Context(), &database.UpdateUserParams{
+		user, err := UpdateUser(r.Context(), apiCfg.DB, &database.UpdateUserParams{
 			Name: sql.NullString{String: body.Name, Valid: body.Name != ""},
 			ID:   tokenPayload.UserId,
 		})
@@ -46,7 +46,7 @@ func handleGetAuthUser(apiCfg *shared.ApiConfg) http.HandlerFunc {
 			return
 		}
 
-		user, err := GetUserByID(apiCfg.DB, r.Context(), tokenPayload.UserId)
+		user, err := GetUserByID(r.Context(), apiCfg.DB, tokenPayload.UserId)
 		if err != nil {
 			shared.ResNotFound(w, shared.ErrUserNotFound)
 			return

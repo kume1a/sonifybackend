@@ -23,9 +23,6 @@ func CreateAudio(
 	if params.CreatedAt.IsZero() {
 		params.CreatedAt = createdAt
 	}
-	if params.UpdatedAt.IsZero() {
-		params.UpdatedAt = createdAt
-	}
 
 	entity, err := db.CreateAudio(ctx, params)
 

@@ -10,18 +10,16 @@ import (
 	"github.com/kume1a/sonifybackend/internal/database"
 )
 
-func CreateUser(db *database.Queries, ctx context.Context, params *database.CreateUserParams) (*database.User, error) {
+func CreateUser(ctx context.Context, db *database.Queries, params database.CreateUserParams) (*database.User, error) {
 	createdAt := time.Now().UTC()
 
-	user, err := db.CreateUser(ctx, database.CreateUserParams{
-		ID:           uuid.New(),
-		CreatedAt:    createdAt,
-		UpdatedAt:    createdAt,
-		Name:         params.Name,
-		Email:        params.Email,
-		AuthProvider: params.AuthProvider,
-		PasswordHash: params.PasswordHash,
-	})
+	if params.ID == uuid.Nil {
+		params.ID = uuid.New()
+	}
+	if params.CreatedAt.IsZero() {
+		params.CreatedAt = createdAt
+	}
+	user, err := db.CreateUser(ctx, params)
 
 	if err != nil {
 		log.Println("Error creating user: ", err)
@@ -30,13 +28,13 @@ func CreateUser(db *database.Queries, ctx context.Context, params *database.Crea
 	return &user, err
 }
 
-func GetUserByID(db *database.Queries, ctx context.Context, userId uuid.UUID) (*database.User, error) {
+func GetUserByID(ctx context.Context, db *database.Queries, userId uuid.UUID) (*database.User, error) {
 	user, err := db.GetUserById(ctx, userId)
 
 	return &user, err
 }
 
-func GetUserByEmail(db *database.Queries, ctx context.Context, email string) (*database.User, error) {
+func GetUserByEmail(ctx context.Context, db *database.Queries, email string) (*database.User, error) {
 	user, err := db.GetUserByEmail(ctx, sql.NullString{
 		String: email,
 		Valid:  true,
@@ -45,13 +43,13 @@ func GetUserByEmail(db *database.Queries, ctx context.Context, email string) (*d
 	return &user, err
 }
 
-func UpdateUser(db *database.Queries, ctx context.Context, params *database.UpdateUserParams) (*database.User, error) {
+func UpdateUser(ctx context.Context, db *database.Queries, params *database.UpdateUserParams) (*database.User, error) {
 	user, err := db.UpdateUser(ctx, *params)
 
 	return &user, err
 }
 
-func UserExistsByEmail(db *database.Queries, ctx context.Context, email string) (bool, error) {
+func UserExistsByEmail(ctx context.Context, db *database.Queries, email string) (bool, error) {
 	count, err := db.CountUsersByEmail(ctx, sql.NullString{String: email, Valid: true})
 
 	return count > 0, err

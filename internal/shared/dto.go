@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/kume1a/sonifybackend/internal/database"
 )
 
 type HttpErrorDto struct {
@@ -20,11 +21,11 @@ type KeywordDto struct {
 }
 
 type UserDto struct {
-	ID        uuid.UUID `json:"id"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
-	Name      string    `json:"name"`
-	Email     string    `json:"email"`
+	ID           uuid.UUID             `json:"id"`
+	CreatedAt    time.Time             `json:"createdAt"`
+	Name         string                `json:"name"`
+	Email        string                `json:"email"`
+	AuthProvider database.AuthProvider `json:"authProvider"`
 }
 
 type LastCreatedAtPageParamsDto struct {

@@ -10,7 +10,7 @@ import (
 )
 
 func AuthWithEmail(apiCfg shared.ApiConfg, ctx context.Context, email string, password string) (*tokenPayloadDTO, *shared.HttpError) {
-	userExistsByEmail, err := user.UserExistsByEmail(apiCfg.DB, ctx, email)
+	userExistsByEmail, err := user.UserExistsByEmail(ctx, apiCfg.DB, email)
 	if err != nil {
 		return nil, shared.HttpErrInternalServerErrorDef()
 	}
@@ -36,7 +36,7 @@ func AuthWithEmail(apiCfg shared.ApiConfg, ctx context.Context, email string, pa
 }
 
 func signInWithEmail(apiCfg shared.ApiConfg, ctx context.Context, email string, password string) (*database.User, *shared.HttpError) {
-	authUser, err := user.GetUserByEmail(apiCfg.DB, ctx, email)
+	authUser, err := user.GetUserByEmail(ctx, apiCfg.DB, email)
 
 	if err != nil {
 		return nil, shared.HttpErrUnauthorized(shared.ErrInvalidEmailOrPassword)
@@ -59,7 +59,7 @@ func signUpWithEmail(apiCfg shared.ApiConfg, ctx context.Context, email string, 
 		return nil, shared.HttpErrInternalServerErrorDef()
 	}
 
-	newUser, err := user.CreateUser(apiCfg.DB, ctx, &database.CreateUserParams{
+	newUser, err := user.CreateUser(ctx, apiCfg.DB, database.CreateUserParams{
 		Name:         sql.NullString{},
 		Email:        sql.NullString{String: email, Valid: true},
 		PasswordHash: sql.NullString{String: passwordHash, Valid: true},

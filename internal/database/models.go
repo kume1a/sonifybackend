@@ -79,11 +79,11 @@ type Audio struct {
 	Duration       sql.NullInt32
 	Path           sql.NullString
 	CreatedAt      time.Time
-	UpdatedAt      time.Time
 	SizeBytes      sql.NullInt64
 	YoutubeVideoID sql.NullString
 	ThumbnailPath  sql.NullString
 	SpotifyID      sql.NullString
+	ThumbnailUrl   sql.NullString
 }
 
 type Playlist struct {
@@ -104,7 +104,6 @@ type PlaylistAudio struct {
 type User struct {
 	ID           uuid.UUID
 	CreatedAt    time.Time
-	UpdatedAt    time.Time
 	Name         sql.NullString
 	Email        sql.NullString
 	AuthProvider AuthProvider

@@ -31,9 +31,9 @@ func AuthWithGoogle(apiCfg shared.ApiConfg, ctx context.Context, token string) (
 		return nil, shared.HttpErrUnauthorized(shared.ErrInvalidGoogleToken)
 	}
 
-	authUser, err := user.GetUserByEmail(apiCfg.DB, ctx, claims.Email)
+	authUser, err := user.GetUserByEmail(ctx, apiCfg.DB, claims.Email)
 	if err != nil {
-		newUser, err := user.CreateUser(apiCfg.DB, ctx, &database.CreateUserParams{
+		newUser, err := user.CreateUser(ctx, apiCfg.DB, database.CreateUserParams{
 			Name:         sql.NullString{},
 			Email:        sql.NullString{String: claims.Email, Valid: true},
 			AuthProvider: database.AuthProviderEMAIL,

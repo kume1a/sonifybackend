@@ -2,7 +2,6 @@
 INSERT INTO audio(
   id, 
   created_at,
-  updated_at,
   title,
   author,
   duration,
@@ -10,7 +9,8 @@ INSERT INTO audio(
   size_bytes,
   youtube_video_id,
   thumbnail_path,
-  spotify_id
+  spotify_id,
+  thumbnail_url
 ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *;
 
 -- name: GetAudiosByUserId :many
