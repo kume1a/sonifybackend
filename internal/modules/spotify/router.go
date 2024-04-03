@@ -11,7 +11,7 @@ func Router(apiCfg *shared.ApiConfg, router *mux.Router) *mux.Router {
 	r.HandleFunc("/downloadPlaylist", shared.AuthMW(handleDownloadPlaylist(apiCfg))).Methods("POST")
 	r.HandleFunc("/authorize", shared.AuthMW(handleAuthorizeSpotify)).Methods("POST")
 
-	r.HandleFunc("/userPlaylists", shared.AuthMW(handleGetSpotifyUserPlaylists(apiCfg))).Methods("GET")
+	r.HandleFunc("/importUserPlaylists", shared.AuthMW(handleImportSpotifyUserPlaylists(apiCfg))).Methods("POST")
 
 	return r
 }

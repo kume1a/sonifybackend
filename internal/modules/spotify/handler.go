@@ -80,7 +80,7 @@ func handleAuthorizeSpotify(w http.ResponseWriter, r *http.Request) {
 	shared.ResOK(w, dto)
 }
 
-func handleGetSpotifyUserPlaylists(apiCfg *shared.ApiConfg) http.HandlerFunc {
+func handleImportSpotifyUserPlaylists(apiCfg *shared.ApiConfg) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authPayload, err := shared.GetAuthPayload(r)
 		if err != nil {
