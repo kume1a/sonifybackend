@@ -121,3 +121,9 @@ type UserPlaylist struct {
 	PlaylistID uuid.UUID
 	CreatedAt  time.Time
 }
+
+type UserSyncDatum struct {
+	ID                  uuid.UUID
+	UserID              uuid.UUID
+	SpotifyLastSyncedAt time.Time
+}
