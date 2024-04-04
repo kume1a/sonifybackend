@@ -123,6 +123,45 @@ func (q *Queries) GetAudioById(ctx context.Context, id uuid.UUID) (Audio, error)
 	return i, err
 }
 
+const getAudiosBySpotifyIds = `-- name: GetAudiosBySpotifyIds :many
+SELECT id, title, author, duration_ms, path, created_at, size_bytes, youtube_video_id, thumbnail_path, spotify_id, thumbnail_url FROM audio WHERE spotify_id = ANY($1::text[])
+`
+
+func (q *Queries) GetAudiosBySpotifyIds(ctx context.Context, spotifyIds []string) ([]Audio, error) {
+	rows, err := q.db.QueryContext(ctx, getAudiosBySpotifyIds, pq.Array(spotifyIds))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Audio
+	for rows.Next() {
+		var i Audio
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Author,
+			&i.DurationMs,
+			&i.Path,
+			&i.CreatedAt,
+			&i.SizeBytes,
+			&i.YoutubeVideoID,
+			&i.ThumbnailPath,
+			&i.SpotifyID,
+			&i.ThumbnailUrl,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getAudiosByUserId = `-- name: GetAudiosByUserId :many
 SELECT 
   audio.id, audio.title, audio.author, audio.duration_ms, audio.path, audio.created_at, audio.size_bytes, audio.youtube_video_id, audio.thumbnail_path, audio.spotify_id, audio.thumbnail_url,

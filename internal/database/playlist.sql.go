@@ -118,6 +118,55 @@ func (q *Queries) DeletePlaylistById(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
+const getPlaylistAudioJoinsBySpotifyIds = `-- name: GetPlaylistAudioJoinsBySpotifyIds :many
+SELECT 
+  playlist_audios.playlist_id, playlist_audios.audio_id, playlist_audios.created_at,
+  audio.spotify_id AS spotify_id
+FROM playlist_audios
+INNER JOIN audio ON playlist_audios.audio_id = audio.id
+WHERE playlist_audios.playlist_id = $1 AND audio.spotify_id = ANY($2::text[])
+`
+
+type GetPlaylistAudioJoinsBySpotifyIdsParams struct {
+	PlaylistID uuid.UUID
+	SpotifyIds []string
+}
+
+type GetPlaylistAudioJoinsBySpotifyIdsRow struct {
+	PlaylistID uuid.UUID
+	AudioID    uuid.UUID
+	CreatedAt  time.Time
+	SpotifyID  sql.NullString
+}
+
+func (q *Queries) GetPlaylistAudioJoinsBySpotifyIds(ctx context.Context, arg GetPlaylistAudioJoinsBySpotifyIdsParams) ([]GetPlaylistAudioJoinsBySpotifyIdsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getPlaylistAudioJoinsBySpotifyIds, arg.PlaylistID, pq.Array(arg.SpotifyIds))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetPlaylistAudioJoinsBySpotifyIdsRow
+	for rows.Next() {
+		var i GetPlaylistAudioJoinsBySpotifyIdsRow
+		if err := rows.Scan(
+			&i.PlaylistID,
+			&i.AudioID,
+			&i.CreatedAt,
+			&i.SpotifyID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getPlaylistAudios = `-- name: GetPlaylistAudios :many
 SELECT playlist_id, audio_id, playlist_audios.created_at, id, title, author, duration_ms, path, audio.created_at, size_bytes, youtube_video_id, thumbnail_path, spotify_id, thumbnail_url FROM playlist_audios
   INNER JOIN audio ON playlist_audios.audio_id = audio.id

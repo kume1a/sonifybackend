@@ -77,3 +77,17 @@ func GetPlaylistAudiosBySpotifyIds(
 
 	return audios, err
 }
+
+func GetAudiosBySpotifyIds(
+	ctx context.Context,
+	db *database.Queries,
+	spotifyIds []string,
+) ([]database.Audio, error) {
+	audios, err := db.GetAudiosBySpotifyIds(ctx, spotifyIds)
+
+	if err != nil {
+		log.Println("Error getting audios by spotify ids: ", err)
+	}
+
+	return audios, err
+}

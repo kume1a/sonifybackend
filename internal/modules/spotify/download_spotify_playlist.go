@@ -110,7 +110,7 @@ func downloadSpotifyPlaylist(
 					PlaylistID: dbPlaylist.ID,
 					AudioIds: shared.Map(
 						toDeletePlaylistItems,
-						func(item database.Audio) uuid.UUID { return item.ID },
+						func(item database.GetPlaylistAudioJoinsBySpotifyIdsRow) uuid.UUID { return item.AudioID },
 					),
 				}
 
@@ -167,23 +167,27 @@ func downloadSpotifyPlaylist(
 func partitionSpotifyPlaylistItems(
 	requestContext context.Context,
 	apiCfg *shared.ApiConfg,
-	playlist *spotifyPlaylistDTO,
+	spotifyPlaylist *spotifyPlaylistDTO,
 	playlistItems *[]spotifyPlaylistItemDTO,
 	dbPlaylists *[]database.Playlist,
-) (toDownload []spotifyPlaylistItemDTO, toDelete []database.Audio, err error) {
+) (
+	toDownload []spotifyPlaylistItemDTO,
+	toDelete []database.GetPlaylistAudioJoinsBySpotifyIdsRow,
+	err error,
+) {
 	dbPlaylist := shared.FirstOrDefault(*dbPlaylists, func(dbPlaylist *database.Playlist) bool {
 		if !dbPlaylist.SpotifyID.Valid {
 			return false
 		}
 
-		return playlist.ID == dbPlaylist.SpotifyID.String
+		return spotifyPlaylist.ID == dbPlaylist.SpotifyID.String
 	})
 
 	if dbPlaylist == nil {
-		return *playlistItems, []database.Audio{}, nil
+		return *playlistItems, []database.GetPlaylistAudioJoinsBySpotifyIdsRow{}, nil
 	}
 
-	dbAudios, err := audio.GetPlaylistAudiosBySpotifyIds(requestContext, apiCfg.DB, database.GetPlaylistAudiosBySpotifyIdsParams{
+	dbAudios, err := playlist.GetPlaylistAudioJoinsBySpotifyIds(requestContext, apiCfg.DB, database.GetPlaylistAudioJoinsBySpotifyIdsParams{
 		PlaylistID: dbPlaylist.ID,
 		SpotifyIds: shared.Map(*playlistItems, func(item spotifyPlaylistItemDTO) string { return item.Track.ID }),
 	})
@@ -191,11 +195,11 @@ func partitionSpotifyPlaylistItems(
 		return nil, nil, err
 	}
 
-	dbAudiosMap := shared.SliceToMap(dbAudios, func(audio *database.Audio) string { return audio.SpotifyID.String })
+	dbAudiosMap := shared.SliceToMap(dbAudios, func(audio *database.GetPlaylistAudioJoinsBySpotifyIdsRow) string { return audio.SpotifyID.String })
 	playlistItemsMap := shared.SliceToMap(*playlistItems, func(item *spotifyPlaylistItemDTO) string { return item.Track.ID })
 
 	toDownload = []spotifyPlaylistItemDTO{}
-	toDelete = []database.Audio{}
+	toDelete = []database.GetPlaylistAudioJoinsBySpotifyIdsRow{}
 
 	for _, item := range *playlistItems {
 		_, ok := dbAudiosMap[item.Track.ID]
