@@ -104,3 +104,17 @@ func GetPlaylistAudioJoinsBySpotifyIds(
 
 	return entities, err
 }
+
+func GetUserPlaylists(
+	ctx context.Context,
+	db *database.Queries,
+	userId uuid.UUID,
+) ([]database.Playlist, error) {
+	playlists, err := db.GetUserPlaylists(ctx, userId)
+
+	if err != nil {
+		log.Println("Error getting user playlists:", err)
+	}
+
+	return playlists, err
+}

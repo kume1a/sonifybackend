@@ -73,3 +73,23 @@ func handleCreatePlaylistAudio(apiCfg *shared.ApiConfg) http.HandlerFunc {
 		shared.ResCreated(w, dto)
 	}
 }
+
+func handleGetAuthUserPlaylists(apiCfg *shared.ApiConfg) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		authPayload, err := shared.GetAuthPayload(r)
+		if err != nil {
+			shared.ResUnauthorized(w, shared.ErrUnauthorized)
+			return
+		}
+
+		playlists, err := GetUserPlaylists(r.Context(), apiCfg.DB, authPayload.UserId)
+		if err != nil {
+			shared.ResInternalServerErrorDef(w)
+			return
+		}
+
+		dtos := shared.Map(playlists, playlistEntityToDto)
+
+		shared.ResOK(w, dtos)
+	}
+}

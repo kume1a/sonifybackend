@@ -60,8 +60,8 @@ func ResNonAuthoritativeInfo(w http.ResponseWriter, payload interface{}) {
 	resJson(w, http.StatusNonAuthoritativeInfo, payload)
 }
 
-func ResNoContent(w http.ResponseWriter, payload interface{}) {
-	resJson(w, http.StatusNoContent, payload)
+func ResNoContent(w http.ResponseWriter) {
+	resJson(w, http.StatusNoContent, struct{}{})
 }
 
 func ResHttpError(w http.ResponseWriter, httpError HttpError) {

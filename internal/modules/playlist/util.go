@@ -39,8 +39,11 @@ func ValidateCreatePlaylistDto(w http.ResponseWriter, r *http.Request) (*createP
 func playlistEntityToDto(e database.Playlist) playlistDto {
 	return playlistDto{
 		ID:            e.ID,
+		CreatedAt:     e.CreatedAt,
 		Name:          e.Name,
 		ThumbnailPath: e.ThumbnailPath.String,
+		ThumbnailUrl:  e.ThumbnailUrl.String,
+		SpotifyId:     e.SpotifyID.String,
 	}
 }
 

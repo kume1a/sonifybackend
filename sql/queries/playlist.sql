@@ -50,9 +50,9 @@ INSERT INTO user_playlists(
 -- name: GetUserPlaylistsBySpotifyIds :many
 SELECT 
   playlists.* 
-  FROM user_playlists
-  INNER JOIN playlists ON user_playlists.playlist_id = playlists.id
-  WHERE user_playlists.user_id = sqlc.arg(user_id) AND playlists.spotify_id = ANY(sqlc.arg(spotify_ids)::text[]);
+FROM user_playlists
+INNER JOIN playlists ON user_playlists.playlist_id = playlists.id
+WHERE user_playlists.user_id = sqlc.arg(user_id) AND playlists.spotify_id = ANY(sqlc.arg(spotify_ids)::text[]);
 
 -- name: DeletePlaylistAudiosByIds :exec
 DELETE FROM playlist_audios 
@@ -66,3 +66,10 @@ SELECT
 FROM playlist_audios
 INNER JOIN audio ON playlist_audios.audio_id = audio.id
 WHERE playlist_audios.playlist_id = sqlc.arg(playlist_id) AND audio.spotify_id = ANY(sqlc.arg(spotify_ids)::text[]);
+
+-- name: GetUserPlaylists :many
+SELECT 
+  playlists.* 
+FROM user_playlists
+INNER JOIN playlists ON user_playlists.playlist_id = playlists.id
+WHERE user_playlists.user_id = $1;
