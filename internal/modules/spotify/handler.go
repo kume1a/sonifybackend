@@ -3,7 +3,10 @@ package spotify
 import (
 	"log"
 	"net/http"
+	"time"
 
+	"github.com/kume1a/sonifybackend/internal/database"
+	"github.com/kume1a/sonifybackend/internal/modules/usersync"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
@@ -95,10 +98,15 @@ func handleImportSpotifyUserPlaylists(apiCfg *shared.ApiConfg) http.HandlerFunc 
 			return
 		}
 
-		if err := downloadSpotifyPlaylist(apiCfg, r.Context(), authPayload.UserId, body.SpotifyAccessToken[0]); err != nil {
+		if err := downloadSpotifyPlaylist(r.Context(), apiCfg, authPayload.UserId, body.SpotifyAccessToken[0]); err != nil {
 			shared.ResInternalServerErrorDef(w)
 			return
 		}
+
+		usersync.UpdateUserSyncDatumByUserId(r.Context(), apiCfg.DB, database.UpdateUserSyncDatumByUserIdParams{
+			UserID:              authPayload.UserId,
+			SpotifyLastSyncedAt: time.Now(),
+		})
 
 		shared.ResNoContent(w)
 	}

@@ -39,7 +39,7 @@ func GetUserSyncDatumByUserId(
 	return &entity, err
 }
 
-func UpdateUserSyncDatumById(
+func UpdateUserSyncDatumByUserId(
 	ctx context.Context,
 	db *database.Queries,
 	params database.UpdateUserSyncDatumByUserIdParams,

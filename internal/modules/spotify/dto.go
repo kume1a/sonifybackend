@@ -23,14 +23,14 @@ type spotifyTokenPayloadDTO struct {
 
 // --------- Spotify API DTOs ---------
 
-type getSpotifyGeneralTokenDTO struct {
+type spotifyClientCredsTokenDTO struct {
 	AccessToken string `json:"access_token"`
 	TokenType   string `json:"token_type"`
 	ExpiresIn   int    `json:"expires_in"`
 }
 
-type getAuthorizationCodeSpotifyTokenPayloadDTO struct {
-	getSpotifyGeneralTokenDTO
+type spotifyAuthCodeTokenDTO struct {
+	spotifyClientCredsTokenDTO
 	RefreshToken string `json:"refresh_token"`
 	Scope        string `json:"scope"`
 	TokenType    string `json:"token_type"`

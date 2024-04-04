@@ -42,7 +42,7 @@ func GetSpotifyPlaylistItems(accessToken, playlistID string) (*spotifyPlaylistIt
 	)
 }
 
-func GetGeneralSpotifyAccessToken() (*getSpotifyGeneralTokenDTO, error) {
+func GetGeneralSpotifyAccessToken() (*spotifyClientCredsTokenDTO, error) {
 	env, err := shared.ParseEnv()
 	if err != nil {
 		return nil, err
@@ -66,7 +66,7 @@ func GetGeneralSpotifyAccessToken() (*getSpotifyGeneralTokenDTO, error) {
 		return nil, err
 	}
 
-	dto := getSpotifyGeneralTokenDTO{}
+	dto := spotifyClientCredsTokenDTO{}
 	if err := json.Unmarshal(body, &dto); err != nil {
 		return nil, err
 	}
@@ -74,7 +74,7 @@ func GetGeneralSpotifyAccessToken() (*getSpotifyGeneralTokenDTO, error) {
 	return &dto, nil
 }
 
-func GetAuthorizationCodeSpotifyTokenPayload(code string) (*getAuthorizationCodeSpotifyTokenPayloadDTO, error) {
+func GetAuthorizationCodeSpotifyTokenPayload(code string) (*spotifyAuthCodeTokenDTO, error) {
 	env, err := shared.ParseEnv()
 	if err != nil {
 		return nil, err
@@ -116,7 +116,7 @@ func GetAuthorizationCodeSpotifyTokenPayload(code string) (*getAuthorizationCode
 		return nil, fmt.Errorf("status code: %d", resp.StatusCode)
 	}
 
-	dto := getAuthorizationCodeSpotifyTokenPayloadDTO{}
+	dto := spotifyAuthCodeTokenDTO{}
 	if err := json.Unmarshal(body, &dto); err != nil {
 		return nil, err
 	}

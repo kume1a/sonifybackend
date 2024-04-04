@@ -48,17 +48,17 @@ func (q *Queries) GetUserSyncDatumByUserId(ctx context.Context, userID uuid.UUID
 const updateUserSyncDatumByUserId = `-- name: UpdateUserSyncDatumByUserId :one
 UPDATE user_sync_data
   SET spotify_last_synced_at = COALESCE($1, spotify_last_synced_at)
-  WHERE id = $2
+  WHERE user_id = $2
   RETURNING id, user_id, spotify_last_synced_at
 `
 
 type UpdateUserSyncDatumByUserIdParams struct {
 	SpotifyLastSyncedAt time.Time
-	ID                  uuid.UUID
+	UserID              uuid.UUID
 }
 
 func (q *Queries) UpdateUserSyncDatumByUserId(ctx context.Context, arg UpdateUserSyncDatumByUserIdParams) (UserSyncDatum, error) {
-	row := q.db.QueryRowContext(ctx, updateUserSyncDatumByUserId, arg.SpotifyLastSyncedAt, arg.ID)
+	row := q.db.QueryRowContext(ctx, updateUserSyncDatumByUserId, arg.SpotifyLastSyncedAt, arg.UserID)
 	var i UserSyncDatum
 	err := row.Scan(&i.ID, &i.UserID, &i.SpotifyLastSyncedAt)
 	return i, err

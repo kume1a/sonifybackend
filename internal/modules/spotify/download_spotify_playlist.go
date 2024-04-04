@@ -20,8 +20,8 @@ type playlistItemWithDownloadMeta struct {
 }
 
 func downloadSpotifyPlaylist(
+	ctx context.Context,
 	apiCfg *shared.ApiConfg,
-	requestContext context.Context,
 	authUserID uuid.UUID,
 	spotifyAccessToken string,
 ) error {
@@ -30,7 +30,7 @@ func downloadSpotifyPlaylist(
 		return err
 	}
 
-	dbPlaylists, err := playlist.GetUserPlaylistsBySpotifyIds(requestContext, apiCfg.DB, database.GetUserPlaylistsBySpotifyIdsParams{
+	dbPlaylists, err := playlist.GetUserPlaylistsBySpotifyIds(ctx, apiCfg.DB, database.GetUserPlaylistsBySpotifyIdsParams{
 		SpotifyIds: shared.Map(playlists.Items, func(playlist spotifyPlaylistDTO) string { return playlist.ID }),
 		UserID:     authUserID,
 	})
@@ -58,12 +58,12 @@ func downloadSpotifyPlaylist(
 			return playlist.ID == dbPlaylist.SpotifyID.String
 		})
 
-		toDownloadAudios, toAttachPlaylistItems, toDeletePlaylistItems, err := partitionSpotifyPlaylistItems(requestContext, apiCfg, &playlist, &playlistItems.Items, &dbPlaylists)
+		toDownloadAudios, toAttachPlaylistItems, toDeletePlaylistItems, err := partitionSpotifyPlaylistItems(ctx, apiCfg, &playlist, &playlistItems.Items, &dbPlaylists)
 		if err != nil {
 			return err
 		}
 
-		spotifyIdToAudioIdMap, err := getSpotifyIdToAudioIdMap(requestContext, apiCfg, createAudioParams, toAttachPlaylistItems)
+		spotifyIdToAudioIdMap, err := getSpotifyIdToAudioIdMap(ctx, apiCfg, createAudioParams, toAttachPlaylistItems)
 		if err != nil {
 			return err
 		}
@@ -125,38 +125,38 @@ func downloadSpotifyPlaylist(
 	}
 
 	shared.RunDbTransaction(
-		requestContext,
+		ctx,
 		apiCfg,
 		func(queries *database.Queries) (any, error) {
 			for _, params := range deletePlaylistAudioParams {
-				if err := playlist.DeletePlaylistAudiosByIds(requestContext, apiCfg.DB, params); err != nil {
+				if err := playlist.DeletePlaylistAudiosByIds(ctx, apiCfg.DB, params); err != nil {
 					return nil, err
 				}
 			}
 
 			for _, params := range createPlaylistParams {
-				_, err := playlist.CreatePlaylist(requestContext, apiCfg.DB, params)
+				_, err := playlist.CreatePlaylist(ctx, apiCfg.DB, params)
 				if err != nil {
 					return nil, err
 				}
 			}
 
 			for _, params := range createUserPlaylistParams {
-				_, err := playlist.CreateUserPlaylist(requestContext, apiCfg.DB, params)
+				_, err := playlist.CreateUserPlaylist(ctx, apiCfg.DB, params)
 				if err != nil {
 					return nil, err
 				}
 			}
 
 			for _, params := range createAudioParams {
-				_, err := audio.CreateAudio(requestContext, apiCfg.DB, params)
+				_, err := audio.CreateAudio(ctx, apiCfg.DB, params)
 				if err != nil {
 					return nil, err
 				}
 			}
 
 			for _, params := range createPlaylistAudioParams {
-				_, err := playlist.CreatePlaylistAudio(requestContext, apiCfg.DB, params)
+				_, err := playlist.CreatePlaylistAudio(ctx, apiCfg.DB, params)
 				if err != nil {
 					return nil, err
 				}
@@ -170,7 +170,7 @@ func downloadSpotifyPlaylist(
 }
 
 func partitionSpotifyPlaylistItems(
-	requestContext context.Context,
+	ctx context.Context,
 	apiCfg *shared.ApiConfg,
 	spotifyPlaylist *spotifyPlaylistDTO,
 	playlistItems *[]spotifyPlaylistItemDTO,
@@ -183,7 +183,7 @@ func partitionSpotifyPlaylistItems(
 ) {
 	playlistTrackSpotifyIds := shared.Map(*playlistItems, func(item spotifyPlaylistItemDTO) string { return item.Track.ID })
 
-	dbAudioSpotifyIds, err := audio.GetAudioSpotifyIdsBySpotifyIds(requestContext, apiCfg.DB, playlistTrackSpotifyIds)
+	dbAudioSpotifyIds, err := audio.GetAudioSpotifyIdsBySpotifyIds(ctx, apiCfg.DB, playlistTrackSpotifyIds)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -210,7 +210,7 @@ func partitionSpotifyPlaylistItems(
 		return toDownloadAudios, *playlistItems, []database.GetPlaylistAudioJoinsBySpotifyIdsRow{}, nil
 	}
 
-	dbPlaylistAudios, err := playlist.GetPlaylistAudioJoinsBySpotifyIds(requestContext, apiCfg.DB, database.GetPlaylistAudioJoinsBySpotifyIdsParams{
+	dbPlaylistAudios, err := playlist.GetPlaylistAudioJoinsBySpotifyIds(ctx, apiCfg.DB, database.GetPlaylistAudioJoinsBySpotifyIdsParams{
 		PlaylistID: dbPlaylist.ID,
 		SpotifyIds: playlistTrackSpotifyIds,
 	})
@@ -242,14 +242,14 @@ func partitionSpotifyPlaylistItems(
 }
 
 func getSpotifyIdToAudioIdMap(
-	requestContext context.Context,
+	ctx context.Context,
 	apiCfg *shared.ApiConfg,
 	audioEntityCreateParams []database.CreateAudioParams,
 	toAttachPlaylistItems []spotifyPlaylistItemDTO,
 ) (map[string]uuid.UUID, error) {
 	toAttachSpotifyIds := shared.Map(toAttachPlaylistItems, func(item spotifyPlaylistItemDTO) string { return item.Track.ID })
 
-	toAttachIds, err := audio.GetAudioSpotifyIdsBySpotifyIds(requestContext, apiCfg.DB, toAttachSpotifyIds)
+	toAttachIds, err := audio.GetAudioSpotifyIdsBySpotifyIds(ctx, apiCfg.DB, toAttachSpotifyIds)
 	if err != nil {
 		return nil, err
 	}
