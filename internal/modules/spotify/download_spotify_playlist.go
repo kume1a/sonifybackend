@@ -58,12 +58,17 @@ func downloadSpotifyPlaylist(
 			return playlist.ID == dbPlaylist.SpotifyID.String
 		})
 
-		toDownloadPlaylistItems, toDeletePlaylistItems, err := partitionSpotifyPlaylistItems(requestContext, apiCfg, &playlist, &playlistItems.Items, &dbPlaylists)
+		toDownloadAudios, toAttachPlaylistItems, toDeletePlaylistItems, err := partitionSpotifyPlaylistItems(requestContext, apiCfg, &playlist, &playlistItems.Items, &dbPlaylists)
 		if err != nil {
 			return err
 		}
 
-		trackMetas, err := downloadSpotifyPlaylistItems(toDownloadPlaylistItems)
+		spotifyIdToAudioIdMap, err := getSpotifyIdToAudioIdMap(requestContext, apiCfg, createAudioParams, toAttachPlaylistItems)
+		if err != nil {
+			return err
+		}
+
+		trackMetas, err := downloadSpotifyPlaylistItems(toDownloadAudios)
 		if err != nil {
 			log.Println("Error downloading playlist items: ", err)
 			return err
@@ -77,11 +82,11 @@ func downloadSpotifyPlaylist(
 			}
 			audioEntityCreateParams := playlistItemWithDownloadMetaToCreateAudioParams(trackMetas)
 			playlistAudioCreateParams := shared.Map(
-				audioEntityCreateParams,
-				func(audioParams database.CreateAudioParams) database.CreatePlaylistAudioParams {
+				toAttachPlaylistItems,
+				func(spotifyPlaylistItem spotifyPlaylistItemDTO) database.CreatePlaylistAudioParams {
 					return database.CreatePlaylistAudioParams{
 						PlaylistID: playlistEntityCreateParams.ID,
-						AudioID:    audioParams.ID,
+						AudioID:    spotifyIdToAudioIdMap[spotifyPlaylistItem.Track.ID],
 					}
 				},
 			)
@@ -93,11 +98,11 @@ func downloadSpotifyPlaylist(
 		} else {
 			audioEntityCreateParams := playlistItemWithDownloadMetaToCreateAudioParams(trackMetas)
 			playlistAudioCreateParams := shared.Map(
-				audioEntityCreateParams,
-				func(audioParams database.CreateAudioParams) database.CreatePlaylistAudioParams {
+				toAttachPlaylistItems,
+				func(spotifyPlaylistItem spotifyPlaylistItemDTO) database.CreatePlaylistAudioParams {
 					return database.CreatePlaylistAudioParams{
 						PlaylistID: dbPlaylist.ID,
-						AudioID:    audioParams.ID,
+						AudioID:    spotifyIdToAudioIdMap[spotifyPlaylistItem.Track.ID],
 					}
 				},
 			)
@@ -171,51 +176,96 @@ func partitionSpotifyPlaylistItems(
 	playlistItems *[]spotifyPlaylistItemDTO,
 	dbPlaylists *[]database.Playlist,
 ) (
-	toDownload []spotifyPlaylistItemDTO,
-	toDelete []database.GetPlaylistAudioJoinsBySpotifyIdsRow,
+	toDownloadAudios []spotifyPlaylistItemDTO,
+	toAttachPlaylistItems []spotifyPlaylistItemDTO,
+	toDeletePlaylistItems []database.GetPlaylistAudioJoinsBySpotifyIdsRow,
 	err error,
 ) {
-	dbPlaylist := shared.FirstOrDefault(*dbPlaylists, func(dbPlaylist *database.Playlist) bool {
-		if !dbPlaylist.SpotifyID.Valid {
-			return false
-		}
+	playlistTrackSpotifyIds := shared.Map(*playlistItems, func(item spotifyPlaylistItemDTO) string { return item.Track.ID })
 
-		return spotifyPlaylist.ID == dbPlaylist.SpotifyID.String
-	})
+	dbAudioSpotifyIds, err := audio.GetAudioSpotifyIdsBySpotifyIds(requestContext, apiCfg.DB, playlistTrackSpotifyIds)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	toDownloadAudios = []spotifyPlaylistItemDTO{}
+	for _, item := range *playlistItems {
+		spotifyIdFromDB := shared.FirstOrDefault(
+			dbAudioSpotifyIds,
+			func(e *database.GetAudioSpotifyIdsBySpotifyIdsRow) bool { return e.SpotifyID.String == item.Track.ID },
+		)
+		if spotifyIdFromDB == nil {
+			toDownloadAudios = append(toDownloadAudios, item)
+		}
+	}
+
+	dbPlaylist := shared.FirstOrDefault(
+		*dbPlaylists,
+		func(dbPlaylist *database.Playlist) bool {
+			return !dbPlaylist.SpotifyID.Valid && spotifyPlaylist.ID == dbPlaylist.SpotifyID.String
+		},
+	)
 
 	if dbPlaylist == nil {
-		return *playlistItems, []database.GetPlaylistAudioJoinsBySpotifyIdsRow{}, nil
+		return toDownloadAudios, *playlistItems, []database.GetPlaylistAudioJoinsBySpotifyIdsRow{}, nil
 	}
 
-	dbAudios, err := playlist.GetPlaylistAudioJoinsBySpotifyIds(requestContext, apiCfg.DB, database.GetPlaylistAudioJoinsBySpotifyIdsParams{
+	dbPlaylistAudios, err := playlist.GetPlaylistAudioJoinsBySpotifyIds(requestContext, apiCfg.DB, database.GetPlaylistAudioJoinsBySpotifyIdsParams{
 		PlaylistID: dbPlaylist.ID,
-		SpotifyIds: shared.Map(*playlistItems, func(item spotifyPlaylistItemDTO) string { return item.Track.ID }),
+		SpotifyIds: playlistTrackSpotifyIds,
 	})
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
-	dbAudiosMap := shared.SliceToMap(dbAudios, func(audio *database.GetPlaylistAudioJoinsBySpotifyIdsRow) string { return audio.SpotifyID.String })
+	dbPlaylistAudiosMap := shared.SliceToMap(dbPlaylistAudios, func(audio *database.GetPlaylistAudioJoinsBySpotifyIdsRow) string { return audio.SpotifyID.String })
 	playlistItemsMap := shared.SliceToMap(*playlistItems, func(item *spotifyPlaylistItemDTO) string { return item.Track.ID })
 
-	toDownload = []spotifyPlaylistItemDTO{}
-	toDelete = []database.GetPlaylistAudioJoinsBySpotifyIdsRow{}
+	toAttachPlaylistItems = []spotifyPlaylistItemDTO{}
+	toDeletePlaylistItems = []database.GetPlaylistAudioJoinsBySpotifyIdsRow{}
 
 	for _, item := range *playlistItems {
-		_, ok := dbAudiosMap[item.Track.ID]
+		_, ok := dbPlaylistAudiosMap[item.Track.ID]
 		if !ok {
-			toDownload = append(toDownload, item)
+			toAttachPlaylistItems = append(toAttachPlaylistItems, item)
 		}
 	}
 
-	for _, dbAudio := range dbAudios {
+	for _, dbAudio := range dbPlaylistAudios {
 		_, ok := playlistItemsMap[dbAudio.SpotifyID.String]
 		if !ok {
-			toDelete = append(toDelete, dbAudio)
+			toDeletePlaylistItems = append(toDeletePlaylistItems, dbAudio)
 		}
 	}
 
-	return toDownload, toDelete, nil
+	return toDownloadAudios, toAttachPlaylistItems, toDeletePlaylistItems, nil
+}
+
+func getSpotifyIdToAudioIdMap(
+	requestContext context.Context,
+	apiCfg *shared.ApiConfg,
+	audioEntityCreateParams []database.CreateAudioParams,
+	toAttachPlaylistItems []spotifyPlaylistItemDTO,
+) (map[string]uuid.UUID, error) {
+	toAttachSpotifyIds := shared.Map(toAttachPlaylistItems, func(item spotifyPlaylistItemDTO) string { return item.Track.ID })
+
+	toAttachIds, err := audio.GetAudioSpotifyIdsBySpotifyIds(requestContext, apiCfg.DB, toAttachSpotifyIds)
+	if err != nil {
+		return nil, err
+	}
+
+	spotifyIdToAudioIds := make(map[string]uuid.UUID)
+	for _, toAttachId := range toAttachIds {
+		spotifyIdToAudioIds[toAttachId.SpotifyID.String] = toAttachId.ID
+	}
+
+	for _, audioEntityCreateParam := range audioEntityCreateParams {
+		if _, ok := spotifyIdToAudioIds[audioEntityCreateParam.SpotifyID.String]; !ok {
+			spotifyIdToAudioIds[audioEntityCreateParam.SpotifyID.String] = audioEntityCreateParam.ID
+		}
+	}
+
+	return spotifyIdToAudioIds, nil
 }
 
 func downloadSpotifyPlaylistItems(playlistItems []spotifyPlaylistItemDTO) ([]*playlistItemWithDownloadMeta, error) {

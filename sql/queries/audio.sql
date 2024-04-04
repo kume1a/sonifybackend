@@ -52,5 +52,14 @@ SELECT
   INNER JOIN audio ON playlist_audios.audio_id = audio.id
   WHERE playlist_audios.playlist_id = sqlc.arg(playlist_id) AND audio.spotify_id = ANY(sqlc.arg(spotify_ids)::text[]);
 
--- name: GetAudiosBySpotifyIds :many
-SELECT * FROM audio WHERE spotify_id = ANY(sqlc.arg(spotify_ids)::text[]);
+-- name: GetAudioSpotifyIdsBySpotifyIds :many
+SELECT 
+  id, spotify_id 
+FROM audio 
+WHERE spotify_id = ANY(sqlc.arg(spotify_ids)::text[]);
+
+-- name: GetAudioIdsBySpotifyIds :many
+SELECT 
+  id
+FROM audio
+WHERE spotify_id = ANY(sqlc.arg(spotify_ids)::text[]);

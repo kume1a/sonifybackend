@@ -123,32 +123,58 @@ func (q *Queries) GetAudioById(ctx context.Context, id uuid.UUID) (Audio, error)
 	return i, err
 }
 
-const getAudiosBySpotifyIds = `-- name: GetAudiosBySpotifyIds :many
-SELECT id, title, author, duration_ms, path, created_at, size_bytes, youtube_video_id, thumbnail_path, spotify_id, thumbnail_url FROM audio WHERE spotify_id = ANY($1::text[])
+const getAudioIdsBySpotifyIds = `-- name: GetAudioIdsBySpotifyIds :many
+SELECT 
+  id
+FROM audio
+WHERE spotify_id = ANY($1::text[])
 `
 
-func (q *Queries) GetAudiosBySpotifyIds(ctx context.Context, spotifyIds []string) ([]Audio, error) {
-	rows, err := q.db.QueryContext(ctx, getAudiosBySpotifyIds, pq.Array(spotifyIds))
+func (q *Queries) GetAudioIdsBySpotifyIds(ctx context.Context, spotifyIds []string) ([]uuid.UUID, error) {
+	rows, err := q.db.QueryContext(ctx, getAudioIdsBySpotifyIds, pq.Array(spotifyIds))
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Audio
+	var items []uuid.UUID
 	for rows.Next() {
-		var i Audio
-		if err := rows.Scan(
-			&i.ID,
-			&i.Title,
-			&i.Author,
-			&i.DurationMs,
-			&i.Path,
-			&i.CreatedAt,
-			&i.SizeBytes,
-			&i.YoutubeVideoID,
-			&i.ThumbnailPath,
-			&i.SpotifyID,
-			&i.ThumbnailUrl,
-		); err != nil {
+		var id uuid.UUID
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		items = append(items, id)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getAudioSpotifyIdsBySpotifyIds = `-- name: GetAudioSpotifyIdsBySpotifyIds :many
+SELECT 
+  id, spotify_id 
+FROM audio 
+WHERE spotify_id = ANY($1::text[])
+`
+
+type GetAudioSpotifyIdsBySpotifyIdsRow struct {
+	ID        uuid.UUID
+	SpotifyID sql.NullString
+}
+
+func (q *Queries) GetAudioSpotifyIdsBySpotifyIds(ctx context.Context, spotifyIds []string) ([]GetAudioSpotifyIdsBySpotifyIdsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAudioSpotifyIdsBySpotifyIds, pq.Array(spotifyIds))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAudioSpotifyIdsBySpotifyIdsRow
+	for rows.Next() {
+		var i GetAudioSpotifyIdsBySpotifyIdsRow
+		if err := rows.Scan(&i.ID, &i.SpotifyID); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
