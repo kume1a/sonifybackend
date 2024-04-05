@@ -16,7 +16,7 @@ import (
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
-func CreateRouter(apiCfg *shared.ApiConfg) *mux.Router {
+func CreateRouter(apiCfg *shared.ApiConfig) *mux.Router {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in f", r)

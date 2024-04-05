@@ -5,7 +5,7 @@ import (
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
-func Router(apiCfg *shared.ApiConfg, router *mux.Router) *mux.Router {
+func Router(apiCfg *shared.ApiConfig, router *mux.Router) *mux.Router {
 	r := router.PathPrefix("/playlist").Subrouter()
 
 	r.HandleFunc("", shared.AuthMW(handleCreatePlaylist(apiCfg))).Methods("POST")

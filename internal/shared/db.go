@@ -14,7 +14,7 @@ type DBOverrideOptions struct {
 
 func RunDbTransaction[T interface{}](
 	ctx context.Context,
-	apiCfg *ApiConfg,
+	apiCfg *ApiConfig,
 	f func(queries *database.Queries) (T, error),
 ) (T, error) {
 	tx, err := apiCfg.SqlDB.BeginTx(ctx, nil)
@@ -36,4 +36,8 @@ func RunDbTransaction[T interface{}](
 	}
 
 	return result, nil
+}
+
+func IsDBErrorNotFound(err error) bool {
+	return err.Error() == "sql: no rows in result set"
 }

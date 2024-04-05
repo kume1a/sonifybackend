@@ -1,6 +1,7 @@
 package spotify
 
 import (
+	"database/sql"
 	"log"
 	"net/http"
 	"time"
@@ -83,7 +84,7 @@ func handleAuthorizeSpotify(w http.ResponseWriter, r *http.Request) {
 	shared.ResOK(w, dto)
 }
 
-func handleImportSpotifyUserPlaylists(apiCfg *shared.ApiConfg) http.HandlerFunc {
+func handleImportSpotifyUserPlaylists(apiCfg *shared.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authPayload, err := shared.GetAuthPayload(r)
 		if err != nil {
@@ -103,10 +104,13 @@ func handleImportSpotifyUserPlaylists(apiCfg *shared.ApiConfg) http.HandlerFunc 
 			return
 		}
 
-		usersync.UpdateUserSyncDatumByUserId(r.Context(), apiCfg.DB, database.UpdateUserSyncDatumByUserIdParams{
+		if _, httpErr := usersync.UpdateUserSyncDatumByUserId(r.Context(), apiCfg.DB, database.UpdateUserSyncDatumByUserIdParams{
 			UserID:              authPayload.UserId,
-			SpotifyLastSyncedAt: time.Now(),
-		})
+			SpotifyLastSyncedAt: sql.NullTime{Time: time.Now().UTC(), Valid: true},
+		}); httpErr != nil {
+			shared.ResHttpError(w, *httpErr)
+			return
+		}
 
 		shared.ResNoContent(w)
 	}

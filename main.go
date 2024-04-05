@@ -30,7 +30,7 @@ func main() {
 		return
 	}
 
-	apiCfg := shared.ApiConfg{
+	apiCfg := shared.ApiConfig{
 		DB:    database.New(conn),
 		SqlDB: conn,
 	}

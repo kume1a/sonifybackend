@@ -25,7 +25,7 @@ type GoogleClaims struct {
 	jwt.StandardClaims
 }
 
-func AuthWithGoogle(apiCfg shared.ApiConfg, ctx context.Context, token string) (*tokenPayloadDTO, *shared.HttpError) {
+func AuthWithGoogle(apiCfg shared.ApiConfig, ctx context.Context, token string) (*tokenPayloadDTO, *shared.HttpError) {
 	claims, err := validateGoogleJWT(token)
 	if err != nil {
 		return nil, shared.HttpErrUnauthorized(shared.ErrInvalidGoogleToken)

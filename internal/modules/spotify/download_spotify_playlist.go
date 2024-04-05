@@ -21,7 +21,7 @@ type playlistItemWithDownloadMeta struct {
 
 func downloadSpotifyPlaylist(
 	ctx context.Context,
-	apiCfg *shared.ApiConfg,
+	apiCfg *shared.ApiConfig,
 	authUserID uuid.UUID,
 	spotifyAccessToken string,
 ) error {
@@ -171,7 +171,7 @@ func downloadSpotifyPlaylist(
 
 func partitionSpotifyPlaylistItems(
 	ctx context.Context,
-	apiCfg *shared.ApiConfg,
+	apiCfg *shared.ApiConfig,
 	spotifyPlaylist *spotifyPlaylistDTO,
 	playlistItems *[]spotifyPlaylistItemDTO,
 	dbPlaylists *[]database.Playlist,
@@ -243,7 +243,7 @@ func partitionSpotifyPlaylistItems(
 
 func getSpotifyIdToAudioIdMap(
 	ctx context.Context,
-	apiCfg *shared.ApiConfg,
+	apiCfg *shared.ApiConfig,
 	audioEntityCreateParams []database.CreateAudioParams,
 	toAttachPlaylistItems []spotifyPlaylistItemDTO,
 ) (map[string]uuid.UUID, error) {

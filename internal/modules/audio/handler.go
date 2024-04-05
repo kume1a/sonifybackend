@@ -10,7 +10,7 @@ import (
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
-func handleDownloadYoutubeAudio(apiCfg *shared.ApiConfg) http.HandlerFunc {
+func handleDownloadYoutubeAudio(apiCfg *shared.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authPayload, err := shared.GetAuthPayload(r)
 		if err != nil {

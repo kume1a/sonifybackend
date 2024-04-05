@@ -5,10 +5,10 @@ import (
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
-func Router(apiCfg *shared.ApiConfg, router *mux.Router) *mux.Router {
+func Router(apiCfg *shared.ApiConfig, router *mux.Router) *mux.Router {
 	r := router.PathPrefix("/usersync").Subrouter()
 
-	r.HandleFunc("/myUserSyncDatum", shared.AuthMW(handleGetUserSyncDatum(apiCfg))).Methods("GET")
+	r.HandleFunc("/myUserSyncDatum", shared.AuthMW(handleGetUserSyncDatumByUserId(apiCfg))).Methods("GET")
 
 	return r
 }

@@ -8,15 +8,15 @@ import (
 	"github.com/kume1a/sonifybackend/internal/database"
 )
 
-func CreateUserSyncData(
+func createUserSyncData(
 	ctx context.Context,
 	db *database.Queries,
-	params database.CreateUserSyncDataParams,
+	params database.CreateUserSyncDatumParams,
 ) (*database.UserSyncDatum, error) {
 	if params.ID == uuid.Nil {
 		params.ID = uuid.New()
 	}
-	entity, err := db.CreateUserSyncData(ctx, params)
+	entity, err := db.CreateUserSyncDatum(ctx, params)
 
 	if err != nil {
 		log.Println("Error creating user: ", err)
@@ -25,7 +25,7 @@ func CreateUserSyncData(
 	return &entity, err
 }
 
-func GetUserSyncDatumByUserId(
+func getUserSyncDatumByUserId(
 	ctx context.Context,
 	db *database.Queries,
 	userId uuid.UUID,
@@ -39,7 +39,7 @@ func GetUserSyncDatumByUserId(
 	return &entity, err
 }
 
-func UpdateUserSyncDatumByUserId(
+func updateUserSyncDatumByUserId(
 	ctx context.Context,
 	db *database.Queries,
 	params database.UpdateUserSyncDatumByUserIdParams,

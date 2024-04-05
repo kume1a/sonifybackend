@@ -6,7 +6,7 @@ import (
 	"github.com/kume1a/sonifybackend/internal/database"
 )
 
-type ApiConfg struct {
+type ApiConfig struct {
 	DB    *database.Queries
 	SqlDB *sql.DB
 }

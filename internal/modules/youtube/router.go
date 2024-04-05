@@ -5,7 +5,7 @@ import (
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
-func Router(apiCfg *shared.ApiConfg, router *mux.Router) *mux.Router {
+func Router(apiCfg *shared.ApiConfig, router *mux.Router) *mux.Router {
 	r := router.PathPrefix("/youtube").Subrouter()
 
 	r.HandleFunc("/musicUrl", shared.AuthMW(handleGetYoutubeMusicUrl)).Methods("GET")

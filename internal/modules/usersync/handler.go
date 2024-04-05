@@ -6,7 +6,7 @@ import (
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
-func handleGetUserSyncDatum(apiCfg *shared.ApiConfg) http.HandlerFunc {
+func handleGetUserSyncDatumByUserId(apiCfg *shared.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tokenPayload, err := shared.GetAuthPayload(r)
 		if err != nil {
@@ -14,9 +14,9 @@ func handleGetUserSyncDatum(apiCfg *shared.ApiConfg) http.HandlerFunc {
 			return
 		}
 
-		syncData, err := GetUserSyncDatumByUserId(r.Context(), apiCfg.DB, tokenPayload.UserId)
-		if err != nil {
-			shared.ResInternalServerErrorDef(w)
+		syncData, httpErr := GetOrCreateUserSyncDatumByUserId(r.Context(), apiCfg.DB, tokenPayload.UserId)
+		if httpErr != nil {
+			shared.ResHttpError(w, *httpErr)
 			return
 		}
 

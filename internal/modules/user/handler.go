@@ -9,7 +9,7 @@ import (
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
-func handleUpdateUser(apiCfg *shared.ApiConfg) http.HandlerFunc {
+func handleUpdateUser(apiCfg *shared.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tokenPayload, err := shared.GetAuthPayload(r)
 		if err != nil {
@@ -38,7 +38,7 @@ func handleUpdateUser(apiCfg *shared.ApiConfg) http.HandlerFunc {
 	}
 }
 
-func handleGetAuthUser(apiCfg *shared.ApiConfg) http.HandlerFunc {
+func handleGetAuthUser(apiCfg *shared.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tokenPayload, err := shared.GetAuthPayload(r)
 		if err != nil {

@@ -7,7 +7,7 @@ import (
 )
 
 type userSyncDatumDTO struct {
-	ID                  uuid.UUID `json:"id"`
-	UserID              uuid.UUID `json:"userId"`
-	SpotifyLastSyncedAt time.Time `json:"spotifyLastSyncedAt"`
+	ID                  *uuid.UUID `json:"id"`
+	UserID              *uuid.UUID `json:"userId"`
+	SpotifyLastSyncedAt *time.Time `json:"spotifyLastSyncedAt"`
 }

@@ -1,4 +1,4 @@
--- name: CreateUserSyncData :one
+-- name: CreateUserSyncDatum :one
 INSERT INTO user_sync_data (
   id,
   user_id, 

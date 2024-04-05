@@ -9,7 +9,7 @@ import (
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
-func AuthWithEmail(apiCfg shared.ApiConfg, ctx context.Context, email string, password string) (*tokenPayloadDTO, *shared.HttpError) {
+func AuthWithEmail(apiCfg shared.ApiConfig, ctx context.Context, email string, password string) (*tokenPayloadDTO, *shared.HttpError) {
 	userExistsByEmail, err := user.UserExistsByEmail(ctx, apiCfg.DB, email)
 	if err != nil {
 		return nil, shared.HttpErrInternalServerErrorDef()
@@ -35,7 +35,7 @@ func AuthWithEmail(apiCfg shared.ApiConfg, ctx context.Context, email string, pa
 	return tokenPayload, nil
 }
 
-func signInWithEmail(apiCfg shared.ApiConfg, ctx context.Context, email string, password string) (*database.User, *shared.HttpError) {
+func signInWithEmail(apiCfg shared.ApiConfig, ctx context.Context, email string, password string) (*database.User, *shared.HttpError) {
 	authUser, err := user.GetUserByEmail(ctx, apiCfg.DB, email)
 
 	if err != nil {
@@ -53,7 +53,7 @@ func signInWithEmail(apiCfg shared.ApiConfg, ctx context.Context, email string, 
 	return authUser, nil
 }
 
-func signUpWithEmail(apiCfg shared.ApiConfg, ctx context.Context, email string, password string) (*database.User, *shared.HttpError) {
+func signUpWithEmail(apiCfg shared.ApiConfig, ctx context.Context, email string, password string) (*database.User, *shared.HttpError) {
 	passwordHash, err := HashPassword(password)
 	if err != nil {
 		return nil, shared.HttpErrInternalServerErrorDef()

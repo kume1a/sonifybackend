@@ -7,12 +7,12 @@ package database
 
 import (
 	"context"
-	"time"
+	"database/sql"
 
 	"github.com/google/uuid"
 )
 
-const createUserSyncData = `-- name: CreateUserSyncData :one
+const createUserSyncDatum = `-- name: CreateUserSyncDatum :one
 INSERT INTO user_sync_data (
   id,
   user_id, 
@@ -21,14 +21,14 @@ INSERT INTO user_sync_data (
 RETURNING id, user_id, spotify_last_synced_at
 `
 
-type CreateUserSyncDataParams struct {
+type CreateUserSyncDatumParams struct {
 	ID                  uuid.UUID
 	UserID              uuid.UUID
-	SpotifyLastSyncedAt time.Time
+	SpotifyLastSyncedAt sql.NullTime
 }
 
-func (q *Queries) CreateUserSyncData(ctx context.Context, arg CreateUserSyncDataParams) (UserSyncDatum, error) {
-	row := q.db.QueryRowContext(ctx, createUserSyncData, arg.ID, arg.UserID, arg.SpotifyLastSyncedAt)
+func (q *Queries) CreateUserSyncDatum(ctx context.Context, arg CreateUserSyncDatumParams) (UserSyncDatum, error) {
+	row := q.db.QueryRowContext(ctx, createUserSyncDatum, arg.ID, arg.UserID, arg.SpotifyLastSyncedAt)
 	var i UserSyncDatum
 	err := row.Scan(&i.ID, &i.UserID, &i.SpotifyLastSyncedAt)
 	return i, err
@@ -53,7 +53,7 @@ UPDATE user_sync_data
 `
 
 type UpdateUserSyncDatumByUserIdParams struct {
-	SpotifyLastSyncedAt time.Time
+	SpotifyLastSyncedAt sql.NullTime
 	UserID              uuid.UUID
 }
 

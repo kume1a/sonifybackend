@@ -8,7 +8,7 @@ import (
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
-func handleCreatePlaylist(apiCfg *shared.ApiConfg) http.HandlerFunc {
+func handleCreatePlaylist(apiCfg *shared.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		body, httpErr := ValidateCreatePlaylistDto(w, r)
 		if httpErr != nil {
@@ -31,7 +31,7 @@ func handleCreatePlaylist(apiCfg *shared.ApiConfg) http.HandlerFunc {
 	}
 }
 
-func handleGetPlaylists(apiCfg *shared.ApiConfg) http.HandlerFunc {
+func handleGetPlaylists(apiCfg *shared.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		query, err := shared.ValidateRequestQuery[*shared.LastCreatedAtPageParamsDto](r)
 		if err != nil {
@@ -51,7 +51,7 @@ func handleGetPlaylists(apiCfg *shared.ApiConfg) http.HandlerFunc {
 	}
 }
 
-func handleCreatePlaylistAudio(apiCfg *shared.ApiConfg) http.HandlerFunc {
+func handleCreatePlaylistAudio(apiCfg *shared.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		body, err := shared.ValidateRequestBody[*createPlaylistAudioDto](r)
 		if err != nil {
@@ -74,7 +74,7 @@ func handleCreatePlaylistAudio(apiCfg *shared.ApiConfg) http.HandlerFunc {
 	}
 }
 
-func handleGetAuthUserPlaylists(apiCfg *shared.ApiConfg) http.HandlerFunc {
+func handleGetAuthUserPlaylists(apiCfg *shared.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authPayload, err := shared.GetAuthPayload(r)
 		if err != nil {
