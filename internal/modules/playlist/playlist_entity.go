@@ -49,8 +49,8 @@ func GetPlaylists(ctx context.Context, db *database.Queries, lastCreatedAt time.
 	return playlists, err
 }
 
-func GetPlaylistAudios(ctx context.Context, db *database.Queries, playlistID uuid.UUID) ([]database.GetPlaylistAudiosRow, error) {
-	audios, err := db.GetPlaylistAudios(ctx, database.GetPlaylistAudiosParams{
+func GetPlaylistAudioJoins(ctx context.Context, db *database.Queries, playlistID uuid.UUID) ([]database.GetPlaylistAudioJoinsRow, error) {
+	audios, err := db.GetPlaylistAudioJoins(ctx, database.GetPlaylistAudioJoinsParams{
 		PlaylistID: playlistID,
 	})
 
@@ -117,4 +117,28 @@ func GetUserPlaylists(
 	}
 
 	return playlists, err
+}
+
+func getPlaylistAudios(ctx context.Context, db *database.Queries, playlistID uuid.UUID) ([]database.Audio, error) {
+	audios, err := db.GetPlaylistAudios(ctx, playlistID)
+
+	if err != nil {
+		log.Println("Error getting playlist audios:", err)
+	}
+
+	return audios, err
+}
+
+func getPlaylistById(
+	ctx context.Context,
+	db *database.Queries,
+	playlistID uuid.UUID,
+) (*database.Playlist, error) {
+	playlist, err := db.GetPlaylistById(ctx, playlistID)
+
+	if err != nil {
+		log.Println("Error getting playlist by id:", err)
+	}
+
+	return &playlist, err
 }

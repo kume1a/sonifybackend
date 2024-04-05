@@ -20,4 +20,5 @@ const (
 	ErrFailedToGetSpotifyAccessToken = "FAILED_TO_GET_SPOTIFY_ACCESS_TOKEN"
 	ErrFailedToGetSpotifyPlaylists   = "FAILED_TO_GET_SPOTIFY_PLAYLISTS"
 	ErrUserSyncDatumNotFound         = "USER_SYNC_DATUM_NOT_FOUND"
+	ErrPlaylistNotFound              = "PLAYLIST_NOT_FOUND"
 )

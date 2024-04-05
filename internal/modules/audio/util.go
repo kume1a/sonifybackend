@@ -10,7 +10,7 @@ func (dto downloadYoutubeAudioDto) Validate() error {
 	return err
 }
 
-func audioEntityToDto(e *database.Audio) *AudioDto {
+func AudioEntityToDto(e database.Audio) *AudioDto {
 	return &AudioDto{
 		ID:             e.ID,
 		CreatedAt:      e.CreatedAt,
@@ -26,7 +26,7 @@ func audioEntityToDto(e *database.Audio) *AudioDto {
 	}
 }
 
-func userAudioEntityToDto(e *database.UserAudio) *UserAudioDto {
+func UserAudioEntityToDto(e *database.UserAudio) *UserAudioDto {
 	return &UserAudioDto{
 		UserId:  e.UserID,
 		AudioId: e.AudioID,

@@ -76,8 +76,8 @@ func handleDownloadYoutubeAudio(apiCfg *shared.ApiConfig) http.HandlerFunc {
 			*UserAudioDto
 			Audio *AudioDto `json:"audio"`
 		}{
-			UserAudioDto: userAudioEntityToDto(userAudio),
-			Audio:        audioEntityToDto(newAudio),
+			UserAudioDto: UserAudioEntityToDto(userAudio),
+			Audio:        AudioEntityToDto(*newAudio),
 		}
 
 		shared.ResCreated(w, res)

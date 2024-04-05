@@ -118,6 +118,76 @@ func (q *Queries) DeletePlaylistById(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
+const getPlaylistAudioJoins = `-- name: GetPlaylistAudioJoins :many
+SELECT playlist_id, audio_id, playlist_audios.created_at, id, title, author, duration_ms, path, audio.created_at, size_bytes, youtube_video_id, thumbnail_path, spotify_id, thumbnail_url FROM playlist_audios
+  INNER JOIN audio ON playlist_audios.audio_id = audio.id
+WHERE (playlist_id = $1 or $1 IS NULL) 
+  AND playlist_audios.created_at > $2
+ORDER BY playlist_audios.created_at DESC
+  LIMIT $3
+`
+
+type GetPlaylistAudioJoinsParams struct {
+	PlaylistID uuid.UUID
+	CreatedAt  time.Time
+	Limit      int32
+}
+
+type GetPlaylistAudioJoinsRow struct {
+	PlaylistID     uuid.UUID
+	AudioID        uuid.UUID
+	CreatedAt      time.Time
+	ID             uuid.UUID
+	Title          sql.NullString
+	Author         sql.NullString
+	DurationMs     sql.NullInt32
+	Path           sql.NullString
+	CreatedAt_2    time.Time
+	SizeBytes      sql.NullInt64
+	YoutubeVideoID sql.NullString
+	ThumbnailPath  sql.NullString
+	SpotifyID      sql.NullString
+	ThumbnailUrl   sql.NullString
+}
+
+func (q *Queries) GetPlaylistAudioJoins(ctx context.Context, arg GetPlaylistAudioJoinsParams) ([]GetPlaylistAudioJoinsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getPlaylistAudioJoins, arg.PlaylistID, arg.CreatedAt, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetPlaylistAudioJoinsRow
+	for rows.Next() {
+		var i GetPlaylistAudioJoinsRow
+		if err := rows.Scan(
+			&i.PlaylistID,
+			&i.AudioID,
+			&i.CreatedAt,
+			&i.ID,
+			&i.Title,
+			&i.Author,
+			&i.DurationMs,
+			&i.Path,
+			&i.CreatedAt_2,
+			&i.SizeBytes,
+			&i.YoutubeVideoID,
+			&i.ThumbnailPath,
+			&i.SpotifyID,
+			&i.ThumbnailUrl,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getPlaylistAudioJoinsBySpotifyIds = `-- name: GetPlaylistAudioJoinsBySpotifyIds :many
 SELECT 
   playlist_audios.playlist_id, playlist_audios.audio_id, playlist_audios.created_at,
@@ -168,56 +238,28 @@ func (q *Queries) GetPlaylistAudioJoinsBySpotifyIds(ctx context.Context, arg Get
 }
 
 const getPlaylistAudios = `-- name: GetPlaylistAudios :many
-SELECT playlist_id, audio_id, playlist_audios.created_at, id, title, author, duration_ms, path, audio.created_at, size_bytes, youtube_video_id, thumbnail_path, spotify_id, thumbnail_url FROM playlist_audios
+SELECT audio.id, audio.title, audio.author, audio.duration_ms, audio.path, audio.created_at, audio.size_bytes, audio.youtube_video_id, audio.thumbnail_path, audio.spotify_id, audio.thumbnail_url 
+  FROM playlist_audios 
   INNER JOIN audio ON playlist_audios.audio_id = audio.id
-WHERE (playlist_id = $1 or $1 IS NULL) 
-  AND playlist_audios.created_at > $2
-ORDER BY playlist_audios.created_at DESC
-  LIMIT $3
+  WHERE playlist_audios.playlist_id = $1
 `
 
-type GetPlaylistAudiosParams struct {
-	PlaylistID uuid.UUID
-	CreatedAt  time.Time
-	Limit      int32
-}
-
-type GetPlaylistAudiosRow struct {
-	PlaylistID     uuid.UUID
-	AudioID        uuid.UUID
-	CreatedAt      time.Time
-	ID             uuid.UUID
-	Title          sql.NullString
-	Author         sql.NullString
-	DurationMs     sql.NullInt32
-	Path           sql.NullString
-	CreatedAt_2    time.Time
-	SizeBytes      sql.NullInt64
-	YoutubeVideoID sql.NullString
-	ThumbnailPath  sql.NullString
-	SpotifyID      sql.NullString
-	ThumbnailUrl   sql.NullString
-}
-
-func (q *Queries) GetPlaylistAudios(ctx context.Context, arg GetPlaylistAudiosParams) ([]GetPlaylistAudiosRow, error) {
-	rows, err := q.db.QueryContext(ctx, getPlaylistAudios, arg.PlaylistID, arg.CreatedAt, arg.Limit)
+func (q *Queries) GetPlaylistAudios(ctx context.Context, playlistID uuid.UUID) ([]Audio, error) {
+	rows, err := q.db.QueryContext(ctx, getPlaylistAudios, playlistID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetPlaylistAudiosRow
+	var items []Audio
 	for rows.Next() {
-		var i GetPlaylistAudiosRow
+		var i Audio
 		if err := rows.Scan(
-			&i.PlaylistID,
-			&i.AudioID,
-			&i.CreatedAt,
 			&i.ID,
 			&i.Title,
 			&i.Author,
 			&i.DurationMs,
 			&i.Path,
-			&i.CreatedAt_2,
+			&i.CreatedAt,
 			&i.SizeBytes,
 			&i.YoutubeVideoID,
 			&i.ThumbnailPath,

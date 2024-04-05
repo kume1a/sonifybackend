@@ -8,12 +8,12 @@ import (
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
-func (dto *createPlaylistAudioDto) Validate() error {
+func (dto *createPlaylistAudioDTO) Validate() error {
 	_, err := govalidator.ValidateStruct(dto)
 	return err
 }
 
-func ValidateCreatePlaylistDto(w http.ResponseWriter, r *http.Request) (*createPlaylistDto, *shared.HttpError) {
+func ValidateCreatePlaylistDto(w http.ResponseWriter, r *http.Request) (*createPlaylistDTO, *shared.HttpError) {
 	thumbnailPath, err := shared.HandleUploadFile(
 		w, r,
 		"thumbnail",
@@ -30,14 +30,14 @@ func ValidateCreatePlaylistDto(w http.ResponseWriter, r *http.Request) (*createP
 		return nil, shared.HttpErrBadRequest("Name must be between 1 and 255 characters")
 	}
 
-	return &createPlaylistDto{
+	return &createPlaylistDTO{
 		Name:          name,
 		ThumbnailPath: thumbnailPath,
 	}, nil
 }
 
-func playlistEntityToDto(e database.Playlist) playlistDto {
-	return playlistDto{
+func playlistEntityToDto(e database.Playlist) playlistDTO {
+	return playlistDTO{
 		ID:            e.ID,
 		CreatedAt:     e.CreatedAt,
 		Name:          e.Name,
@@ -47,8 +47,8 @@ func playlistEntityToDto(e database.Playlist) playlistDto {
 	}
 }
 
-func playlistAudioEntityToDto(e *database.PlaylistAudio) playlistAudioDto {
-	return playlistAudioDto{
+func playlistAudioEntityToDto(e *database.PlaylistAudio) playlistAudioDTO {
+	return playlistAudioDTO{
 		PlaylistID: e.PlaylistID,
 		AudioID:    e.AudioID,
 	}

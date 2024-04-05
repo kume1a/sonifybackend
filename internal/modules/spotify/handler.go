@@ -2,7 +2,6 @@ package spotify
 
 import (
 	"database/sql"
-	"log"
 	"net/http"
 	"time"
 
@@ -92,14 +91,13 @@ func handleImportSpotifyUserPlaylists(apiCfg *shared.ApiConfig) http.HandlerFunc
 			return
 		}
 
-		body, err := shared.ValidateRequestQuery[*spotifyAccessTokenDTO](r)
+		query, err := shared.ValidateRequestQuery[*spotifyAccessTokenDTO](r)
 		if err != nil {
-			log.Println("error validating request query: ", err)
 			shared.ResBadRequest(w, err.Error())
 			return
 		}
 
-		if err := downloadSpotifyPlaylist(r.Context(), apiCfg, authPayload.UserId, body.SpotifyAccessToken[0]); err != nil {
+		if err := downloadSpotifyPlaylist(r.Context(), apiCfg, authPayload.UserId, query.SpotifyAccessToken[0]); err != nil {
 			shared.ResInternalServerErrorDef(w)
 			return
 		}

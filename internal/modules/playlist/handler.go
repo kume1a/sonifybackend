@@ -4,7 +4,10 @@ import (
 	"database/sql"
 	"net/http"
 
+	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 	"github.com/kume1a/sonifybackend/internal/database"
+	"github.com/kume1a/sonifybackend/internal/modules/audio"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
@@ -53,7 +56,7 @@ func handleGetPlaylists(apiCfg *shared.ApiConfig) http.HandlerFunc {
 
 func handleCreatePlaylistAudio(apiCfg *shared.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		body, err := shared.ValidateRequestBody[*createPlaylistAudioDto](r)
+		body, err := shared.ValidateRequestBody[*createPlaylistAudioDTO](r)
 		if err != nil {
 			shared.ResBadRequest(w, err.Error())
 			return
@@ -91,5 +94,39 @@ func handleGetAuthUserPlaylists(apiCfg *shared.ApiConfig) http.HandlerFunc {
 		dtos := shared.Map(playlists, playlistEntityToDto)
 
 		shared.ResOK(w, dtos)
+	}
+}
+
+func handleGetPlaylistWithAudios(apiCfg *shared.ApiConfig) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+
+		playlistID, ok := vars["playlistID"]
+		if !ok {
+			shared.ResBadRequest(w, "playlistID is required")
+			return
+		}
+
+		playlistIDUUID, err := uuid.Parse(playlistID)
+		if err != nil {
+			shared.ResBadRequest(w, "playlistId is not a valid UUID")
+			return
+		}
+
+		playlist, audios, httpErr := GetPlaylistWithAudios(r.Context(), apiCfg.DB, playlistIDUUID)
+		if httpErr != nil {
+			shared.ResHttpError(w, *httpErr)
+			return
+		}
+
+		dto := struct {
+			playlistDTO
+			Audios []*audio.AudioDto `json:"audios"`
+		}{
+			playlistDTO: playlistEntityToDto(*playlist),
+			Audios:      shared.Map(audios, audio.AudioEntityToDto),
+		}
+
+		shared.ResOK(w, dto)
 	}
 }

@@ -33,7 +33,7 @@ INSERT INTO playlist_audios(
   audio_id
 ) VALUES ($1,$2) RETURNING *;
 
--- name: GetPlaylistAudios :many
+-- name: GetPlaylistAudioJoins :many
 SELECT * FROM playlist_audios
   INNER JOIN audio ON playlist_audios.audio_id = audio.id
 WHERE (playlist_id = $1 or $1 IS NULL) 
@@ -73,3 +73,9 @@ SELECT
 FROM user_playlists
 INNER JOIN playlists ON user_playlists.playlist_id = playlists.id
 WHERE user_playlists.user_id = $1;
+
+-- name: GetPlaylistAudios :many
+SELECT audio.* 
+  FROM playlist_audios 
+  INNER JOIN audio ON playlist_audios.audio_id = audio.id
+  WHERE playlist_audios.playlist_id = $1;
