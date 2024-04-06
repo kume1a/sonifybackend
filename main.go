@@ -13,6 +13,8 @@ import (
 	_ "github.com/lib/pq"
 )
 
+// check lib for http: https://github.com/levigross/grequests?utm_campaign=awesomego&utm_medium=referral&utm_source=awesomego
+
 func main() {
 	shared.LoadEnv()
 

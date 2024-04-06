@@ -1,9 +1,8 @@
 package spotify
 
 import (
-	"encoding/base64"
 	"encoding/json"
-	"fmt"
+	"errors"
 	"io"
 	"log"
 	"net/http"
@@ -80,9 +79,10 @@ func GetAuthorizationCodeSpotifyTokenPayload(code string) (*spotifyAuthCodeToken
 		return nil, err
 	}
 
-	basicAuth := "Basic " + base64.StdEncoding.EncodeToString(
-		[]byte(env.SpotifyClientID+":"+env.SpotifyClientSecret),
-	)
+	basicAuth, err := getSpotifyBasicAuthHeader()
+	if err != nil {
+		return nil, err
+	}
 
 	data := url.Values{
 		"grant_type":   {"authorization_code"},
@@ -112,8 +112,8 @@ func GetAuthorizationCodeSpotifyTokenPayload(code string) (*spotifyAuthCodeToken
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		log.Println("status code: ", resp.StatusCode, " body: ", string(body))
-		return nil, fmt.Errorf("status code: %d", resp.StatusCode)
+		log.Println("error getting auth code: ", resp.StatusCode, string(body))
+		return nil, errors.New("error getting auth code")
 	}
 
 	dto := spotifyAuthCodeTokenDTO{}
@@ -122,6 +122,27 @@ func GetAuthorizationCodeSpotifyTokenPayload(code string) (*spotifyAuthCodeToken
 	}
 
 	return &dto, nil
+}
+
+func RefreshSpotifyToken(refreshToken string) (*spotifyRefreshTokenDTO, error) {
+	basicAuthHeader, err := getSpotifyBasicAuthHeader()
+	if err != nil {
+		return nil, err
+	}
+
+	return shared.XWWWFormUrlencoded[spotifyRefreshTokenDTO](
+		shared.XWWWFormUrlencodedParams{
+			URL: "https://accounts.spotify.com/api/token",
+			Form: url.Values{
+				"grant_type":    {"refresh_token"},
+				"refresh_token": {refreshToken},
+			},
+			Headers: map[string]string{
+				"Authorization": basicAuthHeader,
+				"Content-Type":  "application/x-www-form-urlencoded",
+			},
+		},
+	)
 }
 
 func getSpotifyEndpoint[DTO interface{}](endpoint, accessToken string, queryParams url.Values) (*DTO, error) {

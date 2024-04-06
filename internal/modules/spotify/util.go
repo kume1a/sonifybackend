@@ -1,6 +1,11 @@
 package spotify
 
-import "github.com/asaskevich/govalidator"
+import (
+	"encoding/base64"
+
+	"github.com/asaskevich/govalidator"
+	"github.com/kume1a/sonifybackend/internal/shared"
+)
 
 func (dto *downloadSpotifyPlaylistDTO) Validate() error {
 	_, err := govalidator.ValidateStruct(dto)
@@ -13,6 +18,11 @@ func (dto *authorizeSpotifyDTO) Validate() error {
 }
 
 func (dto *spotifyAccessTokenDTO) Validate() error {
+	_, err := govalidator.ValidateStruct(dto)
+	return err
+}
+
+func (dto *refreshSpotifyTokenDTO) Validate() error {
 	_, err := govalidator.ValidateStruct(dto)
 	return err
 }
@@ -45,4 +55,15 @@ func spotifyPlaylistDtoToModel(dto *spotifyPlaylistDTO) *spotifyPlaylist {
 	}
 
 	return model
+}
+
+func getSpotifyBasicAuthHeader() (string, error) {
+	env, err := shared.ParseEnv()
+	if err != nil {
+		return "", err
+	}
+
+	return "Basic " + base64.StdEncoding.EncodeToString(
+		[]byte(env.SpotifyClientID+":"+env.SpotifyClientSecret),
+	), nil
 }

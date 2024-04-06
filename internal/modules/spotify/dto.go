@@ -4,6 +4,10 @@ type spotifyAccessTokenDTO struct {
 	SpotifyAccessToken []string `json:"spotifyAccessToken" valid:"required"`
 }
 
+type refreshSpotifyTokenDTO struct {
+	SpotifyRefreshToken string `json:"spotifyRefreshToken" valid:"required"`
+}
+
 type downloadSpotifyPlaylistDTO struct {
 	SpotifyAccessToken string `json:"spotifyAccessToken" valid:"required"`
 	PlaylistID         string `json:"playlistId" valid:"required"`
@@ -13,12 +17,19 @@ type authorizeSpotifyDTO struct {
 	Code string `json:"code" valid:"required"`
 }
 
-type spotifyTokenPayloadDTO struct {
+type spotifyAuthCodeTokenPayloadDTO struct {
 	AccessToken  string `json:"accessToken"`
 	RefreshToken string `json:"refreshToken"`
 	Scope        string `json:"scope"`
 	ExpiresIn    int    `json:"expiresIn"`
 	TokenType    string `json:"tokenType"`
+}
+
+type spotifyRefreshTokenPayloadDTO struct {
+	AccessToken string `json:"accessToken"`
+	Scope       string `json:"scope"`
+	ExpiresIn   int    `json:"expiresIn"`
+	TokenType   string `json:"tokenType"`
 }
 
 // --------- Spotify API DTOs ---------
@@ -34,6 +45,11 @@ type spotifyAuthCodeTokenDTO struct {
 	RefreshToken string `json:"refresh_token"`
 	Scope        string `json:"scope"`
 	TokenType    string `json:"token_type"`
+}
+
+type spotifyRefreshTokenDTO struct {
+	spotifyClientCredsTokenDTO
+	Scope string `json:"scope"`
 }
 
 type spotifyPlaylistDTO struct {

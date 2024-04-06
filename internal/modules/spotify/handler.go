@@ -72,12 +72,35 @@ func handleAuthorizeSpotify(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dto := spotifyTokenPayloadDTO{
+	dto := spotifyAuthCodeTokenPayloadDTO{
 		AccessToken:  tokenPayload.AccessToken,
 		RefreshToken: tokenPayload.RefreshToken,
 		Scope:        tokenPayload.Scope,
 		ExpiresIn:    tokenPayload.ExpiresIn,
 		TokenType:    tokenPayload.TokenType,
+	}
+
+	shared.ResOK(w, dto)
+}
+
+func handleSpotifyRefreshToken(w http.ResponseWriter, r *http.Request) {
+	body, err := shared.ValidateRequestBody[*refreshSpotifyTokenDTO](r)
+	if err != nil {
+		shared.ResBadRequest(w, err.Error())
+		return
+	}
+
+	tokenPayload, err := RefreshSpotifyToken(body.SpotifyRefreshToken)
+	if err != nil {
+		shared.ResInternalServerError(w, shared.ErrFailedToGetSpotifyAccessToken)
+		return
+	}
+
+	dto := spotifyRefreshTokenPayloadDTO{
+		AccessToken: tokenPayload.AccessToken,
+		Scope:       tokenPayload.Scope,
+		ExpiresIn:   tokenPayload.ExpiresIn,
+		TokenType:   tokenPayload.TokenType,
 	}
 
 	shared.ResOK(w, dto)
