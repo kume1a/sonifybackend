@@ -58,7 +58,9 @@ func CreateRouter(apiCfg *shared.ApiConfig) *mux.Router {
 	v1Router.Handle("", usersync.Router(apiCfg, v1Router))
 
 	router.Handle("", v1Router)
-	router.HandleFunc("/", HandlerHealthcheck).Methods("GET")
+
+	router.HandleFunc("/", handleHealthcheck).Methods("GET")
+	router.HandleFunc("/serverTime", handleGetServerTime).Methods("GET")
 
 	return router
 }
