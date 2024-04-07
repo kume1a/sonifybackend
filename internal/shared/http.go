@@ -1,7 +1,6 @@
 package shared
 
 import (
-	"encoding/json"
 	"io"
 	"log"
 	"net/http"
@@ -15,10 +14,14 @@ type XWWWFormUrlencodedParams struct {
 	Headers map[string]string
 }
 
-func XWWWFormUrlencoded[RESPONSE interface{}](params XWWWFormUrlencodedParams) (*RESPONSE, error) {
+func XWWWFormUrlencoded(params XWWWFormUrlencodedParams) (
+	httpResp *http.Response,
+	respBody string,
+	err error,
+) {
 	req, err := http.NewRequest("POST", params.URL, strings.NewReader(params.Form.Encode()))
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	for key, value := range params.Headers {
@@ -28,7 +31,7 @@ func XWWWFormUrlencoded[RESPONSE interface{}](params XWWWFormUrlencodedParams) (
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		log.Println("error sending request: ", err)
-		return nil, err
+		return nil, "", err
 	}
 
 	defer resp.Body.Close()
@@ -36,14 +39,8 @@ func XWWWFormUrlencoded[RESPONSE interface{}](params XWWWFormUrlencodedParams) (
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Println("error reading response body: ", err)
-		return nil, err
+		return nil, "", err
 	}
 
-	var dto RESPONSE
-	if err := json.Unmarshal(body, &dto); err != nil {
-		log.Println("error unmarshalling response body: ", err)
-		return nil, err
-	}
-
-	return &dto, nil
+	return resp, string(body), nil
 }

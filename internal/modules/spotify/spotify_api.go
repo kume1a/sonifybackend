@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"strings"
 
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
@@ -47,30 +46,31 @@ func GetGeneralSpotifyAccessToken() (*spotifyClientCredsTokenDTO, error) {
 		return nil, err
 	}
 
-	resp, err := http.PostForm("https://api.spotify.com/v1/token", url.Values{
-		"grant_type":    {"client_credentials"},
-		"client_id":     {env.SpotifyClientID},
-		"client_secret": {env.SpotifyClientSecret},
-	})
+	resp, respBody, err := shared.XWWWFormUrlencoded(
+		shared.XWWWFormUrlencodedParams{
+			URL: "https://accounts.spotify.com/api/token",
+			Form: url.Values{
+				"grant_type":    {"client_credentials"},
+				"client_id":     {env.SpotifyClientID},
+				"client_secret": {env.SpotifyClientSecret},
+			},
+			Headers: map[string]string{
+				"Content-Type": "application/x-www-form-urlencoded",
+			},
+		},
+	)
 
-	if err != nil {
-		log.Println("error sending request: ", err)
-		return nil, err
-	}
-
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
+	if resp.StatusCode != http.StatusOK {
+		log.Println("error getting general spotify access token: ", resp.StatusCode, ", body = ", respBody)
+		return nil, errors.New("error getting general spotify access token")
 	}
 
 	dto := spotifyClientCredsTokenDTO{}
-	if err := json.Unmarshal(body, &dto); err != nil {
+	if err := json.Unmarshal([]byte(respBody), &dto); err != nil {
 		return nil, err
 	}
 
-	return &dto, nil
+	return &dto, err
 }
 
 func GetAuthorizationCodeSpotifyTokenPayload(code string) (*spotifyAuthCodeTokenDTO, error) {
@@ -84,44 +84,32 @@ func GetAuthorizationCodeSpotifyTokenPayload(code string) (*spotifyAuthCodeToken
 		return nil, err
 	}
 
-	data := url.Values{
-		"grant_type":   {"authorization_code"},
-		"code":         {code},
-		"redirect_uri": {env.SpotifyRedirectURI},
-	}
-
-	req, err := http.NewRequest("POST", "https://accounts.spotify.com/api/token", strings.NewReader(data.Encode()))
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Set("Authorization", basicAuth)
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		log.Println("error sending request: ", err)
-		return nil, err
-	}
-
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
+	resp, respBody, err := shared.XWWWFormUrlencoded(
+		shared.XWWWFormUrlencodedParams{
+			URL: "https://accounts.spotify.com/api/token",
+			Form: url.Values{
+				"grant_type":   {"authorization_code"},
+				"code":         {code},
+				"redirect_uri": {env.SpotifyRedirectURI},
+			},
+			Headers: map[string]string{
+				"Content-Type":  "application/x-www-form-urlencoded",
+				"Authorization": basicAuth,
+			},
+		},
+	)
 
 	if resp.StatusCode != http.StatusOK {
-		log.Println("error getting auth code: ", resp.StatusCode, string(body))
+		log.Println("error getting auth code: ", resp.StatusCode, ", body = ", respBody)
 		return nil, errors.New("error getting auth code")
 	}
 
 	dto := spotifyAuthCodeTokenDTO{}
-	if err := json.Unmarshal(body, &dto); err != nil {
+	if err := json.Unmarshal([]byte(respBody), &dto); err != nil {
 		return nil, err
 	}
 
-	return &dto, nil
+	return &dto, err
 }
 
 func RefreshSpotifyToken(refreshToken string) (*spotifyRefreshTokenDTO, error) {
@@ -130,7 +118,7 @@ func RefreshSpotifyToken(refreshToken string) (*spotifyRefreshTokenDTO, error) {
 		return nil, err
 	}
 
-	return shared.XWWWFormUrlencoded[spotifyRefreshTokenDTO](
+	resp, respBody, err := shared.XWWWFormUrlencoded(
 		shared.XWWWFormUrlencodedParams{
 			URL: "https://accounts.spotify.com/api/token",
 			Form: url.Values{
@@ -143,6 +131,18 @@ func RefreshSpotifyToken(refreshToken string) (*spotifyRefreshTokenDTO, error) {
 			},
 		},
 	)
+
+	if resp.StatusCode != http.StatusOK {
+		log.Println("error refreshing spotify token: ", resp.StatusCode, ", body = ", respBody)
+		return nil, errors.New("error refreshing spotify token")
+	}
+
+	dto := spotifyRefreshTokenDTO{}
+	if err := json.Unmarshal([]byte(respBody), &dto); err != nil {
+		return nil, err
+	}
+
+	return &dto, err
 }
 
 func getSpotifyEndpoint[DTO interface{}](endpoint, accessToken string, queryParams url.Values) (*DTO, error) {
