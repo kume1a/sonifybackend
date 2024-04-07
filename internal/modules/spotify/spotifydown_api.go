@@ -46,7 +46,7 @@ func GetSpotifyAudioDownloadMeta(trackID string) (*downloadSpotifyTrackMetaDTO, 
 	dto := downloadSpotifyTrackMetaDTO{}
 	err = json.Unmarshal(body, &dto)
 	if err != nil {
-		log.Println("error unmarshalling response: ", err)
+		log.Println("error unmarshalling response: ", err, ", body: ", string(body))
 		return nil, err
 	}
 

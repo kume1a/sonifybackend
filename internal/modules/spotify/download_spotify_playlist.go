@@ -300,7 +300,6 @@ func downloadSpotifyPlaylistItems(playlistItems []spotifyPlaylistItemDTO) (
 		func(playlistItem spotifyPlaylistItemDTO) (playlistItemWithDownloadMeta, error) {
 			downloadMeta, err := GetSpotifyAudioDownloadMeta(playlistItem.Track.ID)
 			if err != nil {
-				log.Println("Error getting download meta: ", err)
 				return playlistItemWithDownloadMeta{isEmpty: true}, err
 			}
 
