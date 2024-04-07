@@ -50,5 +50,9 @@ func GetSpotifyAudioDownloadMeta(trackID string) (*downloadSpotifyTrackMetaDTO, 
 		return nil, err
 	}
 
+	if !dto.Success {
+		log.Println("not success download meta for URL ", "https://api.spotifydown.com/download/"+trackID)
+	}
+
 	return &dto, nil
 }

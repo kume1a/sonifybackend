@@ -13,8 +13,8 @@ import (
 )
 
 type playlistItemWithDownloadMeta struct {
-	downloadMeta        *downloadSpotifyTrackMetaDTO
-	playlistItem        *spotifyPlaylistItemDTO
+	isEmpty             bool
+	playlistItem        spotifyPlaylistItemDTO
 	downloadedAudioPath string
 	downloadedAudioSize *shared.FileSize
 }
@@ -45,12 +45,13 @@ func downloadSpotifyPlaylist(
 	deletePlaylistAudioParams := []database.DeletePlaylistAudiosByIdsParams{}
 
 	for _, playlist := range playlists.Items {
+
 		playlistItems, err := GetSpotifyPlaylistItems(spotifyAccessToken, playlist.ID)
 		if err != nil {
 			return err
 		}
 
-		dbPlaylist := shared.FirstOrDefault(dbPlaylists, func(dbPlaylist *database.Playlist) bool {
+		dbPlaylist := shared.FirstOrDefaultP(dbPlaylists, func(dbPlaylist *database.Playlist) bool {
 			if !dbPlaylist.SpotifyID.Valid {
 				return false
 			}
@@ -74,13 +75,25 @@ func downloadSpotifyPlaylist(
 			return err
 		}
 
+		// remove non-downloaded audios from toAttachPlaylistItems
+		toAttachPlaylistItems = shared.Where(toAttachPlaylistItems, func(item spotifyPlaylistItemDTO) bool {
+			return shared.ContainsWhere(
+				trackMetas,
+				func(meta playlistItemWithDownloadMeta) bool {
+					return meta.playlistItem.Track.ID == item.Track.ID
+				},
+			)
+		})
+
+		audioEntityCreateParams := playlistItemWithDownloadMetaToCreateAudioParams(trackMetas)
+		createAudioParams = append(createAudioParams, audioEntityCreateParams...)
+
 		if dbPlaylist == nil {
 			playlistEntityCreateParams := spotifyPlaylistDTOToCreatePlaylistParams(&playlist)
 			userPlaylistEntityCreateParams := database.CreateUserPlaylistParams{
 				PlaylistID: playlistEntityCreateParams.ID,
 				UserID:     authUserID,
 			}
-			audioEntityCreateParams := playlistItemWithDownloadMetaToCreateAudioParams(trackMetas)
 			playlistAudioCreateParams := shared.Map(
 				toAttachPlaylistItems,
 				func(spotifyPlaylistItem spotifyPlaylistItemDTO) database.CreatePlaylistAudioParams {
@@ -93,10 +106,8 @@ func downloadSpotifyPlaylist(
 
 			createPlaylistParams = append(createPlaylistParams, playlistEntityCreateParams)
 			createUserPlaylistParams = append(createUserPlaylistParams, userPlaylistEntityCreateParams)
-			createAudioParams = append(createAudioParams, audioEntityCreateParams...)
 			createPlaylistAudioParams = append(createPlaylistAudioParams, playlistAudioCreateParams...)
 		} else {
-			audioEntityCreateParams := playlistItemWithDownloadMetaToCreateAudioParams(trackMetas)
 			playlistAudioCreateParams := shared.Map(
 				toAttachPlaylistItems,
 				func(spotifyPlaylistItem spotifyPlaylistItemDTO) database.CreatePlaylistAudioParams {
@@ -107,7 +118,6 @@ func downloadSpotifyPlaylist(
 				},
 			)
 
-			createAudioParams = append(createAudioParams, audioEntityCreateParams...)
 			createPlaylistAudioParams = append(createPlaylistAudioParams, playlistAudioCreateParams...)
 
 			if len(toDeletePlaylistItems) > 0 {
@@ -124,39 +134,12 @@ func downloadSpotifyPlaylist(
 		}
 	}
 
-	shared.RunDbTransaction(
+	_, err = shared.RunDbTransaction(
 		ctx,
 		apiCfg,
 		func(queries *database.Queries) (any, error) {
-			for _, params := range deletePlaylistAudioParams {
-				if err := playlist.DeletePlaylistAudiosByIds(ctx, apiCfg.DB, params); err != nil {
-					return nil, err
-				}
-			}
-
-			for _, params := range createPlaylistParams {
-				_, err := playlist.CreatePlaylist(ctx, apiCfg.DB, params)
-				if err != nil {
-					return nil, err
-				}
-			}
-
-			for _, params := range createUserPlaylistParams {
-				_, err := playlist.CreateUserPlaylist(ctx, apiCfg.DB, params)
-				if err != nil {
-					return nil, err
-				}
-			}
-
 			for _, params := range createAudioParams {
-				_, err := audio.CreateAudio(ctx, apiCfg.DB, params)
-				if err != nil {
-					return nil, err
-				}
-			}
-
-			for _, params := range createPlaylistAudioParams {
-				_, err := playlist.CreatePlaylistAudio(ctx, apiCfg.DB, params)
+				_, err := audio.CreateAudio(ctx, queries, params)
 				if err != nil {
 					return nil, err
 				}
@@ -166,7 +149,46 @@ func downloadSpotifyPlaylist(
 		},
 	)
 
-	return nil
+	if err != nil {
+		return err
+	}
+
+	_, err = shared.RunDbTransaction(
+		ctx,
+		apiCfg,
+		func(queries *database.Queries) (any, error) {
+			for _, params := range deletePlaylistAudioParams {
+				if err := playlist.DeletePlaylistAudiosByIds(ctx, queries, params); err != nil {
+					return nil, err
+				}
+			}
+
+			for _, params := range createPlaylistParams {
+				_, err := playlist.CreatePlaylist(ctx, queries, params)
+				if err != nil {
+					return nil, err
+				}
+			}
+
+			for _, params := range createUserPlaylistParams {
+				_, err := playlist.CreateUserPlaylist(ctx, queries, params)
+				if err != nil {
+					return nil, err
+				}
+			}
+
+			for _, params := range createPlaylistAudioParams {
+				_, err := playlist.CreatePlaylistAudio(ctx, queries, params)
+				if err != nil {
+					return nil, err
+				}
+			}
+
+			return nil, nil
+		},
+	)
+
+	return err
 }
 
 func partitionSpotifyPlaylistItems(
@@ -190,16 +212,16 @@ func partitionSpotifyPlaylistItems(
 
 	toDownloadAudios = []spotifyPlaylistItemDTO{}
 	for _, item := range *playlistItems {
-		spotifyIdFromDB := shared.FirstOrDefault(
+		spotifyIdExistsInDB := shared.ContainsWhereP(
 			dbAudioSpotifyIds,
 			func(e *database.GetAudioSpotifyIdsBySpotifyIdsRow) bool { return e.SpotifyID.String == item.Track.ID },
 		)
-		if spotifyIdFromDB == nil {
+		if !spotifyIdExistsInDB {
 			toDownloadAudios = append(toDownloadAudios, item)
 		}
 	}
 
-	dbPlaylist := shared.FirstOrDefault(
+	dbPlaylist := shared.FirstOrDefaultP(
 		*dbPlaylists,
 		func(dbPlaylist *database.Playlist) bool {
 			return !dbPlaylist.SpotifyID.Valid && spotifyPlaylist.ID == dbPlaylist.SpotifyID.String
@@ -268,14 +290,19 @@ func getSpotifyIdToAudioIdMap(
 	return spotifyIdToAudioIds, nil
 }
 
-func downloadSpotifyPlaylistItems(playlistItems []spotifyPlaylistItemDTO) ([]*playlistItemWithDownloadMeta, error) {
-	return shared.ExecuteParallel(
+func downloadSpotifyPlaylistItems(playlistItems []spotifyPlaylistItemDTO) ([]playlistItemWithDownloadMeta, error) {
+	itemsWithDownloadMeta, err := shared.ExecuteParallel(
+		8,
 		playlistItems,
-		func(input *spotifyPlaylistItemDTO) (*playlistItemWithDownloadMeta, error) {
-			downloadMeta, err := GetSpotifyAudioDownloadMeta(input.Track.ID)
+		func(playlistItem spotifyPlaylistItemDTO) (playlistItemWithDownloadMeta, error) {
+			downloadMeta, err := GetSpotifyAudioDownloadMeta(playlistItem.Track.ID)
 			if err != nil {
 				log.Println("Error getting download meta: ", err)
-				return nil, err
+				return playlistItemWithDownloadMeta{isEmpty: true}, err
+			}
+
+			if !downloadMeta.Success {
+				return playlistItemWithDownloadMeta{isEmpty: true}, nil
 			}
 
 			downloadedAudioPath, err := shared.NewPublicFileLocation(shared.PublicFileLocationArgs{
@@ -283,27 +310,34 @@ func downloadSpotifyPlaylistItems(playlistItems []spotifyPlaylistItemDTO) ([]*pl
 				Dir:       shared.DirSpotifyAudios,
 			})
 			if err != nil {
-				return nil, err
+				return playlistItemWithDownloadMeta{isEmpty: true}, err
 			}
 
 			err = shared.DownloadFile(downloadedAudioPath, downloadMeta.Link)
 			if err != nil {
-				return nil, err
+				log.Println("Error downloading file: ", err, " from: ", downloadMeta.Link, " meta = ", downloadMeta)
+				return playlistItemWithDownloadMeta{isEmpty: true}, err
 			}
 
 			audioFileSize, err := shared.GetFileSize(downloadedAudioPath)
 			if err != nil {
-				return nil, err
+				return playlistItemWithDownloadMeta{isEmpty: true}, err
 			}
 
-			return &playlistItemWithDownloadMeta{
-				downloadMeta:        downloadMeta,
-				playlistItem:        input,
+			return playlistItemWithDownloadMeta{
+				isEmpty:             false,
+				playlistItem:        playlistItem,
 				downloadedAudioPath: downloadedAudioPath,
 				downloadedAudioSize: audioFileSize,
 			}, nil
 		},
 	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return shared.Where(itemsWithDownloadMeta, func(item playlistItemWithDownloadMeta) bool { return !item.isEmpty }), nil
 }
 
 func spotifyPlaylistDTOToCreatePlaylistParams(playlist *spotifyPlaylistDTO) database.CreatePlaylistParams {
@@ -321,11 +355,11 @@ func spotifyPlaylistDTOToCreatePlaylistParams(playlist *spotifyPlaylistDTO) data
 }
 
 func playlistItemWithDownloadMetaToCreateAudioParams(
-	playlistItemWithDownloadMetas []*playlistItemWithDownloadMeta,
+	playlistItemWithDownloadMetas []playlistItemWithDownloadMeta,
 ) []database.CreateAudioParams {
 	return shared.Map(
 		playlistItemWithDownloadMetas,
-		func(itemWithDownloadMeta *playlistItemWithDownloadMeta) database.CreateAudioParams {
+		func(itemWithDownloadMeta playlistItemWithDownloadMeta) database.CreateAudioParams {
 			artistName := ""
 			if len(itemWithDownloadMeta.playlistItem.Track.Artists) > 0 {
 				artistName = itemWithDownloadMeta.playlistItem.Track.Artists[0].Name
@@ -336,16 +370,19 @@ func playlistItemWithDownloadMetaToCreateAudioParams(
 				thumbnailUrl = itemWithDownloadMeta.playlistItem.Track.Album.Images[0].URL
 			}
 
-			return database.CreateAudioParams{
+			log.Println("insert track name: ", itemWithDownloadMeta.playlistItem.Track.Name, ", track id: ", itemWithDownloadMeta.playlistItem.Track.ID)
+			a := database.CreateAudioParams{
 				ID:           uuid.New(),
 				Author:       sql.NullString{String: artistName, Valid: true},
 				DurationMs:   sql.NullInt32{Int32: int32(itemWithDownloadMeta.playlistItem.Track.DurationMS), Valid: true},
-				Title:        sql.NullString{String: itemWithDownloadMeta.downloadMeta.Metadata.Title, Valid: true},
+				Title:        sql.NullString{String: itemWithDownloadMeta.playlistItem.Track.Name, Valid: true},
 				SpotifyID:    sql.NullString{String: itemWithDownloadMeta.playlistItem.Track.ID, Valid: true},
 				Path:         sql.NullString{String: itemWithDownloadMeta.downloadedAudioPath, Valid: true},
 				SizeBytes:    sql.NullInt64{Int64: int64(itemWithDownloadMeta.downloadedAudioSize.Bytes), Valid: true},
 				ThumbnailUrl: sql.NullString{String: thumbnailUrl, Valid: true},
 			}
+
+			return a
 		},
 	)
 }

@@ -9,6 +9,26 @@ func Contains[T comparable](elems []T, v T) bool {
 	return false
 }
 
+func ContainsWhere[T any](slice []T, predicate func(T) bool) bool {
+	for i := 0; i < len(slice); i++ {
+		if predicate(slice[i]) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func ContainsWhereP[T any](slice []T, predicate func(*T) bool) bool {
+	for i := 0; i < len(slice); i++ {
+		if predicate(&slice[i]) {
+			return true
+		}
+	}
+
+	return false
+}
+
 func Map[T, U any](ts []T, f func(T) U) []U {
 	us := make([]U, len(ts))
 	for i := range ts {
@@ -32,7 +52,7 @@ func Partition[T any](elems []T, predicate func(T, int, []T) bool) (pass []T, fa
 	return pass, fail
 }
 
-func FirstOrDefault[T any](slice []T, predicate func(*T) bool) (element *T) {
+func FirstOrDefaultP[T any](slice []T, predicate func(*T) bool) (element *T) {
 	for i := 0; i < len(slice); i++ {
 		if predicate(&slice[i]) {
 			return &slice[i]
@@ -42,12 +62,23 @@ func FirstOrDefault[T any](slice []T, predicate func(*T) bool) (element *T) {
 	return nil
 }
 
-func Where[T any](slice []T, predicate func(*T) bool) []*T {
-	ret := make([]*T, 0)
+func FirstOrDefault[T any](slice []T, predicate func(T) bool) (element T) {
+	for i := 0; i < len(slice); i++ {
+		if predicate(slice[i]) {
+			return slice[i]
+		}
+	}
+
+	var zero T
+	return zero
+}
+
+func Where[T any](slice []T, predicate func(T) bool) []T {
+	ret := make([]T, 0)
 
 	for i := 0; i < len(slice); i++ {
-		if predicate(&slice[i]) {
-			ret = append(ret, &slice[i])
+		if predicate(slice[i]) {
+			ret = append(ret, slice[i])
 		}
 	}
 

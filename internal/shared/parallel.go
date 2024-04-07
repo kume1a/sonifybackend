@@ -9,8 +9,6 @@ type result[T interface{}] struct {
 	err  error
 }
 
-const NUM_PARALLEL = 20
-
 func streamInputs[INPUT interface{}](done <-chan struct{}, inputs []INPUT) <-chan INPUT {
 	inputCh := make(chan INPUT)
 	go func() {
@@ -27,8 +25,9 @@ func streamInputs[INPUT interface{}](done <-chan struct{}, inputs []INPUT) <-cha
 }
 
 func ExecuteParallel[DATA interface{}, INPUT interface{}](
+	parallelism int,
 	inputs []INPUT,
-	call func(input *INPUT) (DATA, error),
+	call func(input INPUT) (DATA, error),
 ) ([]DATA, error) {
 	if len(inputs) == 0 {
 		return []DATA{}, nil
@@ -40,15 +39,15 @@ func ExecuteParallel[DATA interface{}, INPUT interface{}](
 	inputCh := streamInputs(done, inputs)
 
 	var wg sync.WaitGroup
-	wg.Add(NUM_PARALLEL)
+	wg.Add(parallelism)
 
 	resultCh := make(chan result[DATA])
 
-	for i := 0; i < NUM_PARALLEL; i++ {
+	for i := 0; i < parallelism; i++ {
 		// spawn N worker goroutines, each is consuming a shared input channel.
 		go func() {
 			for input := range inputCh {
-				data, err := call(&input)
+				data, err := call(input)
 				resultCh <- result[DATA]{data, err}
 			}
 			wg.Done()
