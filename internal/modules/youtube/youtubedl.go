@@ -38,12 +38,7 @@ func DownloadYoutubeAudioWithThumbnail(videoID string) (outputPath string, thumb
 
 	ytURL := "https://www.youtube.com/watch?v=" + videoID
 
-	var cmd *exec.Cmd
-	if shared.IsPlatformLinux() {
-		cmd = exec.Command("sudo", "yt-dlp", "-f", "bestaudio", "--write-thumbnail", "-o", outputLocation, ytURL)
-	} else {
-		cmd = exec.Command("yt-dlp", "-f", "bestaudio", "--write-thumbnail", "-o", outputLocation, ytURL)
-	}
+	cmd := exec.Command("yt-dlp", "-f", "bestaudio", "--write-thumbnail", "-o", outputLocation, ytURL)
 
 	if err := cmd.Run(); err != nil {
 		log.Println("Error downloading youtube audio: ", err)
@@ -56,12 +51,7 @@ func DownloadYoutubeAudioWithThumbnail(videoID string) (outputPath string, thumb
 func DownloadYoutubeAudio(videoID, outputPath string) (err error) {
 	ytURL := "https://www.youtube.com/watch?v=" + videoID
 
-	var cmd *exec.Cmd
-	if shared.IsPlatformLinux() {
-		cmd = exec.Command("sudo", "yt-dlp", "-f", "bestaudio", "-o", outputPath, ytURL)
-	} else {
-		cmd = exec.Command("yt-dlp", "-f", "bestaudio", "-o", outputPath, ytURL)
-	}
+	cmd := exec.Command("yt-dlp", "-f", "bestaudio", "-o", outputPath, ytURL)
 
 	if err := cmd.Run(); err != nil {
 		log.Println("Error downloading youtube audio: ", err)
