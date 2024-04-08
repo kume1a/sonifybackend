@@ -71,16 +71,6 @@ func CreateUserPlaylist(ctx context.Context, db *database.Queries, params databa
 	return &entity, err
 }
 
-func GetUserPlaylistsBySpotifyIds(ctx context.Context, db *database.Queries, params database.GetUserPlaylistsBySpotifyIdsParams) ([]database.Playlist, error) {
-	playlists, err := db.GetUserPlaylistsBySpotifyIds(ctx, params)
-
-	if err != nil {
-		log.Println("Error getting user playlists by spotify ids:", err)
-	}
-
-	return playlists, err
-}
-
 func DeletePlaylistAudiosByIds(ctx context.Context, db *database.Queries, params database.DeletePlaylistAudiosByIdsParams) error {
 	err := db.DeletePlaylistAudiosByIds(ctx, params)
 
@@ -141,4 +131,46 @@ func getPlaylistById(
 	}
 
 	return &playlist, err
+}
+
+func GetSpotifyUserSavedPlaylistIds(
+	ctx context.Context,
+	db *database.Queries,
+	userId uuid.UUID,
+) (uuid.UUIDs, error) {
+	playlistIds, err := db.GetSpotifyUserSavedPlaylistIds(ctx, userId)
+
+	if err != nil {
+		log.Println("Error getting spotify user saved playlist ids:", err)
+	}
+
+	return playlistIds, err
+}
+
+func DeleteSpotifyUserSavedPlaylistJoins(
+	ctx context.Context,
+	db *database.Queries,
+	userId uuid.UUID,
+) error {
+	err := db.DeleteSpotifyUserSavedPlaylistJoins(ctx, userId)
+
+	if err != nil {
+		log.Println("Error deleting spotify user saved playlist ids:", err)
+	}
+
+	return err
+}
+
+func DeletePlaylistsByIds(
+	ctx context.Context,
+	db *database.Queries,
+	playlistIds uuid.UUIDs,
+) error {
+	err := db.DeletePlaylistsByIds(ctx, playlistIds)
+
+	if err != nil {
+		log.Println("Error deleting playlists by ids:", err)
+	}
+
+	return err
 }

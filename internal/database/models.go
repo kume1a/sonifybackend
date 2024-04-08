@@ -117,9 +117,10 @@ type UserAudio struct {
 }
 
 type UserPlaylist struct {
-	UserID     uuid.UUID
-	PlaylistID uuid.UUID
-	CreatedAt  time.Time
+	UserID                 uuid.UUID
+	PlaylistID             uuid.UUID
+	CreatedAt              time.Time
+	IsSpotifySavedPlaylist sql.NullBool
 }
 
 type UserSyncDatum struct {

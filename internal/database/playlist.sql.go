@@ -77,19 +77,26 @@ func (q *Queries) CreatePlaylistAudio(ctx context.Context, arg CreatePlaylistAud
 const createUserPlaylist = `-- name: CreateUserPlaylist :one
 INSERT INTO user_playlists(
   user_id,
-  playlist_id
-) VALUES ($1,$2) RETURNING user_id, playlist_id, created_at
+  playlist_id,
+  is_spotify_saved_playlist
+) VALUES ($1,$2,$3) RETURNING user_id, playlist_id, created_at, is_spotify_saved_playlist
 `
 
 type CreateUserPlaylistParams struct {
-	UserID     uuid.UUID
-	PlaylistID uuid.UUID
+	UserID                 uuid.UUID
+	PlaylistID             uuid.UUID
+	IsSpotifySavedPlaylist sql.NullBool
 }
 
 func (q *Queries) CreateUserPlaylist(ctx context.Context, arg CreateUserPlaylistParams) (UserPlaylist, error) {
-	row := q.db.QueryRowContext(ctx, createUserPlaylist, arg.UserID, arg.PlaylistID)
+	row := q.db.QueryRowContext(ctx, createUserPlaylist, arg.UserID, arg.PlaylistID, arg.IsSpotifySavedPlaylist)
 	var i UserPlaylist
-	err := row.Scan(&i.UserID, &i.PlaylistID, &i.CreatedAt)
+	err := row.Scan(
+		&i.UserID,
+		&i.PlaylistID,
+		&i.CreatedAt,
+		&i.IsSpotifySavedPlaylist,
+	)
 	return i, err
 }
 
@@ -115,6 +122,26 @@ DELETE FROM playlists WHERE id = $1
 
 func (q *Queries) DeletePlaylistById(ctx context.Context, id uuid.UUID) error {
 	_, err := q.db.ExecContext(ctx, deletePlaylistById, id)
+	return err
+}
+
+const deletePlaylistsByIds = `-- name: DeletePlaylistsByIds :exec
+DELETE FROM playlists WHERE id = ANY($1::uuid[])
+`
+
+func (q *Queries) DeletePlaylistsByIds(ctx context.Context, ids []uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deletePlaylistsByIds, pq.Array(ids))
+	return err
+}
+
+const deleteSpotifyUserSavedPlaylistJoins = `-- name: DeleteSpotifyUserSavedPlaylistJoins :exec
+DELETE FROM user_playlists
+  WHERE user_playlists.user_id = $1
+  AND user_playlists.is_spotify_saved_playlist = true
+`
+
+func (q *Queries) DeleteSpotifyUserSavedPlaylistJoins(ctx context.Context, userID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deleteSpotifyUserSavedPlaylistJoins, userID)
 	return err
 }
 
@@ -339,34 +366,26 @@ func (q *Queries) GetPlaylists(ctx context.Context, arg GetPlaylistsParams) ([]P
 	return items, nil
 }
 
-const getUserPlaylists = `-- name: GetUserPlaylists :many
-SELECT 
-  playlists.id, playlists.name, playlists.thumbnail_path, playlists.created_at, playlists.spotify_id, playlists.thumbnail_url 
-FROM user_playlists
-INNER JOIN playlists ON user_playlists.playlist_id = playlists.id
-WHERE user_playlists.user_id = $1
+const getSpotifyUserSavedPlaylistIds = `-- name: GetSpotifyUserSavedPlaylistIds :many
+SELECT id FROM playlists
+  INNER JOIN user_playlists ON playlists.id = user_playlists.playlist_id
+  WHERE user_playlists.user_id = $1 
+  AND user_playlists.is_spotify_saved_playlist = true
 `
 
-func (q *Queries) GetUserPlaylists(ctx context.Context, userID uuid.UUID) ([]Playlist, error) {
-	rows, err := q.db.QueryContext(ctx, getUserPlaylists, userID)
+func (q *Queries) GetSpotifyUserSavedPlaylistIds(ctx context.Context, userID uuid.UUID) ([]uuid.UUID, error) {
+	rows, err := q.db.QueryContext(ctx, getSpotifyUserSavedPlaylistIds, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Playlist
+	var items []uuid.UUID
 	for rows.Next() {
-		var i Playlist
-		if err := rows.Scan(
-			&i.ID,
-			&i.Name,
-			&i.ThumbnailPath,
-			&i.CreatedAt,
-			&i.SpotifyID,
-			&i.ThumbnailUrl,
-		); err != nil {
+		var id uuid.UUID
+		if err := rows.Scan(&id); err != nil {
 			return nil, err
 		}
-		items = append(items, i)
+		items = append(items, id)
 	}
 	if err := rows.Close(); err != nil {
 		return nil, err
@@ -377,21 +396,16 @@ func (q *Queries) GetUserPlaylists(ctx context.Context, userID uuid.UUID) ([]Pla
 	return items, nil
 }
 
-const getUserPlaylistsBySpotifyIds = `-- name: GetUserPlaylistsBySpotifyIds :many
+const getUserPlaylists = `-- name: GetUserPlaylists :many
 SELECT 
   playlists.id, playlists.name, playlists.thumbnail_path, playlists.created_at, playlists.spotify_id, playlists.thumbnail_url 
 FROM user_playlists
 INNER JOIN playlists ON user_playlists.playlist_id = playlists.id
-WHERE user_playlists.user_id = $1 AND playlists.spotify_id = ANY($2::text[])
+WHERE user_playlists.user_id = $1
 `
 
-type GetUserPlaylistsBySpotifyIdsParams struct {
-	UserID     uuid.UUID
-	SpotifyIds []string
-}
-
-func (q *Queries) GetUserPlaylistsBySpotifyIds(ctx context.Context, arg GetUserPlaylistsBySpotifyIdsParams) ([]Playlist, error) {
-	rows, err := q.db.QueryContext(ctx, getUserPlaylistsBySpotifyIds, arg.UserID, pq.Array(arg.SpotifyIds))
+func (q *Queries) GetUserPlaylists(ctx context.Context, userID uuid.UUID) ([]Playlist, error) {
+	rows, err := q.db.QueryContext(ctx, getUserPlaylists, userID)
 	if err != nil {
 		return nil, err
 	}
