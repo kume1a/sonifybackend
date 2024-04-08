@@ -9,6 +9,7 @@ import (
 	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/modules/audio"
 	"github.com/kume1a/sonifybackend/internal/modules/playlist"
+	"github.com/kume1a/sonifybackend/internal/modules/youtube"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
@@ -298,30 +299,31 @@ func downloadSpotifyPlaylistItems(playlistItems []spotifyPlaylistItemDTO) (
 		8,
 		playlistItems,
 		func(playlistItem spotifyPlaylistItemDTO) (playlistItemWithDownloadMeta, error) {
-			downloadMeta, err := GetSpotifyAudioDownloadMeta(playlistItem.Track.ID)
-			if err != nil {
-				return playlistItemWithDownloadMeta{isEmpty: true}, err
-			}
-
-			if !downloadMeta.Success {
-				return playlistItemWithDownloadMeta{isEmpty: true, playlistItem: playlistItem}, nil
-			}
-
-			downloadedAudioPath, err := shared.NewPublicFileLocation(shared.PublicFileLocationArgs{
+			audioOutputPath, err := shared.NewPublicFileLocation(shared.PublicFileLocationArgs{
+				Dir:       shared.DirYoutubeAudios,
 				Extension: "mp3",
-				Dir:       shared.DirSpotifyAudios,
 			})
 			if err != nil {
 				return playlistItemWithDownloadMeta{isEmpty: true}, err
 			}
 
-			err = shared.DownloadFile(downloadedAudioPath, downloadMeta.Link)
+			artistName := ""
+			if len(playlistItem.Track.Artists) > 0 {
+				artistName = playlistItem.Track.Artists[0].Name
+			}
+
+			searchQuery := playlistItem.Track.Name + " " + artistName
+
+			videoID, err := youtube.GetYoutubeSearchBestMatchVideoID(searchQuery)
 			if err != nil {
-				log.Println("Error downloading file: ", err, " from: ", downloadMeta.Link, " meta = ", downloadMeta)
 				return playlistItemWithDownloadMeta{isEmpty: true}, err
 			}
 
-			audioFileSize, err := shared.GetFileSize(downloadedAudioPath)
+			if err := youtube.DownloadYoutubeAudio(videoID, audioOutputPath); err != nil {
+				return playlistItemWithDownloadMeta{isEmpty: true}, err
+			}
+
+			audioFileSize, err := shared.GetFileSize(audioOutputPath)
 			if err != nil {
 				return playlistItemWithDownloadMeta{isEmpty: true}, err
 			}
@@ -329,7 +331,7 @@ func downloadSpotifyPlaylistItems(playlistItems []spotifyPlaylistItemDTO) (
 			return playlistItemWithDownloadMeta{
 				isEmpty:             false,
 				playlistItem:        playlistItem,
-				downloadedAudioPath: downloadedAudioPath,
+				downloadedAudioPath: audioOutputPath,
 				downloadedAudioSize: audioFileSize,
 			}, nil
 		},

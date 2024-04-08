@@ -24,6 +24,7 @@ type PublicFileLocationArgs struct {
 
 func NewPublicFileLocation(args PublicFileLocationArgs) (string, error) {
 	if err := ensureDir(args.Dir); err != nil {
+		log.Println("error ensuring dir: ", err)
 		return "", err
 	}
 

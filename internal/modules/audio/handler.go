@@ -36,7 +36,7 @@ func handleDownloadYoutubeAudio(apiCfg *shared.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		filePath, thumbnailPath, err := youtube.DownloadYoutubeAudio(body.VideoId)
+		filePath, thumbnailPath, err := youtube.DownloadYoutubeAudioWithThumbnail(body.VideoId)
 		if err != nil {
 			shared.ResInternalServerErrorDef(w)
 			return

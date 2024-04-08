@@ -13,7 +13,7 @@ type ApiConfig struct {
 
 const (
 	DirPublic                    = "public"
-	DirSpotifyAudios             = DirPublic + "/spotify_audios"
+	DirYoutubeAudios             = DirPublic + "/youtube_audios"
 	DirSpotifyAudioThumbnails    = DirPublic + "/spotify_audio_thumbnails"
 	DirSpotifyPlaylistThumbnails = DirPublic + "/spotify_playlist_thumbnails"
 	DirPlaylistThumbnails        = DirPublic + "/playlist_thumbnails"

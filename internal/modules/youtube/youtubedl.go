@@ -2,6 +2,7 @@ package youtube
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"os/exec"
 	"path"
@@ -23,10 +24,10 @@ func GetYoutubeAudioUrl(videoID string) (string, error) {
 	return url, nil
 }
 
-func DownloadYoutubeAudio(videoID string) (outputPath string, thumbnailPath string, err error) {
+func DownloadYoutubeAudioWithThumbnail(videoID string) (outputPath string, thumbnailPath string, err error) {
 	outputLocation, err := shared.NewPublicFileLocation(shared.PublicFileLocationArgs{
 		Dir:       shared.DirPublic,
-		Extension: ".mp3",
+		Extension: "mp3",
 	})
 	if err != nil {
 		log.Println("Error creating public file location: ", err)
@@ -35,11 +36,13 @@ func DownloadYoutubeAudio(videoID string) (outputPath string, thumbnailPath stri
 
 	thumbnailLocation := strings.TrimSuffix(outputLocation, path.Ext(outputLocation)) + ".webp"
 
+	ytURL := "https://www.youtube.com/watch?v=" + videoID
+
 	var cmd *exec.Cmd
 	if shared.IsPlatformLinux() {
-		cmd = exec.Command("sudo", "yt-dlp", "-f", "bestaudio", "--write-thumbnail", "-o", outputLocation, "https://www.youtube.com/watch?v="+videoID)
+		cmd = exec.Command("sudo", "yt-dlp", "-f", "bestaudio", "--write-thumbnail", "-o", outputLocation, ytURL)
 	} else {
-		cmd = exec.Command("yt-dlp", "-f", "bestaudio", "--write-thumbnail", "-o", outputLocation, "https://www.youtube.com/watch?v="+videoID)
+		cmd = exec.Command("yt-dlp", "-f", "bestaudio", "--write-thumbnail", "-o", outputLocation, ytURL)
 	}
 
 	if err := cmd.Run(); err != nil {
@@ -48,6 +51,24 @@ func DownloadYoutubeAudio(videoID string) (outputPath string, thumbnailPath stri
 	}
 
 	return outputLocation, thumbnailLocation, nil
+}
+
+func DownloadYoutubeAudio(videoID, outputPath string) (err error) {
+	ytURL := "https://www.youtube.com/watch?v=" + videoID
+
+	var cmd *exec.Cmd
+	if shared.IsPlatformLinux() {
+		cmd = exec.Command("sudo", "yt-dlp", "-f", "bestaudio", "-o", outputPath, ytURL)
+	} else {
+		cmd = exec.Command("yt-dlp", "-f", "bestaudio", "-o", outputPath, ytURL)
+	}
+
+	if err := cmd.Run(); err != nil {
+		log.Println("Error downloading youtube audio: ", err)
+		return err
+	}
+
+	return nil
 }
 
 func GetYoutubeVideoInfo(videoID string) (*youtubeVideoInfoDTO, error) {
@@ -71,4 +92,40 @@ func GetYoutubeVideoInfo(videoID string) (*youtubeVideoInfoDTO, error) {
 	}
 
 	return &info, nil
+}
+
+func GetYoutubeAudioURL(query string) (string, error) {
+	cmd := exec.Command("yt-dlp", "-f", "bestaudio", "--get-url", "--default-search", "ytsearch", "\""+query+"\"")
+
+	output, err := cmd.Output()
+	if err != nil {
+		log.Println("Error searching youtube music video:", err)
+		return "", err
+	}
+
+	url := strings.TrimSpace(string(output))
+
+	if url == "" {
+		return "", errors.New("yt no audio found for query: " + query)
+	}
+
+	return url, nil
+}
+
+func GetYoutubeSearchBestMatchVideoID(query string) (string, error) {
+	cmd := exec.Command("yt-dlp", "--get-id", "--default-search", "ytsearch", "\""+query+"\"")
+
+	output, err := cmd.Output()
+	if err != nil {
+		log.Println("Error searching youtube: ", err)
+		return "", err
+	}
+
+	ids := strings.Split(strings.TrimSpace(string(output)), "\n")
+
+	if len(ids) == 0 {
+		return "", errors.New("No video found for query: " + query)
+	}
+
+	return ids[0], nil
 }
