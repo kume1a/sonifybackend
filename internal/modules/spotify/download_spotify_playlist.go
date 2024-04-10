@@ -77,8 +77,9 @@ func downloadSpotifyPlaylist(
 
 		playlistEntityCreateParams := spotifyPlaylistDTOToCreatePlaylistParams(&playlist)
 		userPlaylistEntityCreateParams := database.CreateUserPlaylistParams{
-			PlaylistID: playlistEntityCreateParams.ID,
-			UserID:     authUserID,
+			PlaylistID:             playlistEntityCreateParams.ID,
+			UserID:                 authUserID,
+			IsSpotifySavedPlaylist: true,
 		}
 		playlistAudioCreateParams := shared.Map(
 			dbPlaylistAudioSpotifyIds,

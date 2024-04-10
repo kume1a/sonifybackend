@@ -30,8 +30,9 @@ SELECT * FROM playlists WHERE id = $1;
 -- name: CreatePlaylistAudio :one
 INSERT INTO playlist_audios(
   playlist_id,
-  audio_id
-) VALUES ($1,$2) RETURNING *;
+  audio_id,
+  created_at
+) VALUES ($1,$2,$3) RETURNING *;
 
 -- name: GetPlaylistAudioJoins :many
 SELECT * FROM playlist_audios
@@ -45,8 +46,9 @@ ORDER BY playlist_audios.created_at DESC
 INSERT INTO user_playlists(
   user_id,
   playlist_id,
-  is_spotify_saved_playlist
-) VALUES ($1,$2,$3) RETURNING *;
+  is_spotify_saved_playlist,
+  created_at
+) VALUES ($1,$2,$3,$4) RETURNING *;
 
 -- name: DeletePlaylistAudiosByIds :exec
 DELETE FROM playlist_audios 

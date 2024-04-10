@@ -76,16 +76,21 @@ func (q *Queries) CreateAudio(ctx context.Context, arg CreateAudioParams) (Audio
 }
 
 const createUserAudio = `-- name: CreateUserAudio :one
-INSERT INTO user_audios(user_id, audio_id) VALUES ($1, $2) RETURNING user_id, audio_id, created_at
+INSERT INTO user_audios(
+  created_at,
+  user_id, 
+  audio_id
+) VALUES ($1,$2,$3) RETURNING user_id, audio_id, created_at
 `
 
 type CreateUserAudioParams struct {
-	UserID  uuid.UUID
-	AudioID uuid.UUID
+	CreatedAt time.Time
+	UserID    uuid.UUID
+	AudioID   uuid.UUID
 }
 
 func (q *Queries) CreateUserAudio(ctx context.Context, arg CreateUserAudioParams) (UserAudio, error) {
-	row := q.db.QueryRowContext(ctx, createUserAudio, arg.UserID, arg.AudioID)
+	row := q.db.QueryRowContext(ctx, createUserAudio, arg.CreatedAt, arg.UserID, arg.AudioID)
 	var i UserAudio
 	err := row.Scan(&i.UserID, &i.AudioID, &i.CreatedAt)
 	return i, err

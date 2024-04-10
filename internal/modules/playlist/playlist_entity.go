@@ -27,6 +27,10 @@ func CreatePlaylist(ctx context.Context, db *database.Queries, params database.C
 }
 
 func CreatePlaylistAudio(ctx context.Context, db *database.Queries, params database.CreatePlaylistAudioParams) (*database.PlaylistAudio, error) {
+	if params.CreatedAt.IsZero() {
+		params.CreatedAt = time.Now().UTC()
+	}
+
 	entity, err := db.CreatePlaylistAudio(ctx, params)
 
 	if err != nil {
@@ -62,6 +66,10 @@ func GetPlaylistAudioJoins(ctx context.Context, db *database.Queries, playlistID
 }
 
 func CreateUserPlaylist(ctx context.Context, db *database.Queries, params database.CreateUserPlaylistParams) (*database.UserPlaylist, error) {
+	if params.CreatedAt.IsZero() {
+		params.CreatedAt = time.Now().UTC()
+	}
+
 	entity, err := db.CreateUserPlaylist(ctx, params)
 
 	if err != nil {

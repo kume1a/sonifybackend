@@ -58,17 +58,19 @@ func (q *Queries) CreatePlaylist(ctx context.Context, arg CreatePlaylistParams) 
 const createPlaylistAudio = `-- name: CreatePlaylistAudio :one
 INSERT INTO playlist_audios(
   playlist_id,
-  audio_id
-) VALUES ($1,$2) RETURNING playlist_id, audio_id, created_at
+  audio_id,
+  created_at
+) VALUES ($1,$2,$3) RETURNING playlist_id, audio_id, created_at
 `
 
 type CreatePlaylistAudioParams struct {
 	PlaylistID uuid.UUID
 	AudioID    uuid.UUID
+	CreatedAt  time.Time
 }
 
 func (q *Queries) CreatePlaylistAudio(ctx context.Context, arg CreatePlaylistAudioParams) (PlaylistAudio, error) {
-	row := q.db.QueryRowContext(ctx, createPlaylistAudio, arg.PlaylistID, arg.AudioID)
+	row := q.db.QueryRowContext(ctx, createPlaylistAudio, arg.PlaylistID, arg.AudioID, arg.CreatedAt)
 	var i PlaylistAudio
 	err := row.Scan(&i.PlaylistID, &i.AudioID, &i.CreatedAt)
 	return i, err
@@ -78,18 +80,25 @@ const createUserPlaylist = `-- name: CreateUserPlaylist :one
 INSERT INTO user_playlists(
   user_id,
   playlist_id,
-  is_spotify_saved_playlist
-) VALUES ($1,$2,$3) RETURNING user_id, playlist_id, created_at, is_spotify_saved_playlist
+  is_spotify_saved_playlist,
+  created_at
+) VALUES ($1,$2,$3,$4) RETURNING user_id, playlist_id, created_at, is_spotify_saved_playlist
 `
 
 type CreateUserPlaylistParams struct {
 	UserID                 uuid.UUID
 	PlaylistID             uuid.UUID
-	IsSpotifySavedPlaylist sql.NullBool
+	IsSpotifySavedPlaylist bool
+	CreatedAt              time.Time
 }
 
 func (q *Queries) CreateUserPlaylist(ctx context.Context, arg CreateUserPlaylistParams) (UserPlaylist, error) {
-	row := q.db.QueryRowContext(ctx, createUserPlaylist, arg.UserID, arg.PlaylistID, arg.IsSpotifySavedPlaylist)
+	row := q.db.QueryRowContext(ctx, createUserPlaylist,
+		arg.UserID,
+		arg.PlaylistID,
+		arg.IsSpotifySavedPlaylist,
+		arg.CreatedAt,
+	)
 	var i UserPlaylist
 	err := row.Scan(
 		&i.UserID,

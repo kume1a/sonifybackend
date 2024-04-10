@@ -66,7 +66,10 @@ func handleDownloadYoutubeAudio(apiCfg *shared.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		userAudio, err := CreateUserAudio(r.Context(), apiCfg.DB, authPayload.UserId, newAudio.ID)
+		userAudio, err := CreateUserAudio(r.Context(), apiCfg.DB, database.CreateUserAudioParams{
+			UserID:  authPayload.UserId,
+			AudioID: newAudio.ID,
+		})
 		if err != nil {
 			shared.ResInternalServerErrorDef(w)
 			return

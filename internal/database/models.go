@@ -120,7 +120,7 @@ type UserPlaylist struct {
 	UserID                 uuid.UUID
 	PlaylistID             uuid.UUID
 	CreatedAt              time.Time
-	IsSpotifySavedPlaylist sql.NullBool
+	IsSpotifySavedPlaylist bool
 }
 
 type UserSyncDatum struct {

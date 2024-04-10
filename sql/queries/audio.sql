@@ -43,7 +43,11 @@ SELECT * FROM user_audios
   WHERE user_audios.user_id = $1 AND audio.youtube_video_id = $2;
 
 -- name: CreateUserAudio :one
-INSERT INTO user_audios(user_id, audio_id) VALUES ($1, $2) RETURNING *;
+INSERT INTO user_audios(
+  created_at,
+  user_id, 
+  audio_id
+) VALUES ($1,$2,$3) RETURNING *;
 
 -- name: GetPlaylistAudiosBySpotifyIds :many
 SELECT 

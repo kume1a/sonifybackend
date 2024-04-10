@@ -33,11 +33,12 @@ func CreateAudio(
 	return &entity, err
 }
 
-func CreateUserAudio(ctx context.Context, db *database.Queries, userId uuid.UUID, audioId uuid.UUID) (*database.UserAudio, error) {
-	entity, err := db.CreateUserAudio(ctx, database.CreateUserAudioParams{
-		UserID:  userId,
-		AudioID: audioId,
-	})
+func CreateUserAudio(ctx context.Context, db *database.Queries, params database.CreateUserAudioParams) (*database.UserAudio, error) {
+	if params.CreatedAt.IsZero() {
+		params.CreatedAt = time.Now().UTC()
+	}
+
+	entity, err := db.CreateUserAudio(ctx, params)
 
 	if err != nil {
 		log.Println("Error creating user audio:", err)
