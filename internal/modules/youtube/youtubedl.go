@@ -33,12 +33,12 @@ func DownloadYoutubeAudioWithThumbnail(videoID string) (outputPath string, thumb
 		return "", "", err
 	}
 
-	audioOutputLocation := baseLocation + ".mp3"
+	audioOutputLocation := baseLocation + ".webm"
 	thumbnailOutputLocation := baseLocation + ".webp"
 
 	ytURL := "https://www.youtube.com/watch?v=" + videoID
 
-	cmd := exec.Command("yt-dlp", "-f", "bestaudio", "--audio-format", "mp3", "--write-thumbnail", "-o", baseLocation+".%(ext)s", ytURL)
+	cmd := exec.Command("yt-dlp", "-f", "bestaudio", "--write-thumbnail", "-o", baseLocation+".%(ext)s", ytURL)
 
 	if err := cmd.Run(); err != nil {
 		log.Println("Error downloading youtube audio: ", err)
@@ -51,7 +51,7 @@ func DownloadYoutubeAudioWithThumbnail(videoID string) (outputPath string, thumb
 func DownloadYoutubeAudio(videoID string) (string, error) {
 	outputPath, err := shared.NewPublicFileLocation(shared.PublicFileLocationArgs{
 		Dir:       shared.DirYoutubeAudios,
-		Extension: "mp3",
+		Extension: "webm",
 	})
 	if err != nil {
 		log.Println("Error creating public file location: ", err)
@@ -60,7 +60,7 @@ func DownloadYoutubeAudio(videoID string) (string, error) {
 
 	ytURL := "https://www.youtube.com/watch?v=" + videoID
 
-	cmd := exec.Command("yt-dlp", "-f", "bestaudio", "--audio-format", "mp3", "-o", outputPath, ytURL)
+	cmd := exec.Command("yt-dlp", "-f", "bestaudio", "-o", outputPath, ytURL)
 
 	if err := cmd.Run(); err != nil {
 		log.Println("Error downloading youtube audio: ", err)
