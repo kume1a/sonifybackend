@@ -28,7 +28,10 @@ func NewPublicFileLocation(args PublicFileLocationArgs) (string, error) {
 		return "", err
 	}
 
-	fileName := fmt.Sprintf("%s.%s", uuid.New(), args.Extension)
+	fileName := uuid.New().String()
+	if args.Extension != "" {
+		fileName = fileName + "." + args.Extension
+	}
 
 	return args.Dir + "/" + fileName, nil
 }

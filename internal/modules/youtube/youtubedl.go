@@ -5,7 +5,6 @@ import (
 	"errors"
 	"log"
 	"os/exec"
-	"path"
 	"strings"
 
 	"github.com/kume1a/sonifybackend/internal/shared"
@@ -25,40 +24,50 @@ func GetYoutubeAudioUrl(videoID string) (string, error) {
 }
 
 func DownloadYoutubeAudioWithThumbnail(videoID string) (outputPath string, thumbnailPath string, err error) {
-	outputLocation, err := shared.NewPublicFileLocation(shared.PublicFileLocationArgs{
-		Dir:       shared.DirPublic,
-		Extension: "mp3",
+	baseLocation, err := shared.NewPublicFileLocation(shared.PublicFileLocationArgs{
+		Dir:       shared.DirYoutubeAudios,
+		Extension: "",
 	})
 	if err != nil {
 		log.Println("Error creating public file location: ", err)
 		return "", "", err
 	}
 
-	thumbnailLocation := strings.TrimSuffix(outputLocation, path.Ext(outputLocation)) + ".webp"
+	audioOutputLocation := baseLocation + ".mp3"
+	thumbnailOutputLocation := baseLocation + ".webp"
 
 	ytURL := "https://www.youtube.com/watch?v=" + videoID
 
-	cmd := exec.Command("yt-dlp", "-f", "bestaudio", "--write-thumbnail", "-o", outputLocation, ytURL)
+	cmd := exec.Command("yt-dlp", "-f", "bestaudio", "--audio-format", "mp3", "--write-thumbnail", "-o", baseLocation+".%(ext)s", ytURL)
 
 	if err := cmd.Run(); err != nil {
 		log.Println("Error downloading youtube audio: ", err)
 		return "", "", err
 	}
 
-	return outputLocation, thumbnailLocation, nil
+	return audioOutputLocation, thumbnailOutputLocation, nil
 }
 
-func DownloadYoutubeAudio(videoID, outputPath string) (err error) {
+func DownloadYoutubeAudio(videoID string) (string, error) {
+	outputPath, err := shared.NewPublicFileLocation(shared.PublicFileLocationArgs{
+		Dir:       shared.DirYoutubeAudios,
+		Extension: "mp3",
+	})
+	if err != nil {
+		log.Println("Error creating public file location: ", err)
+		return "", err
+	}
+
 	ytURL := "https://www.youtube.com/watch?v=" + videoID
 
-	cmd := exec.Command("yt-dlp", "-f", "bestaudio", "-o", outputPath, ytURL)
+	cmd := exec.Command("yt-dlp", "-f", "bestaudio", "--audio-format", "mp3", "-o", outputPath, ytURL)
 
 	if err := cmd.Run(); err != nil {
 		log.Println("Error downloading youtube audio: ", err)
-		return err
+		return "", err
 	}
 
-	return nil
+	return outputPath, nil
 }
 
 func GetYoutubeVideoInfo(videoID string) (*youtubeVideoInfoDTO, error) {

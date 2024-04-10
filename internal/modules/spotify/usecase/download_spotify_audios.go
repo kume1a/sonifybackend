@@ -55,14 +55,6 @@ func DownloadSpotifyAudios(
 		8,
 		filteredInputs,
 		func(input DownloadSpotifyAudioInput) (DownloadedSpotifyAudio, error) {
-			audioOutputPath, err := shared.NewPublicFileLocation(shared.PublicFileLocationArgs{
-				Dir:       shared.DirYoutubeAudios,
-				Extension: "mp3",
-			})
-			if err != nil {
-				return DownloadedSpotifyAudio{}, err
-			}
-
 			searchQuery := input.TrackName + " " + input.ArtistName
 
 			ytVideoID, err := youtube.GetYoutubeSearchBestMatchVideoID(searchQuery)
@@ -70,7 +62,8 @@ func DownloadSpotifyAudios(
 				return DownloadedSpotifyAudio{}, err
 			}
 
-			if err := youtube.DownloadYoutubeAudio(ytVideoID, audioOutputPath); err != nil {
+			audioOutputPath, err := youtube.DownloadYoutubeAudio(ytVideoID)
+			if err != nil {
 				return DownloadedSpotifyAudio{}, err
 			}
 
