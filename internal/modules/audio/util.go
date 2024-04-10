@@ -28,7 +28,8 @@ func AudioEntityToDto(e database.Audio) *AudioDto {
 
 func UserAudioEntityToDto(e *database.UserAudio) *UserAudioDto {
 	return &UserAudioDto{
-		UserId:  e.UserID,
-		AudioId: e.AudioID,
+		CreatedAt: e.CreatedAt,
+		UserId:    e.UserID,
+		AudioId:   e.AudioID,
 	}
 }

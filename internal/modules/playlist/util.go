@@ -49,6 +49,7 @@ func playlistEntityToDto(e database.Playlist) playlistDTO {
 
 func playlistAudioEntityToDto(e *database.PlaylistAudio) playlistAudioDTO {
 	return playlistAudioDTO{
+		CreatedAt:  e.CreatedAt,
 		PlaylistID: e.PlaylistID,
 		AudioID:    e.AudioID,
 	}

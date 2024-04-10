@@ -25,6 +25,7 @@ type AudioDto struct {
 }
 
 type UserAudioDto struct {
-	UserId  uuid.UUID `json:"userId"`
-	AudioId uuid.UUID `json:"audioId"`
+	UserId    uuid.UUID `json:"userId"`
+	AudioId   uuid.UUID `json:"audioId"`
+	CreatedAt time.Time `json:"createdAt"`
 }

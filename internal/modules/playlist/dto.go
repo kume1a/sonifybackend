@@ -26,6 +26,7 @@ type createPlaylistAudioDTO struct {
 }
 
 type playlistAudioDTO struct {
+	CreatedAt  time.Time `json:"createdAt"`
 	PlaylistID uuid.UUID `json:"playlistId"`
 	AudioID    uuid.UUID `json:"audioId"`
 }
