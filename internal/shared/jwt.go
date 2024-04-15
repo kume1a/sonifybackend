@@ -83,7 +83,7 @@ func generateJWT(tokenClaims *TokenClaims, secretKey string) (string, error) {
 		return "", err
 	}
 
-	expDuration := time.Millisecond * time.Duration(env.AccessTokenExp)
+	expDuration := time.Millisecond * time.Duration(env.AccessTokenExpMillis)
 
 	claims := jwt.MapClaims{
 		"userId": tokenClaims.UserId.String(),

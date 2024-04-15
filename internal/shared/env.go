@@ -29,18 +29,18 @@ func LoadEnv() {
 }
 
 type EnvVariables struct {
-	IsDevelopment       bool
-	IsProduction        bool
-	Port                string
-	DbUrl               string
-	GoogleClientKey     string
-	AccessTokenSecret   string
-	AccessTokenExp      int64
-	PublicDIr           string
-	MaxUploadSizeBytes  int64
-	SpotifyClientID     string
-	SpotifyClientSecret string
-	SpotifyRedirectURI  string
+	IsDevelopment        bool
+	IsProduction         bool
+	Port                 string
+	DbUrl                string
+	GoogleClientKey      string
+	AccessTokenSecret    string
+	AccessTokenExpMillis int64
+	PublicDIr            string
+	MaxUploadSizeBytes   int64
+	SpotifyClientID      string
+	SpotifyClientSecret  string
+	SpotifyRedirectURI   string
 }
 
 func ParseEnv() (*EnvVariables, error) {
@@ -69,7 +69,7 @@ func ParseEnv() (*EnvVariables, error) {
 		return nil, err
 	}
 
-	accessTokenExp, err := getEnvInt("ACCESS_TOKEN_EXP")
+	accessTokenExpMillis, err := getEnvInt("ACCESS_TOKEN_EXP_MILLIS")
 	if err != nil {
 		return nil, err
 	}
@@ -100,18 +100,18 @@ func ParseEnv() (*EnvVariables, error) {
 	}
 
 	return &EnvVariables{
-		IsDevelopment:       environment == "development",
-		IsProduction:        environment == "production",
-		Port:                port,
-		DbUrl:               dbUrl,
-		GoogleClientKey:     googleClientKey,
-		AccessTokenSecret:   accessTokenSecret,
-		AccessTokenExp:      accessTokenExp,
-		PublicDIr:           publicDir,
-		MaxUploadSizeBytes:  maxUploadSizeBytes,
-		SpotifyClientID:     spotifyClientID,
-		SpotifyClientSecret: spotifyClientSecret,
-		SpotifyRedirectURI:  spotifyRedirectURI,
+		IsDevelopment:        environment == "development",
+		IsProduction:         environment == "production",
+		Port:                 port,
+		DbUrl:                dbUrl,
+		GoogleClientKey:      googleClientKey,
+		AccessTokenSecret:    accessTokenSecret,
+		AccessTokenExpMillis: accessTokenExpMillis,
+		PublicDIr:            publicDir,
+		MaxUploadSizeBytes:   maxUploadSizeBytes,
+		SpotifyClientID:      spotifyClientID,
+		SpotifyClientSecret:  spotifyClientSecret,
+		SpotifyRedirectURI:   spotifyRedirectURI,
 	}, nil
 }
 
