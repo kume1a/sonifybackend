@@ -14,12 +14,14 @@ func (dto *createPlaylistAudioDTO) Validate() error {
 }
 
 func ValidateCreatePlaylistDto(w http.ResponseWriter, r *http.Request) (*createPlaylistDTO, *shared.HttpError) {
-	thumbnailPath, err := shared.HandleUploadFile(
-		w, r,
-		"thumbnail",
-		shared.DirPlaylistThumbnails,
-		shared.ImageMimeTypes,
-	)
+	thumbnailPath, err := shared.HandleUploadFile(shared.HandleUploadFileArgs{
+		ResponseWriter:   w,
+		Request:          r,
+		FieldName:        "thumbnail",
+		Dir:              shared.DirPlaylistThumbnails,
+		AllowedMimeTypes: shared.ImageMimeTypes,
+		IsOptional:       false,
+	})
 	if err != nil {
 		return nil, err
 	}

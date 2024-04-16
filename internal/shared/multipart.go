@@ -1,6 +1,7 @@
 package shared
 
 import (
+	"database/sql"
 	"io"
 	"log"
 	"mime/multipart"
@@ -9,37 +10,50 @@ import (
 	"path/filepath"
 )
 
-func HandleUploadFile(w http.ResponseWriter, r *http.Request, fieldName string, dir string, allowedMimeTypes []string) (string, *HttpError) {
+type HandleUploadFileArgs struct {
+	ResponseWriter   http.ResponseWriter
+	Request          *http.Request
+	FieldName        string
+	Dir              string
+	AllowedMimeTypes []string
+	IsOptional       bool
+}
+
+func HandleUploadFile(args HandleUploadFileArgs) (string, *HttpError) {
 	env, err := ParseEnv()
 	if err != nil {
 		return "", HttpErrInternalServerErrorDef()
 	}
 
-	if r.Method != "POST" {
+	if args.Request.Method != "POST" {
 		return "", HttpErrMethodNotAllowed(ErrMethodNotAllowed)
 	}
 
-	r.Body = http.MaxBytesReader(w, r.Body, env.MaxUploadSizeBytes)
-	if err := r.ParseMultipartForm(env.MaxUploadSizeBytes); err != nil {
+	args.Request.Body = http.MaxBytesReader(args.ResponseWriter, args.Request.Body, env.MaxUploadSizeBytes)
+	if err := args.Request.ParseMultipartForm(env.MaxUploadSizeBytes); err != nil {
 		return "", HttpErrBadRequest(ErrExceededMaxUploadSize)
 	}
 
-	file, fileHeader, err := r.FormFile(fieldName)
+	file, fileHeader, err := args.Request.FormFile(args.FieldName)
 
 	if err != nil {
+		if err == http.ErrMissingFile && args.IsOptional {
+			return "", nil
+		}
+
 		log.Println("error parsing form file: ", err)
-		return "", HttpErrBadRequest("field " + fieldName + " is required")
+		return "", HttpErrBadRequest("field " + args.FieldName + " is required")
 	}
 
 	defer file.Close()
 
-	if err := validateMimeType(file, allowedMimeTypes); err != nil {
+	if err := validateMimeType(file, args.AllowedMimeTypes); err != nil {
 		return "", err
 	}
 
 	extension := filepath.Ext(fileHeader.Filename)
 	location, err := NewPublicFileLocation(PublicFileLocationArgs{
-		Dir:       dir,
+		Dir:       args.Dir,
 		Extension: extension,
 	})
 	if err != nil {

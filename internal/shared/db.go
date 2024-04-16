@@ -2,6 +2,7 @@ package shared
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/kume1a/sonifybackend/internal/database"
 )
@@ -39,5 +40,5 @@ func RunDBTransaction[T interface{}](
 }
 
 func IsDBErrorNotFound(err error) bool {
-	return err.Error() == "sql: no rows in result set"
+	return err == sql.ErrNoRows
 }

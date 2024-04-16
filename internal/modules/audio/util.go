@@ -15,22 +15,26 @@ func (dto downloadYoutubeAudioDTO) Validate() error {
 }
 
 func ValidateUploadUserLocalMusicDTO(w http.ResponseWriter, r *http.Request) (*uploadUserLocalMusicDTO, *shared.HttpError) {
-	thumbnailPath, httpErr := shared.HandleUploadFile(
-		w, r,
-		"thumbnail",
-		shared.DirUserLocalAudioThumbnails,
-		shared.ImageMimeTypes,
-	)
+	thumbnailPath, httpErr := shared.HandleUploadFile(shared.HandleUploadFileArgs{
+		ResponseWriter:   w,
+		Request:          r,
+		FieldName:        "thumbnail",
+		Dir:              shared.DirUserLocalAudioThumbnails,
+		AllowedMimeTypes: shared.ImageMimeTypes,
+		IsOptional:       true,
+	})
 	if httpErr != nil {
 		return nil, httpErr
 	}
 
-	audioPath, httpErr := shared.HandleUploadFile(
-		w, r,
-		"audio",
-		shared.DirUserLocalAudios,
-		shared.AudioMimeTypes,
-	)
+	audioPath, httpErr := shared.HandleUploadFile(shared.HandleUploadFileArgs{
+		ResponseWriter:   w,
+		Request:          r,
+		FieldName:        "audio",
+		Dir:              shared.DirUserLocalAudios,
+		AllowedMimeTypes: shared.AudioMimeTypes,
+		IsOptional:       false,
+	})
 	if httpErr != nil {
 		return nil, httpErr
 	}
