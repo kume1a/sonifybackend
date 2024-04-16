@@ -10,7 +10,7 @@ type downloadYoutubeAudioDTO struct {
 	VideoID string `json:"videoId" valid:"required"`
 }
 
-type importUserLocalMusicDTO struct {
+type uploadUserLocalMusicDTO struct {
 	LocalId       string
 	Title         string
 	Author        string

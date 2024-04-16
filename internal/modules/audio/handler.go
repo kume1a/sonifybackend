@@ -40,7 +40,7 @@ func handleDownloadYoutubeAudio(apiCfg *shared.ApiConfig) http.HandlerFunc {
 	}
 }
 
-func handleImportUserLocalMusic(apiCfg *shared.ApiConfig) http.HandlerFunc {
+func handleUploadUserLocalMusic(apiCfg *shared.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authPayload, err := shared.GetAuthPayload(r)
 		if err != nil {
@@ -48,7 +48,7 @@ func handleImportUserLocalMusic(apiCfg *shared.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		form, httpErr := ValidateImportUserLocalMusicDTO(w, r)
+		form, httpErr := ValidateUploadUserLocalMusicDTO(w, r)
 		if httpErr != nil {
 			shared.ResHttpError(w, httpErr)
 			return

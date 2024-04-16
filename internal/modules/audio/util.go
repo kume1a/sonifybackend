@@ -14,7 +14,7 @@ func (dto downloadYoutubeAudioDTO) Validate() error {
 	return err
 }
 
-func ValidateImportUserLocalMusicDTO(w http.ResponseWriter, r *http.Request) (*importUserLocalMusicDTO, *shared.HttpError) {
+func ValidateUploadUserLocalMusicDTO(w http.ResponseWriter, r *http.Request) (*uploadUserLocalMusicDTO, *shared.HttpError) {
 	thumbnailPath, httpErr := shared.HandleUploadFile(
 		w, r,
 		"thumbnail",
@@ -61,7 +61,7 @@ func ValidateImportUserLocalMusicDTO(w http.ResponseWriter, r *http.Request) (*i
 		return nil, shared.HttpErrBadRequest("durationMs must be an integer")
 	}
 
-	return &importUserLocalMusicDTO{
+	return &uploadUserLocalMusicDTO{
 		LocalId:       localId,
 		Title:         title,
 		Author:        author,
