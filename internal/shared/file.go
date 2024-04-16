@@ -88,6 +88,16 @@ func GetFileSize(filepath string) (*FileSize, error) {
 	}, nil
 }
 
+func DeleteFiles(filepaths []string) error {
+	for _, filepath := range filepaths {
+		if err := os.Remove(filepath); err != nil {
+			log.Println("error deleting file: ", err)
+			return err
+		}
+	}
+	return nil
+}
+
 func ensureDir(dirName string) error {
 	err := os.MkdirAll(dirName, os.ModePerm)
 	if err == nil {

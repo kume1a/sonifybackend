@@ -54,6 +54,19 @@ func handleUploadUserLocalMusic(apiCfg *shared.ApiConfig) http.HandlerFunc {
 			return
 		}
 
+		audioExists, err := DoesAudioExistByLocalId(r.Context(), apiCfg.DB, authPayload.UserID, form.LocalId)
+		if err != nil {
+			shared.ResInternalServerErrorDef(w)
+			return
+		}
+
+		if audioExists {
+			shared.DeleteFiles([]string{form.AudioPath, form.ThumbnailPath})
+
+			shared.ResConflict(w, shared.ErrAudioAlreadyExists)
+			return
+		}
+
 		userAudioWithAudio, httpErr := WriteUserImportedLocalMusic(WriteUserImportedLocalMusicParams{
 			ApiConfig:          apiCfg,
 			Context:            r.Context(),

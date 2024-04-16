@@ -92,6 +92,21 @@ func DownloadYoutubeAudio(params DownloadYoutubeAudioParams) (*database.UserAudi
 	return userAudio, newAudio, nil
 }
 
+func DoesAudioExistByLocalId(ctx context.Context, db *database.Queries, userID uuid.UUID, localID string) (bool, error) {
+	count, err := CountUserAudioByLocalId(ctx, db, database.CountUserAudioByLocalIdParams{
+		LocalID: sql.NullString{String: localID, Valid: true},
+		UserID:  userID,
+	})
+	if err != nil {
+		if shared.IsDBErrorNotFound(err) {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return count > 0, nil
+}
+
 type WriteUserImportedLocalMusicParams struct {
 	ApiConfig          *shared.ApiConfig
 	Context            context.Context
@@ -105,14 +120,6 @@ type WriteUserImportedLocalMusicParams struct {
 }
 
 func WriteUserImportedLocalMusic(params WriteUserImportedLocalMusicParams) (*UserAudioWithAudio, *shared.HttpError) {
-	_, err := GetUserAudioByLocalId(params.Context, params.ApiConfig.DB, database.GetUserAudioByLocalIdParams{
-		UserID:  params.UserID,
-		LocalID: sql.NullString{String: params.AudioLocalId, Valid: true},
-	})
-	if err == nil {
-		return nil, shared.HttpErrConflict(shared.ErrAudioAlreadyExists)
-	}
-
 	audioFileSize, err := shared.GetFileSize(params.AudioPath)
 	if err != nil {
 		return nil, shared.HttpErrInternalServerErrorDef()

@@ -14,6 +14,24 @@ import (
 	"github.com/lib/pq"
 )
 
+const countUserAudioByLocalId = `-- name: CountUserAudioByLocalId :one
+SELECT COUNT(*) FROM user_audios 
+  INNER JOIN audio ON user_audios.audio_id = audio.id 
+  WHERE user_audios.user_id = $1 AND audio.local_id = $2
+`
+
+type CountUserAudioByLocalIdParams struct {
+	UserID  uuid.UUID
+	LocalID sql.NullString
+}
+
+func (q *Queries) CountUserAudioByLocalId(ctx context.Context, arg CountUserAudioByLocalIdParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countUserAudioByLocalId, arg.UserID, arg.LocalID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createAudio = `-- name: CreateAudio :one
 INSERT INTO audio(
   id, 
@@ -307,37 +325,6 @@ func (q *Queries) GetPlaylistAudiosBySpotifyIds(ctx context.Context, arg GetPlay
 		return nil, err
 	}
 	return items, nil
-}
-
-const getUserAudioByLocalId = `-- name: GetUserAudioByLocalId :one
-SELECT audio.id, audio.title, audio.author, audio.duration_ms, audio.path, audio.created_at, audio.size_bytes, audio.youtube_video_id, audio.thumbnail_path, audio.spotify_id, audio.thumbnail_url, audio.local_id FROM user_audios 
-  INNER JOIN audio ON user_audios.audio_id = audio.id 
-  WHERE user_audios.user_id = $1 AND audio.local_id = $2
-`
-
-type GetUserAudioByLocalIdParams struct {
-	UserID  uuid.UUID
-	LocalID sql.NullString
-}
-
-func (q *Queries) GetUserAudioByLocalId(ctx context.Context, arg GetUserAudioByLocalIdParams) (Audio, error) {
-	row := q.db.QueryRowContext(ctx, getUserAudioByLocalId, arg.UserID, arg.LocalID)
-	var i Audio
-	err := row.Scan(
-		&i.ID,
-		&i.Title,
-		&i.Author,
-		&i.DurationMs,
-		&i.Path,
-		&i.CreatedAt,
-		&i.SizeBytes,
-		&i.YoutubeVideoID,
-		&i.ThumbnailPath,
-		&i.SpotifyID,
-		&i.ThumbnailUrl,
-		&i.LocalID,
-	)
-	return i, err
 }
 
 const getUserAudioByVideoId = `-- name: GetUserAudioByVideoId :one

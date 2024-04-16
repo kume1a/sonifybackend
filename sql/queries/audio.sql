@@ -69,7 +69,7 @@ SELECT
 FROM audio
 WHERE spotify_id = ANY(sqlc.arg(spotify_ids)::text[]);
 
--- name: GetUserAudioByLocalId :one
-SELECT audio.* FROM user_audios 
+-- name: CountUserAudioByLocalId :one
+SELECT COUNT(*) FROM user_audios 
   INNER JOIN audio ON user_audios.audio_id = audio.id 
   WHERE user_audios.user_id = $1 AND audio.local_id = $2;

@@ -107,16 +107,16 @@ func GetAudioIdsBySpotifyIds(
 	return ids, err
 }
 
-func GetUserAudioByLocalId(
+func CountUserAudioByLocalId(
 	ctx context.Context,
 	db *database.Queries,
-	params database.GetUserAudioByLocalIdParams,
-) (*database.Audio, error) {
-	audio, err := db.GetUserAudioByLocalId(ctx, params)
+	params database.CountUserAudioByLocalIdParams,
+) (int64, error) {
+	count, err := db.CountUserAudioByLocalId(ctx, params)
 
 	if err != nil {
 		log.Println("Error getting audio by local id: ", err)
 	}
 
-	return &audio, err
+	return count, err
 }
