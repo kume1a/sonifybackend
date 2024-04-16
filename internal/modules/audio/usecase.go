@@ -127,11 +127,11 @@ func WriteUserImportedLocalMusic(params WriteUserImportedLocalMusicParams) (*Use
 				tx,
 				database.CreateAudioParams{
 					Title:         sql.NullString{String: params.AudioTitle, Valid: true},
-					Author:        sql.NullString{String: params.AudioAuthor, Valid: true},
+					Author:        sql.NullString{String: params.AudioAuthor, Valid: params.AudioAuthor != ""},
 					Path:          sql.NullString{String: params.AudioPath, Valid: true},
 					ThumbnailPath: sql.NullString{String: params.AudioThumbnailPath, Valid: params.AudioThumbnailPath != ""},
-					LocalID:       sql.NullString{String: params.AudioLocalId, Valid: true},
-					DurationMs:    sql.NullInt32{Int32: params.AudioDurationMs, Valid: true},
+					LocalID:       sql.NullString{String: params.AudioLocalId, Valid: params.AudioLocalId != ""},
+					DurationMs:    sql.NullInt32{Int32: params.AudioDurationMs, Valid: params.AudioDurationMs != 0},
 					SizeBytes:     sql.NullInt64{Int64: audioFileSize.Bytes, Valid: true},
 				},
 			)

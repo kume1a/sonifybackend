@@ -52,17 +52,14 @@ func ValidateUploadUserLocalMusicDTO(w http.ResponseWriter, r *http.Request) (*u
 		return nil, shared.HttpErrBadRequest("title must be between 1 and 255 characters")
 	}
 
-	if !govalidator.IsByteLength(author, 1, 255) {
-		return nil, shared.HttpErrBadRequest("author must be between 1 and 255 characters")
-	}
+	intDurationMs := 0
+	if durationMs != "" {
+		intDurationMsValue, err := strconv.Atoi(durationMs)
+		if err != nil {
+			return nil, shared.HttpErrBadRequest("durationMs must be an integer")
+		}
 
-	if durationMs == "" {
-		return nil, shared.HttpErrBadRequest("durationMs must be provided")
-	}
-
-	intDurationMs, err := strconv.Atoi(durationMs)
-	if err != nil {
-		return nil, shared.HttpErrBadRequest("durationMs must be an integer")
+		intDurationMs = intDurationMsValue
 	}
 
 	return &uploadUserLocalMusicDTO{
