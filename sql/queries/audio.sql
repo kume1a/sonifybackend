@@ -10,8 +10,9 @@ INSERT INTO audio(
   youtube_video_id,
   thumbnail_path,
   spotify_id,
-  thumbnail_url
-) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *;
+  thumbnail_url,
+  local_id
+) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING *;
 
 -- name: GetAudiosByUserId :many
 SELECT 
@@ -67,3 +68,8 @@ SELECT
   id
 FROM audio
 WHERE spotify_id = ANY(sqlc.arg(spotify_ids)::text[]);
+
+-- name: GetUserAudioByLocalId :one
+SELECT audio.* FROM user_audios 
+  INNER JOIN audio ON user_audios.audio_id = audio.id 
+  WHERE user_audios.user_id = $1 AND audio.local_id = $2;

@@ -18,7 +18,7 @@ func DeleteSpotifyUserSavedPlaylists(
 		return err
 	}
 
-	if _, err := shared.RunDbTransaction(ctx, apiCfg, func(tx *database.Queries) (any, error) {
+	if _, err := shared.RunDBTransaction(ctx, apiCfg, func(tx *database.Queries) (any, error) {
 		err = DeleteSpotifyUserSavedPlaylistJoins(ctx, tx, userId)
 		if err != nil {
 			return nil, err

@@ -16,7 +16,7 @@ func BulkWriteAudios(
 	apiCfg *shared.ApiConfig,
 	params []database.CreateAudioParams,
 ) ([]database.Audio, error) {
-	return shared.RunDbTransaction(
+	return shared.RunDBTransaction(
 		ctx,
 		apiCfg,
 		func(tx *database.Queries) ([]database.Audio, error) {
@@ -90,4 +90,77 @@ func DownloadYoutubeAudio(params DownloadYoutubeAudioParams) (*database.UserAudi
 	}
 
 	return userAudio, newAudio, nil
+}
+
+type WriteUserImportedLocalMusicParams struct {
+	ApiConfig          *shared.ApiConfig
+	Context            context.Context
+	UserID             uuid.UUID
+	AudioLocalId       string
+	AudioTitle         string
+	AudioAuthor        string
+	AudioPath          string
+	AudioThumbnailPath string
+	AudioDurationMs    int32
+}
+
+func WriteUserImportedLocalMusic(params WriteUserImportedLocalMusicParams) (*UserAudioWithAudio, *shared.HttpError) {
+	_, err := GetUserAudioByLocalId(params.Context, params.ApiConfig.DB, database.GetUserAudioByLocalIdParams{
+		UserID:  params.UserID,
+		LocalID: sql.NullString{String: params.AudioLocalId, Valid: true},
+	})
+	if err == nil {
+		return nil, shared.HttpErrConflict(shared.ErrAudioAlreadyExists)
+	}
+
+	audioFileSize, err := shared.GetFileSize(params.AudioPath)
+	if err != nil {
+		return nil, shared.HttpErrInternalServerErrorDef()
+	}
+
+	res, err := shared.RunDBTransaction(
+		params.Context,
+		params.ApiConfig,
+		func(tx *database.Queries) (*UserAudioWithAudio, error) {
+			audio, err := CreateAudio(
+				params.Context,
+				tx,
+				database.CreateAudioParams{
+					Title:         sql.NullString{String: params.AudioTitle, Valid: true},
+					Author:        sql.NullString{String: params.AudioAuthor, Valid: true},
+					Path:          sql.NullString{String: params.AudioPath, Valid: true},
+					ThumbnailPath: sql.NullString{String: params.AudioThumbnailPath, Valid: true},
+					LocalID:       sql.NullString{String: params.AudioLocalId, Valid: true},
+					DurationMs:    sql.NullInt32{Int32: params.AudioDurationMs, Valid: true},
+					SizeBytes:     sql.NullInt64{Int64: audioFileSize.Bytes, Valid: true},
+				},
+			)
+			if err != nil {
+				return nil, err
+			}
+
+			userAudio, err := CreateUserAudio(
+				params.Context,
+				tx,
+				database.CreateUserAudioParams{
+					UserID:  params.UserID,
+					AudioID: audio.ID,
+				},
+			)
+			if err != nil {
+				return nil, err
+			}
+
+			return &UserAudioWithAudio{
+				UserAudio: userAudio,
+				Audio:     audio,
+			}, nil
+		},
+	)
+
+	if err != nil {
+		return nil, shared.HttpErrInternalServerErrorDef()
+	}
+
+	return res, nil
 }

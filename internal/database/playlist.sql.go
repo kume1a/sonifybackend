@@ -155,7 +155,7 @@ func (q *Queries) DeleteSpotifyUserSavedPlaylistJoins(ctx context.Context, userI
 }
 
 const getPlaylistAudioJoins = `-- name: GetPlaylistAudioJoins :many
-SELECT playlist_id, audio_id, playlist_audios.created_at, id, title, author, duration_ms, path, audio.created_at, size_bytes, youtube_video_id, thumbnail_path, spotify_id, thumbnail_url FROM playlist_audios
+SELECT playlist_id, audio_id, playlist_audios.created_at, id, title, author, duration_ms, path, audio.created_at, size_bytes, youtube_video_id, thumbnail_path, spotify_id, thumbnail_url, local_id FROM playlist_audios
   INNER JOIN audio ON playlist_audios.audio_id = audio.id
 WHERE (playlist_id = $1 or $1 IS NULL) 
   AND playlist_audios.created_at > $2
@@ -184,6 +184,7 @@ type GetPlaylistAudioJoinsRow struct {
 	ThumbnailPath  sql.NullString
 	SpotifyID      sql.NullString
 	ThumbnailUrl   sql.NullString
+	LocalID        sql.NullString
 }
 
 func (q *Queries) GetPlaylistAudioJoins(ctx context.Context, arg GetPlaylistAudioJoinsParams) ([]GetPlaylistAudioJoinsRow, error) {
@@ -210,6 +211,7 @@ func (q *Queries) GetPlaylistAudioJoins(ctx context.Context, arg GetPlaylistAudi
 			&i.ThumbnailPath,
 			&i.SpotifyID,
 			&i.ThumbnailUrl,
+			&i.LocalID,
 		); err != nil {
 			return nil, err
 		}
@@ -274,7 +276,7 @@ func (q *Queries) GetPlaylistAudioJoinsBySpotifyIds(ctx context.Context, arg Get
 }
 
 const getPlaylistAudios = `-- name: GetPlaylistAudios :many
-SELECT audio.id, audio.title, audio.author, audio.duration_ms, audio.path, audio.created_at, audio.size_bytes, audio.youtube_video_id, audio.thumbnail_path, audio.spotify_id, audio.thumbnail_url 
+SELECT audio.id, audio.title, audio.author, audio.duration_ms, audio.path, audio.created_at, audio.size_bytes, audio.youtube_video_id, audio.thumbnail_path, audio.spotify_id, audio.thumbnail_url, audio.local_id 
   FROM playlist_audios 
   INNER JOIN audio ON playlist_audios.audio_id = audio.id
   WHERE playlist_audios.playlist_id = $1
@@ -301,6 +303,7 @@ func (q *Queries) GetPlaylistAudios(ctx context.Context, playlistID uuid.UUID) (
 			&i.ThumbnailPath,
 			&i.SpotifyID,
 			&i.ThumbnailUrl,
+			&i.LocalID,
 		); err != nil {
 			return nil, err
 		}

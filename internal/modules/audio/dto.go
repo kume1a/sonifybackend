@@ -16,6 +16,7 @@ type importUserLocalMusicDTO struct {
 	Author        string
 	AudioPath     string
 	ThumbnailPath string
+	DurationMs    int32
 }
 
 type AudioDTO struct {
@@ -30,6 +31,7 @@ type AudioDTO struct {
 	ThumbnailPath  string    `json:"thumbnailPath"`
 	ThumbnailUrl   string    `json:"thumbnailUrl"`
 	SpotifyID      string    `json:"spotifyId"`
+	LocalID        string    `json:"localId"`
 }
 
 type UserAudioDTO struct {

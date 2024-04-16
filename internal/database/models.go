@@ -84,6 +84,7 @@ type Audio struct {
 	ThumbnailPath  sql.NullString
 	SpotifyID      sql.NullString
 	ThumbnailUrl   sql.NullString
+	LocalID        sql.NullString
 }
 
 type Playlist struct {

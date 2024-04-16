@@ -94,7 +94,7 @@ func downloadSpotifyPlaylist(
 		createPlaylistAudioParams = append(createPlaylistAudioParams, playlistAudioCreateParams...)
 	}
 
-	_, err = shared.RunDbTransaction(
+	_, err = shared.RunDBTransaction(
 		ctx,
 		apiCfg,
 		func(queries *database.Queries) (any, error) {

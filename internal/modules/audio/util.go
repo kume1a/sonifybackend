@@ -2,6 +2,7 @@ package audio
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/kume1a/sonifybackend/internal/database"
@@ -14,29 +15,30 @@ func (dto downloadYoutubeAudioDTO) Validate() error {
 }
 
 func ValidateImportUserLocalMusicDTO(w http.ResponseWriter, r *http.Request) (*importUserLocalMusicDTO, *shared.HttpError) {
-	thumbnailPath, err := shared.HandleUploadFile(
+	thumbnailPath, httpErr := shared.HandleUploadFile(
 		w, r,
 		"thumbnail",
 		shared.DirUserLocalAudioThumbnails,
 		shared.ImageMimeTypes,
 	)
-	if err != nil {
-		return nil, err
+	if httpErr != nil {
+		return nil, httpErr
 	}
 
-	audioPath, err := shared.HandleUploadFile(
+	audioPath, httpErr := shared.HandleUploadFile(
 		w, r,
 		"audio",
 		shared.DirUserLocalAudios,
 		shared.AudioMimeTypes,
 	)
-	if err != nil {
-		return nil, err
+	if httpErr != nil {
+		return nil, httpErr
 	}
 
 	localId := r.FormValue("localId")
 	title := r.FormValue("title")
-	author := r.FormValue("title")
+	author := r.FormValue("author")
+	durationMs := r.FormValue("durationMs")
 
 	if localId == "" {
 		return nil, shared.HttpErrBadRequest("localId must be provided")
@@ -50,12 +52,22 @@ func ValidateImportUserLocalMusicDTO(w http.ResponseWriter, r *http.Request) (*i
 		return nil, shared.HttpErrBadRequest("author must be between 1 and 255 characters")
 	}
 
+	if durationMs == "" {
+		return nil, shared.HttpErrBadRequest("durationMs must be provided")
+	}
+
+	intDurationMs, err := strconv.Atoi(durationMs)
+	if err != nil {
+		return nil, shared.HttpErrBadRequest("durationMs must be an integer")
+	}
+
 	return &importUserLocalMusicDTO{
 		LocalId:       localId,
 		Title:         title,
 		Author:        author,
 		AudioPath:     audioPath,
 		ThumbnailPath: thumbnailPath,
+		DurationMs:    int32(intDurationMs),
 	}, nil
 }
 
@@ -72,6 +84,7 @@ func AudioEntityToDto(e database.Audio) *AudioDTO {
 		ThumbnailPath:  e.ThumbnailPath.String,
 		ThumbnailUrl:   e.ThumbnailUrl.String,
 		SpotifyID:      e.SpotifyID.String,
+		LocalID:        e.LocalID.String,
 	}
 }
 

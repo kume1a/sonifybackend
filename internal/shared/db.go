@@ -12,7 +12,7 @@ type DBOverrideOptions struct {
 	OverrideUpdatedAt bool `default:"true"`
 }
 
-func RunDbTransaction[T interface{}](
+func RunDBTransaction[T interface{}](
 	ctx context.Context,
 	apiCfg *ApiConfig,
 	f func(queries *database.Queries) (T, error),

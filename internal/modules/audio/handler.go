@@ -1,7 +1,6 @@
 package audio
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/kume1a/sonifybackend/internal/shared"
@@ -55,7 +54,28 @@ func handleImportUserLocalMusic(apiCfg *shared.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		log.Println("authPayload = ", authPayload)
-		log.Println("form.Title = ", form.Title, "form.Author = ", form.Author, "form.LocalId = ", form.LocalId, "form.AudioPath = ", form.AudioPath, "form.ThumbnailPath = ", form.ThumbnailPath)
+		userAudioWithAudio, httpErr := WriteUserImportedLocalMusic(WriteUserImportedLocalMusicParams{
+			ApiConfig:          apiCfg,
+			Context:            r.Context(),
+			UserID:             authPayload.UserID,
+			AudioTitle:         form.Title,
+			AudioAuthor:        form.Author,
+			AudioPath:          form.AudioPath,
+			AudioThumbnailPath: form.ThumbnailPath,
+			AudioDurationMs:    form.DurationMs,
+			AudioLocalId:       form.LocalId,
+		})
+
+		if httpErr != nil {
+			shared.ResHttpError(w, httpErr)
+			return
+		}
+
+		res := UserAudioWithRelDTO{
+			UserAudioDTO: UserAudioEntityToDto(userAudioWithAudio.UserAudio),
+			Audio:        AudioEntityToDto(*userAudioWithAudio.Audio),
+		}
+
+		shared.ResCreated(w, res)
 	}
 }
