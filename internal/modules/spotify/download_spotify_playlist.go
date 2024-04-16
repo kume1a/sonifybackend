@@ -8,8 +8,6 @@ import (
 	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/modules/audio"
 	"github.com/kume1a/sonifybackend/internal/modules/playlist"
-	playlistusecase "github.com/kume1a/sonifybackend/internal/modules/playlist/usecase"
-	spotifyusecase "github.com/kume1a/sonifybackend/internal/modules/spotify/usecase"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
@@ -24,7 +22,7 @@ func downloadSpotifyPlaylist(
 		return err
 	}
 
-	playlistusecase.DeleteSpotifyUserSavedPlaylists(ctx, apiCfg, authUserID)
+	playlist.DeleteSpotifyUserSavedPlaylists(ctx, apiCfg, authUserID)
 
 	createPlaylistParams := []database.CreatePlaylistParams{}
 	createPlaylistAudioParams := []database.CreatePlaylistAudioParams{}
@@ -36,12 +34,12 @@ func downloadSpotifyPlaylist(
 			return err
 		}
 
-		if err := spotifyusecase.DownloadWriteSpotifyAudios(
+		if err := DownloadWriteSpotifyAudios(
 			ctx,
 			apiCfg,
 			shared.Map(
 				playlistItems.Items,
-				func(playlistItem spotifyPlaylistItemDTO) spotifyusecase.DownloadSpotifyAudioInput {
+				func(playlistItem spotifyPlaylistItemDTO) DownloadSpotifyAudioInput {
 					artistName := ""
 					if len(playlistItem.Track.Artists) > 0 {
 						artistName = playlistItem.Track.Artists[0].Name
@@ -52,7 +50,7 @@ func downloadSpotifyPlaylist(
 						thumbnailURL = playlistItem.Track.Album.Images[0].URL
 					}
 
-					return spotifyusecase.DownloadSpotifyAudioInput{
+					return DownloadSpotifyAudioInput{
 						SpotifyID:    playlistItem.Track.ID,
 						TrackName:    playlistItem.Track.Name,
 						ArtistName:   artistName,

@@ -1,10 +1,9 @@
-package audiousecase
+package audio
 
 import (
 	"context"
 
 	"github.com/kume1a/sonifybackend/internal/database"
-	"github.com/kume1a/sonifybackend/internal/modules/audio"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
@@ -20,7 +19,7 @@ func BulkWriteAudios(
 			audios := make([]database.Audio, 0, len(params))
 
 			for _, param := range params {
-				audio, err := audio.CreateAudio(ctx, tx, param)
+				audio, err := CreateAudio(ctx, tx, param)
 				if err != nil {
 					return nil, err
 				}
