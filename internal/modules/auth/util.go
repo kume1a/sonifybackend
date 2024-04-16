@@ -30,7 +30,7 @@ func ComparePasswordHash(password, hash string) bool {
 
 func getTokenPayloadDtoFromUserEntity(userEntity *database.User) (*tokenPayloadDTO, error) {
 	accessToken, err := shared.GenerateAccessToken(&shared.TokenClaims{
-		UserId: userEntity.ID,
+		UserID: userEntity.ID,
 		Email:  userEntity.Email.String})
 
 	if err != nil {

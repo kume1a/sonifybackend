@@ -1,12 +1,8 @@
 package audio
 
 import (
-	"database/sql"
 	"net/http"
-	"strings"
 
-	"github.com/kume1a/sonifybackend/internal/database"
-	"github.com/kume1a/sonifybackend/internal/modules/youtube"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
@@ -24,54 +20,14 @@ func handleDownloadYoutubeAudio(apiCfg *shared.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		// check if the user already has the audio
-		if _, err := GetUserAudioByYoutubeVideoId(r.Context(), apiCfg.DB, authPayload.UserId, body.VideoId); err == nil {
-			shared.ResConflict(w, shared.ErrAudioAlreadyExists)
-			return
-		}
-
-		videoInfo, err := youtube.GetYoutubeVideoInfo(body.VideoId)
-		if err != nil {
-			shared.ResInternalServerErrorDef(w)
-			return
-		}
-
-		filePath, thumbnailPath, err := youtube.DownloadYoutubeAudioWithThumbnail(body.VideoId)
-		if err != nil {
-			shared.ResInternalServerErrorDef(w)
-			return
-		}
-
-		fileSize, err := shared.GetFileSize(filePath)
-		if err != nil {
-			shared.ResInternalServerErrorDef(w)
-			return
-		}
-
-		newAudio, err := CreateAudio(
-			r.Context(),
-			apiCfg.DB,
-			database.CreateAudioParams{
-				Title:          sql.NullString{String: strings.TrimSpace(videoInfo.Title), Valid: true},
-				Author:         sql.NullString{String: strings.TrimSpace(videoInfo.Uploader), Valid: true},
-				DurationMs:     sql.NullInt32{Int32: int32(videoInfo.DurationSeconds * 1000), Valid: true},
-				Path:           sql.NullString{String: filePath, Valid: true},
-				SizeBytes:      sql.NullInt64{Int64: fileSize.Bytes, Valid: true},
-				YoutubeVideoID: sql.NullString{String: body.VideoId, Valid: true},
-				ThumbnailPath:  sql.NullString{String: thumbnailPath, Valid: true},
-			},
-		)
-		if err != nil {
-			shared.ResInternalServerErrorDef(w)
-			return
-		}
-
-		userAudio, err := CreateUserAudio(r.Context(), apiCfg.DB, database.CreateUserAudioParams{
-			UserID:  authPayload.UserId,
-			AudioID: newAudio.ID,
+		userAudio, audio, httpErr := DownloadYoutubeAudio(DownloadYoutubeAudioParams{
+			ApiConfig: apiCfg,
+			Context:   r.Context(),
+			UserID:    authPayload.UserID,
+			VideoID:   body.VideoID,
 		})
-		if err != nil {
-			shared.ResInternalServerErrorDef(w)
+		if httpErr != nil {
+			shared.ResHttpError(w, httpErr)
 			return
 		}
 
@@ -80,7 +36,7 @@ func handleDownloadYoutubeAudio(apiCfg *shared.ApiConfig) http.HandlerFunc {
 			Audio *AudioDto `json:"audio"`
 		}{
 			UserAudioDto: UserAudioEntityToDto(userAudio),
-			Audio:        AudioEntityToDto(*newAudio),
+			Audio:        AudioEntityToDto(*audio),
 		}
 
 		shared.ResCreated(w, res)

@@ -14,9 +14,9 @@ func handleGetUserSyncDatumByUserId(apiCfg *shared.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		syncData, httpErr := GetOrCreateUserSyncDatumByUserId(r.Context(), apiCfg.DB, tokenPayload.UserId)
+		syncData, httpErr := GetOrCreateUserSyncDatumByUserId(r.Context(), apiCfg.DB, tokenPayload.UserID)
 		if httpErr != nil {
-			shared.ResHttpError(w, *httpErr)
+			shared.ResHttpError(w, httpErr)
 			return
 		}
 

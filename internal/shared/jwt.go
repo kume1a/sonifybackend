@@ -10,7 +10,7 @@ import (
 )
 
 type TokenClaims struct {
-	UserId uuid.UUID
+	UserID uuid.UUID
 	Email  string
 }
 
@@ -72,7 +72,7 @@ func verifyJWT(tokenString string, secretKey string) (*TokenClaims, error) {
 	}
 
 	return &TokenClaims{
-		UserId: userIdUUID,
+		UserID: userIdUUID,
 		Email:  email,
 	}, nil
 }
@@ -86,7 +86,7 @@ func generateJWT(tokenClaims *TokenClaims, secretKey string) (string, error) {
 	expDuration := time.Millisecond * time.Duration(env.AccessTokenExpMillis)
 
 	claims := jwt.MapClaims{
-		"userId": tokenClaims.UserId.String(),
+		"userId": tokenClaims.UserID.String(),
 		"email":  tokenClaims.Email,
 		"exp":    time.Now().Add(expDuration).Unix(),
 	}

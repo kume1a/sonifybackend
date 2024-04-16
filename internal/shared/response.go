@@ -64,7 +64,7 @@ func ResNoContent(w http.ResponseWriter) {
 	resJson(w, http.StatusNoContent, struct{}{})
 }
 
-func ResHttpError(w http.ResponseWriter, httpError HttpError) {
+func ResHttpError(w http.ResponseWriter, httpError *HttpError) {
 	resError(w, httpError.Code, httpError.Message)
 }
 
@@ -140,6 +140,20 @@ func HttpErrMethodNotAllowed(msg string) *HttpError {
 	return &HttpError{
 		Message: msg,
 		Code:    http.StatusMethodNotAllowed,
+	}
+}
+
+func HttpErrNotAcceptable(msg string) *HttpError {
+	return &HttpError{
+		Message: msg,
+		Code:    http.StatusNotAcceptable,
+	}
+}
+
+func HttpErrConflict(msg string) *HttpError {
+	return &HttpError{
+		Message: msg,
+		Code:    http.StatusConflict,
 	}
 }
 

@@ -7,7 +7,7 @@ import (
 )
 
 type downloadYoutubeAudioDto struct {
-	VideoId string `json:"videoId" valid:"required"`
+	VideoID string `json:"videoId" valid:"required"`
 }
 
 type AudioDto struct {

@@ -17,7 +17,7 @@ func handleGoogleAuth(apiCfg *shared.ApiConfig) http.HandlerFunc {
 
 		tokenPayload, httpErr := AuthWithGoogle(*apiCfg, r.Context(), body.Token)
 		if httpErr != nil {
-			shared.ResHttpError(w, *httpErr)
+			shared.ResHttpError(w, httpErr)
 			return
 		}
 
@@ -36,7 +36,7 @@ func handleEmailAuth(apiCfg *shared.ApiConfig) http.HandlerFunc {
 
 		tokenPayload, httpErr := AuthWithEmail(*apiCfg, r.Context(), body.Email, body.Password)
 		if httpErr != nil {
-			shared.ResHttpError(w, *httpErr)
+			shared.ResHttpError(w, httpErr)
 			return
 		}
 
