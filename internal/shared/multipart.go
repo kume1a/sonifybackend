@@ -1,7 +1,6 @@
 package shared
 
 import (
-	"database/sql"
 	"io"
 	"log"
 	"mime/multipart"
