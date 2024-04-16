@@ -1,17 +1,66 @@
 package audio
 
 import (
+	"net/http"
+
 	"github.com/asaskevich/govalidator"
 	"github.com/kume1a/sonifybackend/internal/database"
+	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
-func (dto downloadYoutubeAudioDto) Validate() error {
+func (dto downloadYoutubeAudioDTO) Validate() error {
 	_, err := govalidator.ValidateStruct(dto)
 	return err
 }
 
-func AudioEntityToDto(e database.Audio) *AudioDto {
-	return &AudioDto{
+func ValidateImportUserLocalMusicDTO(w http.ResponseWriter, r *http.Request) (*importUserLocalMusicDTO, *shared.HttpError) {
+	thumbnailPath, err := shared.HandleUploadFile(
+		w, r,
+		"thumbnail",
+		shared.DirUserLocalAudioThumbnails,
+		shared.ImageMimeTypes,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	audioPath, err := shared.HandleUploadFile(
+		w, r,
+		"audio",
+		shared.DirUserLocalAudios,
+		shared.AudioMimeTypes,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	localId := r.FormValue("localId")
+	title := r.FormValue("title")
+	author := r.FormValue("title")
+
+	if localId == "" {
+		return nil, shared.HttpErrBadRequest("localId must be provided")
+	}
+
+	if !govalidator.IsByteLength(title, 1, 255) {
+		return nil, shared.HttpErrBadRequest("title must be between 1 and 255 characters")
+	}
+
+	if !govalidator.IsByteLength(author, 1, 255) {
+		return nil, shared.HttpErrBadRequest("author must be between 1 and 255 characters")
+	}
+
+	return &importUserLocalMusicDTO{
+		LocalId:       localId,
+		Title:         title,
+		Author:        author,
+		AudioPath:     audioPath,
+		ThumbnailPath: thumbnailPath,
+	}, nil
+}
+
+func AudioEntityToDto(e database.Audio) *AudioDTO {
+	return &AudioDTO{
 		ID:             e.ID,
 		CreatedAt:      e.CreatedAt,
 		Title:          e.Title.String,
@@ -26,8 +75,8 @@ func AudioEntityToDto(e database.Audio) *AudioDto {
 	}
 }
 
-func UserAudioEntityToDto(e *database.UserAudio) *UserAudioDto {
-	return &UserAudioDto{
+func UserAudioEntityToDto(e *database.UserAudio) *UserAudioDTO {
+	return &UserAudioDTO{
 		CreatedAt: e.CreatedAt,
 		UserId:    e.UserID,
 		AudioId:   e.AudioID,

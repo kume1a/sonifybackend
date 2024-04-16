@@ -121,7 +121,7 @@ func handleGetPlaylistWithAudios(apiCfg *shared.ApiConfig) http.HandlerFunc {
 
 		dto := struct {
 			playlistDTO
-			Audios []*audio.AudioDto `json:"audios"`
+			Audios []*audio.AudioDTO `json:"audios"`
 		}{
 			playlistDTO: playlistEntityToDto(*playlist),
 			Audios:      shared.Map(audios, audio.AudioEntityToDto),

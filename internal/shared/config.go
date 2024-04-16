@@ -17,4 +17,6 @@ const (
 	DirSpotifyAudioThumbnails    = DirPublic + "/spotify_audio_thumbnails"
 	DirSpotifyPlaylistThumbnails = DirPublic + "/spotify_playlist_thumbnails"
 	DirPlaylistThumbnails        = DirPublic + "/playlist_thumbnails"
+	DirUserLocalAudios           = DirPublic + "/user_local_audios"
+	DirUserLocalAudioThumbnails  = DirPublic + "/user_local_audio_thumbnails"
 )

@@ -18,7 +18,7 @@ func ValidateCreatePlaylistDto(w http.ResponseWriter, r *http.Request) (*createP
 		w, r,
 		"thumbnail",
 		shared.DirPlaylistThumbnails,
-		[]string{"image/jpeg", "image/png"},
+		shared.ImageMimeTypes,
 	)
 	if err != nil {
 		return nil, err

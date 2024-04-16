@@ -69,6 +69,7 @@ func validateMimeType(file multipart.File, allowedMimeTypes []string) *HttpError
 
 	filetype := http.DetectContentType(buff)
 	if !Contains(allowedMimeTypes, filetype) {
+		log.Println("Invalid mime type: ", filetype, ", allowed = ", allowedMimeTypes)
 		return HttpErrBadRequest(ErrInvalidMimeType)
 	}
 

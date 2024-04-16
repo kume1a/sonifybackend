@@ -6,11 +6,19 @@ import (
 	"github.com/google/uuid"
 )
 
-type downloadYoutubeAudioDto struct {
+type downloadYoutubeAudioDTO struct {
 	VideoID string `json:"videoId" valid:"required"`
 }
 
-type AudioDto struct {
+type importUserLocalMusicDTO struct {
+	LocalId       string
+	Title         string
+	Author        string
+	AudioPath     string
+	ThumbnailPath string
+}
+
+type AudioDTO struct {
 	ID             uuid.UUID `json:"id"`
 	CreatedAt      time.Time `json:"createdAt"`
 	Title          string    `json:"title"`
@@ -24,8 +32,13 @@ type AudioDto struct {
 	SpotifyID      string    `json:"spotifyId"`
 }
 
-type UserAudioDto struct {
+type UserAudioDTO struct {
 	UserId    uuid.UUID `json:"userId"`
 	AudioId   uuid.UUID `json:"audioId"`
 	CreatedAt time.Time `json:"createdAt"`
+}
+
+type UserAudioWithRelDTO struct {
+	*UserAudioDTO
+	Audio *AudioDTO `json:"audio"`
 }

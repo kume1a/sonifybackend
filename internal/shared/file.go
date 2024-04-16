@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/google/uuid"
 )
@@ -22,6 +23,15 @@ type PublicFileLocationArgs struct {
 	Dir       string
 }
 
+var AudioMimeTypes = []string{
+	"audio/mpeg", "audio/mp3", "audio/x-m4a",
+	"audio/x-wav", "audio/x-aiff", "audio/x-flac",
+	"audio/ogg", "audio/x-ms-wma", "audio/x-ms-wmv",
+	"audio/x-ms-wav", "audio/webm", "video/webm",
+}
+
+var ImageMimeTypes = []string{"image/jpeg", "image/png"}
+
 func NewPublicFileLocation(args PublicFileLocationArgs) (string, error) {
 	if err := ensureDir(args.Dir); err != nil {
 		log.Println("error ensuring dir: ", err)
@@ -30,7 +40,7 @@ func NewPublicFileLocation(args PublicFileLocationArgs) (string, error) {
 
 	fileName := uuid.New().String()
 	if args.Extension != "" {
-		fileName = fileName + "." + args.Extension
+		fileName = fileName + "." + strings.Trim(args.Extension, ".")
 	}
 
 	return args.Dir + "/" + fileName, nil
