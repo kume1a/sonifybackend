@@ -16,8 +16,7 @@ INSERT INTO audio(
 
 -- name: GetAudiosByUserId :many
 SELECT 
-  audio.*,
-  user_audios.user_id AS user_id
+  audio.*
   FROM user_audios
   INNER JOIN audio ON user_audios.audio_id = audio.id
   WHERE user_id = $1;
@@ -73,3 +72,9 @@ WHERE spotify_id = ANY(sqlc.arg(spotify_ids)::text[]);
 SELECT COUNT(*) FROM user_audios 
   INNER JOIN audio ON user_audios.audio_id = audio.id 
   WHERE user_audios.user_id = $1 AND audio.local_id = $2;
+
+-- name: GetUserAudioIds :many
+SELECT audio_id FROM user_audios WHERE user_id = $1;
+
+-- name: GetAudiosByIds :many
+SELECT * FROM audio WHERE id = ANY(sqlc.arg(ids)::uuid[]);

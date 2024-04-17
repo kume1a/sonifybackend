@@ -11,12 +11,16 @@ type downloadYoutubeAudioDTO struct {
 }
 
 type uploadUserLocalMusicDTO struct {
-	LocalId       string
+	LocalID       string
 	Title         string
 	Author        string
 	AudioPath     string
 	ThumbnailPath string
 	DurationMs    int32
+}
+
+type getAudiosByIdsDTO struct {
+	IDs []uuid.UUID `json:"ids" valid:"required"`
 }
 
 type AudioDTO struct {

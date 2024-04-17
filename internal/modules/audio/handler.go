@@ -14,7 +14,7 @@ func handleDownloadYoutubeAudio(apiCfg *shared.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		body, err := shared.ValidateRequestBody[downloadYoutubeAudioDTO](r)
+		body, err := shared.ValidateRequestBody[*downloadYoutubeAudioDTO](r)
 		if err != nil {
 			shared.ResBadRequest(w, err.Error())
 			return
@@ -54,7 +54,7 @@ func handleUploadUserLocalMusic(apiCfg *shared.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		audioExists, err := DoesAudioExistByLocalId(r.Context(), apiCfg.DB, authPayload.UserID, form.LocalId)
+		audioExists, err := DoesAudioExistByLocalId(r.Context(), apiCfg.DB, authPayload.UserID, form.LocalID)
 		if err != nil {
 			shared.ResInternalServerErrorDef(w)
 			return
@@ -76,7 +76,7 @@ func handleUploadUserLocalMusic(apiCfg *shared.ApiConfig) http.HandlerFunc {
 			AudioPath:          form.AudioPath,
 			AudioThumbnailPath: form.ThumbnailPath,
 			AudioDurationMs:    form.DurationMs,
-			AudioLocalId:       form.LocalId,
+			AudioLocalId:       form.LocalID,
 		})
 
 		if httpErr != nil {
@@ -90,5 +90,69 @@ func handleUploadUserLocalMusic(apiCfg *shared.ApiConfig) http.HandlerFunc {
 		}
 
 		shared.ResCreated(w, res)
+	}
+}
+
+func handleGetUserAudios(apiCfg *shared.ApiConfig) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		authPayload, err := shared.GetAuthPayload(r)
+		if err != nil {
+			shared.ResUnauthorized(w, err.Error())
+			return
+		}
+
+		userAudios, err := GetUserAudios(r.Context(), apiCfg.DB, authPayload.UserID)
+		if err != nil {
+			shared.ResInternalServerErrorDef(w)
+			return
+		}
+
+		res := make([]*AudioDTO, 0, len(userAudios))
+		for _, userAudio := range userAudios {
+			res = append(res, AudioEntityToDto(userAudio))
+		}
+
+		shared.ResOK(w, res)
+	}
+}
+
+func handleGetUserAudioIds(apiCfg *shared.ApiConfig) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		authPayload, err := shared.GetAuthPayload(r)
+		if err != nil {
+			shared.ResUnauthorized(w, err.Error())
+			return
+		}
+
+		userAudioIds, err := GetUserAudioIds(r.Context(), apiCfg.DB, authPayload.UserID)
+		if err != nil {
+			shared.ResInternalServerErrorDef(w)
+			return
+		}
+
+		shared.ResOK(w, userAudioIds)
+	}
+}
+
+func handleGetAudiosByIds(apiCfg *shared.ApiConfig) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		body, err := shared.ValidateRequestBody[*getAudiosByIdsDTO](r)
+		if err != nil {
+			shared.ResBadRequest(w, err.Error())
+			return
+		}
+
+		audios, err := GetAudiosByIds(r.Context(), apiCfg.DB, body.IDs)
+		if err != nil {
+			shared.ResInternalServerErrorDef(w)
+			return
+		}
+
+		res := make([]*AudioDTO, 0, len(audios))
+		for _, audio := range audios {
+			res = append(res, AudioEntityToDto(audio))
+		}
+
+		shared.ResOK(w, res)
 	}
 }

@@ -9,7 +9,12 @@ import (
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
-func (dto downloadYoutubeAudioDTO) Validate() error {
+func (dto *downloadYoutubeAudioDTO) Validate() error {
+	_, err := govalidator.ValidateStruct(dto)
+	return err
+}
+
+func (dto *getAudiosByIdsDTO) Validate() error {
 	_, err := govalidator.ValidateStruct(dto)
 	return err
 }
@@ -63,7 +68,7 @@ func ValidateUploadUserLocalMusicDTO(w http.ResponseWriter, r *http.Request) (*u
 	}
 
 	return &uploadUserLocalMusicDTO{
-		LocalId:       localId,
+		LocalID:       localId,
 		Title:         title,
 		Author:        author,
 		AudioPath:     audioPath,
