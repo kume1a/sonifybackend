@@ -101,3 +101,27 @@ func UserAudioEntityToDto(e *database.UserAudio) *UserAudioDTO {
 		AudioId:   e.AudioID,
 	}
 }
+
+func GetUserAudiosByAudioIdsRowToUserAudioWithRelDTO(e database.GetUserAudiosByAudioIdsRow) *UserAudioWithRelDTO {
+	return &UserAudioWithRelDTO{
+		UserAudioDTO: &UserAudioDTO{
+			CreatedAt: e.CreatedAt,
+			UserId:    e.UserID,
+			AudioId:   e.AudioID,
+		},
+		Audio: &AudioDTO{
+			ID:             e.AudioID,
+			CreatedAt:      e.AudioCreatedAt,
+			Title:          e.AudioTitle.String,
+			DurationMs:     e.AudioDurationMs.Int32,
+			Path:           e.AudioPath.String,
+			Author:         e.AudioAuthor.String,
+			SizeBytes:      e.AudioSizeBytes.Int64,
+			YoutubeVideoID: e.AudioYoutubeVideoID.String,
+			ThumbnailPath:  e.AudioThumbnailPath.String,
+			ThumbnailUrl:   e.AudioThumbnailUrl.String,
+			SpotifyID:      e.AudioSpotifyID.String,
+			LocalID:        e.AudioLocalID.String,
+		},
+	}
+}

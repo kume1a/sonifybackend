@@ -216,46 +216,6 @@ func (q *Queries) GetAudioSpotifyIdsBySpotifyIds(ctx context.Context, spotifyIds
 	return items, nil
 }
 
-const getAudiosByIds = `-- name: GetAudiosByIds :many
-SELECT id, title, author, duration_ms, path, created_at, size_bytes, youtube_video_id, thumbnail_path, spotify_id, thumbnail_url, local_id FROM audio WHERE id = ANY($1::uuid[])
-`
-
-func (q *Queries) GetAudiosByIds(ctx context.Context, ids []uuid.UUID) ([]Audio, error) {
-	rows, err := q.db.QueryContext(ctx, getAudiosByIds, pq.Array(ids))
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Audio
-	for rows.Next() {
-		var i Audio
-		if err := rows.Scan(
-			&i.ID,
-			&i.Title,
-			&i.Author,
-			&i.DurationMs,
-			&i.Path,
-			&i.CreatedAt,
-			&i.SizeBytes,
-			&i.YoutubeVideoID,
-			&i.ThumbnailPath,
-			&i.SpotifyID,
-			&i.ThumbnailUrl,
-			&i.LocalID,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const getAudiosByUserId = `-- name: GetAudiosByUserId :many
 SELECT 
   audio.id, audio.title, audio.author, audio.duration_ms, audio.path, audio.created_at, audio.size_bytes, audio.youtube_video_id, audio.thumbnail_path, audio.spotify_id, audio.thumbnail_url, audio.local_id
@@ -418,6 +378,87 @@ func (q *Queries) GetUserAudioIds(ctx context.Context, userID uuid.UUID) ([]uuid
 			return nil, err
 		}
 		items = append(items, audio_id)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getUserAudiosByAudioIds = `-- name: GetUserAudiosByAudioIds :many
+SELECT user_audios.user_id, user_audios.audio_id, user_audios.created_at,
+  audio.id as audio_id,
+  audio.created_at as audio_created_at,
+  audio.title as audio_title,
+  audio.author as audio_author,
+  audio.duration_ms as audio_duration_ms,
+  audio.path as audio_path,
+  audio.size_bytes as audio_size_bytes,
+  audio.youtube_video_id as audio_youtube_video_id,
+  audio.thumbnail_path as audio_thumbnail_path,
+  audio.spotify_id as audio_spotify_id,
+  audio.thumbnail_url as audio_thumbnail_url,
+  audio.local_id as audio_local_id
+FROM user_audios
+INNER JOIN audio ON user_audios.audio_id = audio.id
+WHERE user_audios.user_id = $1 AND audio.id = ANY($2::uuid[])
+`
+
+type GetUserAudiosByAudioIdsParams struct {
+	UserID   uuid.UUID
+	AudioIds []uuid.UUID
+}
+
+type GetUserAudiosByAudioIdsRow struct {
+	UserID              uuid.UUID
+	AudioID             uuid.UUID
+	CreatedAt           time.Time
+	AudioID_2           uuid.UUID
+	AudioCreatedAt      time.Time
+	AudioTitle          sql.NullString
+	AudioAuthor         sql.NullString
+	AudioDurationMs     sql.NullInt32
+	AudioPath           sql.NullString
+	AudioSizeBytes      sql.NullInt64
+	AudioYoutubeVideoID sql.NullString
+	AudioThumbnailPath  sql.NullString
+	AudioSpotifyID      sql.NullString
+	AudioThumbnailUrl   sql.NullString
+	AudioLocalID        sql.NullString
+}
+
+func (q *Queries) GetUserAudiosByAudioIds(ctx context.Context, arg GetUserAudiosByAudioIdsParams) ([]GetUserAudiosByAudioIdsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getUserAudiosByAudioIds, arg.UserID, pq.Array(arg.AudioIds))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetUserAudiosByAudioIdsRow
+	for rows.Next() {
+		var i GetUserAudiosByAudioIdsRow
+		if err := rows.Scan(
+			&i.UserID,
+			&i.AudioID,
+			&i.CreatedAt,
+			&i.AudioID_2,
+			&i.AudioCreatedAt,
+			&i.AudioTitle,
+			&i.AudioAuthor,
+			&i.AudioDurationMs,
+			&i.AudioPath,
+			&i.AudioSizeBytes,
+			&i.AudioYoutubeVideoID,
+			&i.AudioThumbnailPath,
+			&i.AudioSpotifyID,
+			&i.AudioThumbnailUrl,
+			&i.AudioLocalID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
 	}
 	if err := rows.Close(); err != nil {
 		return nil, err

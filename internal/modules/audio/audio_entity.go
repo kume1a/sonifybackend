@@ -149,12 +149,12 @@ func GetUserAudioIds(
 	return ids, err
 }
 
-func GetAudiosByIds(
+func GetUserAudiosByAudioIds(
 	ctx context.Context,
 	db *database.Queries,
-	ids []uuid.UUID,
-) ([]database.Audio, error) {
-	audios, err := db.GetAudiosByIds(ctx, ids)
+	params database.GetUserAudiosByAudioIdsParams,
+) ([]database.GetUserAudiosByAudioIdsRow, error) {
+	audios, err := db.GetUserAudiosByAudioIds(ctx, params)
 
 	if err != nil {
 		log.Println("Error getting audios by ids: ", err)

@@ -1,12 +1,26 @@
 package shared
 
 import (
+	"encoding/json"
+	"errors"
 	"io"
 	"log"
 	"net/http"
 	"net/url"
 	"strings"
 )
+
+func GetRequestBody[T interface{}](r *http.Request) (T, error) {
+	defer r.Body.Close()
+
+	var body T
+
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		return body, errors.New(ErrInvalidJSON)
+	}
+
+	return body, nil
+}
 
 type XWWWFormUrlencodedParams struct {
 	URL     string

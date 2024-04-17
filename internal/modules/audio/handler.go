@@ -3,6 +3,7 @@ package audio
 import (
 	"net/http"
 
+	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
@@ -93,7 +94,7 @@ func handleUploadUserLocalMusic(apiCfg *shared.ApiConfig) http.HandlerFunc {
 	}
 }
 
-func handleGetUserAudios(apiCfg *shared.ApiConfig) http.HandlerFunc {
+func handleAuthGetUserAudios(apiCfg *shared.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authPayload, err := shared.GetAuthPayload(r)
 		if err != nil {
@@ -116,7 +117,7 @@ func handleGetUserAudios(apiCfg *shared.ApiConfig) http.HandlerFunc {
 	}
 }
 
-func handleGetUserAudioIds(apiCfg *shared.ApiConfig) http.HandlerFunc {
+func handleGetAuthUserAudioIds(apiCfg *shared.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authPayload, err := shared.GetAuthPayload(r)
 		if err != nil {
@@ -134,23 +135,38 @@ func handleGetUserAudioIds(apiCfg *shared.ApiConfig) http.HandlerFunc {
 	}
 }
 
-func handleGetAudiosByIds(apiCfg *shared.ApiConfig) http.HandlerFunc {
+func handleGetAuthUserUserAudios(apiCfg *shared.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		body, err := shared.ValidateRequestBody[*getAudiosByIdsDTO](r)
+		authPayload, err := shared.GetAuthPayload(r)
+		if err != nil {
+			shared.ResUnauthorized(w, err.Error())
+			return
+		}
+
+		// user body for big payload
+		body, err := shared.GetRequestBody[getAudiosByIdsDTO](r)
 		if err != nil {
 			shared.ResBadRequest(w, err.Error())
 			return
 		}
 
-		audios, err := GetAudiosByIds(r.Context(), apiCfg.DB, body.IDs)
+		if len(body.AudioIDs) == 0 {
+			shared.ResOK(w, []UserAudioWithRelDTO{})
+			return
+		}
+
+		audios, err := GetUserAudiosByAudioIds(r.Context(), apiCfg.DB, database.GetUserAudiosByAudioIdsParams{
+			UserID:   authPayload.UserID,
+			AudioIds: body.AudioIDs,
+		})
 		if err != nil {
 			shared.ResInternalServerErrorDef(w)
 			return
 		}
 
-		res := make([]*AudioDTO, 0, len(audios))
+		res := make([]*UserAudioWithRelDTO, 0, len(audios))
 		for _, audio := range audios {
-			res = append(res, AudioEntityToDto(audio))
+			res = append(res, GetUserAudiosByAudioIdsRowToUserAudioWithRelDTO(audio))
 		}
 
 		shared.ResOK(w, res)

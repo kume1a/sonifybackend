@@ -76,5 +76,20 @@ SELECT COUNT(*) FROM user_audios
 -- name: GetUserAudioIds :many
 SELECT audio_id FROM user_audios WHERE user_id = $1;
 
--- name: GetAudiosByIds :many
-SELECT * FROM audio WHERE id = ANY(sqlc.arg(ids)::uuid[]);
+-- name: GetUserAudiosByAudioIds :many
+SELECT user_audios.*,
+  audio.id as audio_id,
+  audio.created_at as audio_created_at,
+  audio.title as audio_title,
+  audio.author as audio_author,
+  audio.duration_ms as audio_duration_ms,
+  audio.path as audio_path,
+  audio.size_bytes as audio_size_bytes,
+  audio.youtube_video_id as audio_youtube_video_id,
+  audio.thumbnail_path as audio_thumbnail_path,
+  audio.spotify_id as audio_spotify_id,
+  audio.thumbnail_url as audio_thumbnail_url,
+  audio.local_id as audio_local_id
+FROM user_audios
+INNER JOIN audio ON user_audios.audio_id = audio.id
+WHERE user_audios.user_id = sqlc.arg(user_id) AND audio.id = ANY(sqlc.arg(audio_ids)::uuid[]);
