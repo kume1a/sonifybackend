@@ -16,50 +16,74 @@ const createUserSyncDatum = `-- name: CreateUserSyncDatum :one
 INSERT INTO user_sync_data (
   id,
   user_id, 
-  spotify_last_synced_at
-) VALUES ($1,$2,$3)
-RETURNING id, user_id, spotify_last_synced_at
+  spotify_last_synced_at,
+  user_audio_last_synced_at
+) VALUES ($1,$2,$3,$4)
+RETURNING id, user_id, spotify_last_synced_at, user_audio_last_synced_at
 `
 
 type CreateUserSyncDatumParams struct {
-	ID                  uuid.UUID
-	UserID              uuid.UUID
-	SpotifyLastSyncedAt sql.NullTime
+	ID                    uuid.UUID
+	UserID                uuid.UUID
+	SpotifyLastSyncedAt   sql.NullTime
+	UserAudioLastSyncedAt sql.NullTime
 }
 
 func (q *Queries) CreateUserSyncDatum(ctx context.Context, arg CreateUserSyncDatumParams) (UserSyncDatum, error) {
-	row := q.db.QueryRowContext(ctx, createUserSyncDatum, arg.ID, arg.UserID, arg.SpotifyLastSyncedAt)
+	row := q.db.QueryRowContext(ctx, createUserSyncDatum,
+		arg.ID,
+		arg.UserID,
+		arg.SpotifyLastSyncedAt,
+		arg.UserAudioLastSyncedAt,
+	)
 	var i UserSyncDatum
-	err := row.Scan(&i.ID, &i.UserID, &i.SpotifyLastSyncedAt)
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.SpotifyLastSyncedAt,
+		&i.UserAudioLastSyncedAt,
+	)
 	return i, err
 }
 
 const getUserSyncDatumByUserId = `-- name: GetUserSyncDatumByUserId :one
-SELECT id, user_id, spotify_last_synced_at FROM user_sync_data WHERE user_id = $1
+SELECT id, user_id, spotify_last_synced_at, user_audio_last_synced_at FROM user_sync_data WHERE user_id = $1
 `
 
 func (q *Queries) GetUserSyncDatumByUserId(ctx context.Context, userID uuid.UUID) (UserSyncDatum, error) {
 	row := q.db.QueryRowContext(ctx, getUserSyncDatumByUserId, userID)
 	var i UserSyncDatum
-	err := row.Scan(&i.ID, &i.UserID, &i.SpotifyLastSyncedAt)
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.SpotifyLastSyncedAt,
+		&i.UserAudioLastSyncedAt,
+	)
 	return i, err
 }
 
 const updateUserSyncDatumByUserId = `-- name: UpdateUserSyncDatumByUserId :one
 UPDATE user_sync_data
-  SET spotify_last_synced_at = COALESCE($1, spotify_last_synced_at)
-  WHERE user_id = $2
-  RETURNING id, user_id, spotify_last_synced_at
+  SET spotify_last_synced_at = COALESCE($1, spotify_last_synced_at),
+      user_audio_last_synced_at = COALESCE($2, user_audio_last_synced_at)
+  WHERE user_id = $3
+  RETURNING id, user_id, spotify_last_synced_at, user_audio_last_synced_at
 `
 
 type UpdateUserSyncDatumByUserIdParams struct {
-	SpotifyLastSyncedAt sql.NullTime
-	UserID              uuid.UUID
+	SpotifyLastSyncedAt   sql.NullTime
+	UserAudioLastSyncedAt sql.NullTime
+	UserID                uuid.UUID
 }
 
 func (q *Queries) UpdateUserSyncDatumByUserId(ctx context.Context, arg UpdateUserSyncDatumByUserIdParams) (UserSyncDatum, error) {
-	row := q.db.QueryRowContext(ctx, updateUserSyncDatumByUserId, arg.SpotifyLastSyncedAt, arg.UserID)
+	row := q.db.QueryRowContext(ctx, updateUserSyncDatumByUserId, arg.SpotifyLastSyncedAt, arg.UserAudioLastSyncedAt, arg.UserID)
 	var i UserSyncDatum
-	err := row.Scan(&i.ID, &i.UserID, &i.SpotifyLastSyncedAt)
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.SpotifyLastSyncedAt,
+		&i.UserAudioLastSyncedAt,
+	)
 	return i, err
 }

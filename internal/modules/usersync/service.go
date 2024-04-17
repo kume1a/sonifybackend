@@ -18,8 +18,9 @@ func GetOrCreateUserSyncDatumByUserId(
 
 	if err != nil && shared.IsDBErrorNotFound(err) {
 		entity, err = createUserSyncData(ctx, db, database.CreateUserSyncDatumParams{
-			UserID:              userId,
-			SpotifyLastSyncedAt: sql.NullTime{},
+			UserID:                userId,
+			SpotifyLastSyncedAt:   sql.NullTime{},
+			UserAudioLastSyncedAt: sql.NullTime{},
 		})
 		if err != nil {
 			return nil, shared.HttpErrInternalServerErrorDef()

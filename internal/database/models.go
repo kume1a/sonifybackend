@@ -125,7 +125,8 @@ type UserPlaylist struct {
 }
 
 type UserSyncDatum struct {
-	ID                  uuid.UUID
-	UserID              uuid.UUID
-	SpotifyLastSyncedAt sql.NullTime
+	ID                    uuid.UUID
+	UserID                uuid.UUID
+	SpotifyLastSyncedAt   sql.NullTime
+	UserAudioLastSyncedAt sql.NullTime
 }
