@@ -21,4 +21,5 @@ const (
 	ErrFailedToGetSpotifyPlaylists   = "FAILED_TO_GET_SPOTIFY_PLAYLISTS"
 	ErrUserSyncDatumNotFound         = "USER_SYNC_DATUM_NOT_FOUND"
 	ErrPlaylistNotFound              = "PLAYLIST_NOT_FOUND"
+	ErrAudioLikeNotFound             = "AUDIO_LIKE_NOT_FOUND"
 )

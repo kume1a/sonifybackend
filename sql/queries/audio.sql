@@ -78,6 +78,8 @@ SELECT audio_id FROM user_audios WHERE user_id = $1;
 
 -- name: GetUserAudiosByAudioIds :many
 SELECT user_audios.*,
+  audio_likes.user_id as audio_likes_user_id,
+  audio_likes.audio_id as audio_likes_audio_id,
   audio.id as audio_id,
   audio.created_at as audio_created_at,
   audio.title as audio_title,
@@ -92,4 +94,5 @@ SELECT user_audios.*,
   audio.local_id as audio_local_id
 FROM user_audios
 INNER JOIN audio ON user_audios.audio_id = audio.id
+LEFT JOIN audio_likes ON audio_likes.audio_id = audio.id
 WHERE user_audios.user_id = sqlc.arg(user_id) AND audio.id = ANY(sqlc.arg(audio_ids)::uuid[]);

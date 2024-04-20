@@ -23,6 +23,14 @@ type getAudiosByIdsDTO struct {
 	AudioIDs []uuid.UUID `json:"audioIds"`
 }
 
+type likeAudioDTO struct {
+	AudioID uuid.UUID `json:"audioId" valid:"required"`
+}
+
+type unlikeAudioDTO struct {
+	AudioID uuid.UUID `json:"audioId" valid:"required"`
+}
+
 type AudioDTO struct {
 	ID             uuid.UUID `json:"id"`
 	CreatedAt      time.Time `json:"createdAt"`

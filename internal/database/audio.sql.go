@@ -390,6 +390,8 @@ func (q *Queries) GetUserAudioIds(ctx context.Context, userID uuid.UUID) ([]uuid
 
 const getUserAudiosByAudioIds = `-- name: GetUserAudiosByAudioIds :many
 SELECT user_audios.user_id, user_audios.audio_id, user_audios.created_at,
+  audio_likes.user_id as audio_likes_user_id,
+  audio_likes.audio_id as audio_likes_audio_id,
   audio.id as audio_id,
   audio.created_at as audio_created_at,
   audio.title as audio_title,
@@ -404,6 +406,7 @@ SELECT user_audios.user_id, user_audios.audio_id, user_audios.created_at,
   audio.local_id as audio_local_id
 FROM user_audios
 INNER JOIN audio ON user_audios.audio_id = audio.id
+LEFT JOIN audio_likes ON audio_likes.audio_id = audio.id
 WHERE user_audios.user_id = $1 AND audio.id = ANY($2::uuid[])
 `
 
@@ -416,6 +419,8 @@ type GetUserAudiosByAudioIdsRow struct {
 	UserID              uuid.UUID
 	AudioID             uuid.UUID
 	CreatedAt           time.Time
+	AudioLikesUserID    uuid.NullUUID
+	AudioLikesAudioID   uuid.NullUUID
 	AudioID_2           uuid.UUID
 	AudioCreatedAt      time.Time
 	AudioTitle          sql.NullString
@@ -443,6 +448,8 @@ func (q *Queries) GetUserAudiosByAudioIds(ctx context.Context, arg GetUserAudios
 			&i.UserID,
 			&i.AudioID,
 			&i.CreatedAt,
+			&i.AudioLikesUserID,
+			&i.AudioLikesAudioID,
 			&i.AudioID_2,
 			&i.AudioCreatedAt,
 			&i.AudioTitle,

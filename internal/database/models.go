@@ -87,6 +87,11 @@ type Audio struct {
 	LocalID        sql.NullString
 }
 
+type AudioLike struct {
+	UserID  uuid.UUID
+	AudioID uuid.UUID
+}
+
 type Playlist struct {
 	ID            uuid.UUID
 	Name          string

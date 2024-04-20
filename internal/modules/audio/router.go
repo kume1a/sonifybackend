@@ -15,5 +15,8 @@ func Router(apiCfg *shared.ApiConfig, router *mux.Router) *mux.Router {
 	r.HandleFunc("/downloadYoutubeAudio", shared.AuthMW(handleDownloadYoutubeAudio(apiCfg))).Methods("POST")
 	r.HandleFunc("/uploadUserLocalMusic", shared.AuthMW(handleUploadUserLocalMusic(apiCfg))).Methods("POST")
 
+	r.HandleFunc("/like", shared.AuthMW(handleLikeAudio(apiCfg))).Methods("POST")
+	r.HandleFunc("/unlike", shared.AuthMW(handleUnlikeAudio(apiCfg))).Methods("POST")
+
 	return r
 }
