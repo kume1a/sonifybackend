@@ -31,6 +31,10 @@ type unlikeAudioDTO struct {
 	AudioID uuid.UUID `json:"audioId" valid:"required"`
 }
 
+type syncAudioLikesDTO struct {
+	AudioIDs []uuid.UUID `json:"audioIds" valid:"required"`
+}
+
 type AudioDTO struct {
 	ID             uuid.UUID `json:"id"`
 	CreatedAt      time.Time `json:"createdAt"`

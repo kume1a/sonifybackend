@@ -229,3 +229,32 @@ func handleUnlikeAudio(apiCfg *shared.ApiConfig) http.HandlerFunc {
 		shared.ResOK(w, nil)
 	}
 }
+
+func handleSyncAudioLikes(apiCfg *shared.ApiConfig) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		authPayload, err := shared.GetAuthPayload(r)
+		if err != nil {
+			shared.ResUnauthorized(w, err.Error())
+			return
+		}
+
+		body, err := shared.ValidateRequestBody[*syncAudioLikesDTO](r)
+		if err != nil {
+			shared.ResBadRequest(w, err.Error())
+			return
+		}
+
+		err = SyncAudioLikes(SyncAudioLikesParams{
+			Context:  r.Context(),
+			ApiCfg:   apiCfg,
+			UserID:   authPayload.UserID,
+			AudioIDs: body.AudioIDs,
+		})
+		if err != nil {
+			shared.ResInternalServerErrorDef(w)
+			return
+		}
+
+		shared.ResNoContent(w)
+	}
+}

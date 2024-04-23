@@ -17,6 +17,7 @@ func Router(apiCfg *shared.ApiConfig, router *mux.Router) *mux.Router {
 
 	r.HandleFunc("/like", shared.AuthMW(handleLikeAudio(apiCfg))).Methods("POST")
 	r.HandleFunc("/unlike", shared.AuthMW(handleUnlikeAudio(apiCfg))).Methods("POST")
+	r.HandleFunc("/syncLikes", shared.AuthMW(handleSyncAudioLikes(apiCfg))).Methods("POST")
 
 	return r
 }
