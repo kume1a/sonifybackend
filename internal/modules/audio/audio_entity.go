@@ -121,20 +121,6 @@ func CountUserAudioByLocalId(
 	return count, err
 }
 
-func GetUserAudios(
-	ctx context.Context,
-	db *database.Queries,
-	userId uuid.UUID,
-) ([]database.Audio, error) {
-	audios, err := db.GetAudiosByUserId(ctx, userId)
-
-	if err != nil {
-		log.Println("Error getting user audios: ", err)
-	}
-
-	return audios, err
-}
-
 func GetUserAudioIds(
 	ctx context.Context,
 	db *database.Queries,

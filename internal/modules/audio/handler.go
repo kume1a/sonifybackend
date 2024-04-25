@@ -34,7 +34,7 @@ func handleDownloadYoutubeAudio(apiCfg *shared.ApiConfig) http.HandlerFunc {
 
 		res := UserAudioWithRelDTO{
 			UserAudioDTO: UserAudioEntityToDto(userAudio),
-			Audio:        AudioEntityToDto(*audio),
+			Audio:        AudioEntityToDto(*audio, nil),
 		}
 
 		shared.ResCreated(w, res)
@@ -87,33 +87,10 @@ func handleUploadUserLocalMusic(apiCfg *shared.ApiConfig) http.HandlerFunc {
 
 		res := UserAudioWithRelDTO{
 			UserAudioDTO: UserAudioEntityToDto(userAudioWithAudio.UserAudio),
-			Audio:        AudioEntityToDto(*userAudioWithAudio.Audio),
+			Audio:        AudioEntityToDto(*userAudioWithAudio.Audio, nil),
 		}
 
 		shared.ResCreated(w, res)
-	}
-}
-
-func handleAuthGetUserAudios(apiCfg *shared.ApiConfig) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		authPayload, err := shared.GetAuthPayload(r)
-		if err != nil {
-			shared.ResUnauthorized(w, err.Error())
-			return
-		}
-
-		userAudios, err := GetUserAudios(r.Context(), apiCfg.DB, authPayload.UserID)
-		if err != nil {
-			shared.ResInternalServerErrorDef(w)
-			return
-		}
-
-		res := make([]*AudioDTO, 0, len(userAudios))
-		for _, userAudio := range userAudios {
-			res = append(res, AudioEntityToDto(userAudio))
-		}
-
-		shared.ResOK(w, res)
 	}
 }
 

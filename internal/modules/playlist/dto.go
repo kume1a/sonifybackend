@@ -30,3 +30,7 @@ type playlistAudioDTO struct {
 	PlaylistID uuid.UUID `json:"playlistId"`
 	AudioID    uuid.UUID `json:"audioId"`
 }
+
+type playlistIDDTO struct {
+	PlaylistID uuid.UUID
+}

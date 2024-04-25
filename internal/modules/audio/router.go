@@ -8,7 +8,6 @@ import (
 func Router(apiCfg *shared.ApiConfig, router *mux.Router) *mux.Router {
 	r := router.PathPrefix("/audio").Subrouter()
 
-	r.HandleFunc("/myAudios", shared.AuthMW(handleAuthGetUserAudios(apiCfg))).Methods("GET")
 	r.HandleFunc("/myAudioIds", shared.AuthMW(handleGetAuthUserAudioIds(apiCfg))).Methods("GET")
 	r.HandleFunc("/myUserAudios", shared.AuthMW(handleGetAuthUserUserAudios(apiCfg))).Methods("GET")
 

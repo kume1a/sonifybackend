@@ -4,6 +4,8 @@ import (
 	"net/http"
 
 	"github.com/asaskevich/govalidator"
+	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
@@ -36,6 +38,22 @@ func ValidateCreatePlaylistDto(w http.ResponseWriter, r *http.Request) (*createP
 		Name:          name,
 		ThumbnailPath: thumbnailPath,
 	}, nil
+}
+
+func ValidateGetPlaylistByIDVars(r *http.Request) (*playlistIDDTO, *shared.HttpError) {
+	vars := mux.Vars(r)
+
+	playlistID, ok := vars["playlistID"]
+	if !ok {
+		return nil, shared.HttpErrBadRequest("playlistID is required")
+	}
+
+	playlistIDUUID, err := uuid.Parse(playlistID)
+	if err != nil {
+		return nil, shared.HttpErrBadRequest("playlistId is not a valid UUID")
+	}
+
+	return &playlistIDDTO{PlaylistID: playlistIDUUID}, nil
 }
 
 func playlistEntityToDto(e database.Playlist) playlistDTO {

@@ -117,8 +117,12 @@ func GetUserPlaylists(
 	return playlists, err
 }
 
-func getPlaylistAudios(ctx context.Context, db *database.Queries, playlistID uuid.UUID) ([]database.Audio, error) {
-	audios, err := db.GetPlaylistAudios(ctx, playlistID)
+func getPlaylistAudios(
+	ctx context.Context,
+	db *database.Queries,
+	params database.GetPlaylistAudiosParams,
+) ([]database.GetPlaylistAudiosRow, error) {
+	audios, err := db.GetPlaylistAudios(ctx, params)
 
 	if err != nil {
 		log.Println("Error getting playlist audios:", err)
