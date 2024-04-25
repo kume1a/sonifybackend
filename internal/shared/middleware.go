@@ -1,7 +1,9 @@
 package shared
 
 import (
+	"errors"
 	"net/http"
+	"strings"
 )
 
 func AuthMW(h http.HandlerFunc) http.HandlerFunc {
@@ -28,4 +30,19 @@ func GetAuthPayload(r *http.Request) (*TokenClaims, error) {
 	}
 
 	return VerifyAccessToken(accessToken)
+}
+
+func GetAccessTokenFromRequest(r *http.Request) (string, error) {
+	accessToken, ok := r.Header["Authorization"]
+	if !ok {
+		return "", errors.New(ErrMissingToken)
+	}
+
+	if len(accessToken) == 0 {
+		return "", errors.New(ErrInvalidToken)
+	}
+
+	accessToken[0] = strings.Replace(accessToken[0], "Bearer ", "", 1)
+
+	return accessToken[0], nil
 }

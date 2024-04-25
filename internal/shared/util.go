@@ -1,39 +1,110 @@
 package shared
 
-import (
-	"errors"
-	"fmt"
-	"net/http"
-	"strings"
+import "golang.org/x/exp/constraints"
 
-	"github.com/asaskevich/govalidator"
-)
-
-func (dto *KeywordDto) Validate() error {
-	if len(dto.Keyword) != 1 {
-		return fmt.Errorf("keyword must have exactly one element")
+func Contains[T comparable](elems []T, v T) bool {
+	for _, s := range elems {
+		if v == s {
+			return true
+		}
 	}
-
-	_, err := govalidator.ValidateStruct(dto)
-	return err
+	return false
 }
 
-func (dto *LastCreatedAtPageParamsDto) Validate() error {
-	_, err := govalidator.ValidateStruct(dto)
-	return err
+func ContainsWhere[T any](slice []T, predicate func(T) bool) bool {
+	for i := 0; i < len(slice); i++ {
+		if predicate(slice[i]) {
+			return true
+		}
+	}
+
+	return false
 }
 
-func GetAccessTokenFromRequest(r *http.Request) (string, error) {
-	accessToken, ok := r.Header["Authorization"]
-	if !ok {
-		return "", errors.New(ErrMissingToken)
+func ContainsWhereP[T any](slice []T, predicate func(*T) bool) bool {
+	for i := 0; i < len(slice); i++ {
+		if predicate(&slice[i]) {
+			return true
+		}
 	}
 
-	if len(accessToken) == 0 {
-		return "", errors.New(ErrInvalidToken)
+	return false
+}
+
+func Map[T, U any](ts []T, f func(T) U) []U {
+	us := make([]U, len(ts))
+	for i := range ts {
+		us[i] = f(ts[i])
+	}
+	return us
+}
+
+func Partition[T any](elems []T, predicate func(T, int, []T) bool) (pass []T, fail []T) {
+	pass = make([]T, 0)
+	fail = make([]T, 0)
+
+	for i, e := range elems {
+		if predicate(e, i, elems) {
+			pass = append(pass, e)
+		} else {
+			fail = append(fail, e)
+		}
 	}
 
-	accessToken[0] = strings.Replace(accessToken[0], "Bearer ", "", 1)
+	return pass, fail
+}
 
-	return accessToken[0], nil
+func FirstOrDefaultP[T any](slice []T, predicate func(*T) bool) (element *T) {
+	for i := 0; i < len(slice); i++ {
+		if predicate(&slice[i]) {
+			return &slice[i]
+		}
+	}
+
+	return nil
+}
+
+func FirstOrDefault[T any](slice []T, predicate func(T) bool) (element T) {
+	for i := 0; i < len(slice); i++ {
+		if predicate(slice[i]) {
+			return slice[i]
+		}
+	}
+
+	var zero T
+	return zero
+}
+
+func Where[T any](slice []T, predicate func(T) bool) []T {
+	ret := make([]T, 0)
+
+	for i := 0; i < len(slice); i++ {
+		if predicate(slice[i]) {
+			ret = append(ret, slice[i])
+		}
+	}
+
+	return ret
+}
+
+func SliceToMap[T any, K comparable](slice []T, keyFunc func(*T) K) map[K]T {
+	m := make(map[K]T)
+	for _, v := range slice {
+		m[keyFunc(&v)] = v
+	}
+	return m
+}
+
+func Min[T constraints.Ordered](a, b T) T {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func Max[T constraints.Ordered](a, b T) T {
+	if a > b {
+		return a
+	}
+	return b
 }
