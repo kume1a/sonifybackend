@@ -164,7 +164,7 @@ func handleLikeAudio(apiCfg *shared.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		_, err = CreateAudioLike(r.Context(), apiCfg.DB, database.CreateAudioLikeParams{
+		audioLike, err := CreateAudioLike(r.Context(), apiCfg.DB, database.CreateAudioLikeParams{
 			UserID:  authPayload.UserID,
 			AudioID: body.AudioID,
 		})
@@ -173,7 +173,9 @@ func handleLikeAudio(apiCfg *shared.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		shared.ResOK(w, nil)
+		audioLikeDTO := AudioLikeEntityToDTO(audioLike)
+
+		shared.ResOK(w, audioLikeDTO)
 	}
 }
 
