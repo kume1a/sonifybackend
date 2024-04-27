@@ -34,7 +34,7 @@ func handleDownloadYoutubeAudio(apiCfg *shared.ApiConfig) http.HandlerFunc {
 
 		res := UserAudioWithRelDTO{
 			UserAudioDTO: UserAudioEntityToDto(userAudio),
-			Audio:        AudioEntityToDto(*audio, nil),
+			Audio:        AudioEntityToDto(*audio),
 		}
 
 		shared.ResCreated(w, res)
@@ -87,7 +87,7 @@ func handleUploadUserLocalMusic(apiCfg *shared.ApiConfig) http.HandlerFunc {
 
 		res := UserAudioWithRelDTO{
 			UserAudioDTO: UserAudioEntityToDto(userAudioWithAudio.UserAudio),
-			Audio:        AudioEntityToDto(*userAudioWithAudio.Audio, nil),
+			Audio:        AudioEntityToDto(*userAudioWithAudio.Audio),
 		}
 
 		shared.ResCreated(w, res)

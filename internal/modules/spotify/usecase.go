@@ -82,7 +82,7 @@ func DownloadSpotifyAudios(
 		8,
 		filteredInputs,
 		func(input DownloadSpotifyAudioInput) (DownloadedSpotifyAudio, error) {
-			searchQuery := input.TrackName + " " + input.ArtistName
+			searchQuery := input.TrackName + " " + input.ArtistName + "\"topic\""
 
 			ytVideoID, err := youtube.GetYoutubeSearchBestMatchVideoID(searchQuery)
 			if err != nil {

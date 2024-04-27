@@ -97,13 +97,19 @@ func handleGetAuthUserPlaylists(apiCfg *shared.ApiConfig) http.HandlerFunc {
 
 func handleGetPlaylistWithAudios(apiCfg *shared.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		authPaylad, err := shared.GetAuthPayload(r)
+		if err != nil {
+			shared.ResUnauthorized(w, shared.ErrUnauthorized)
+			return
+		}
+
 		playlistIDDTO, httpErr := ValidateGetPlaylistByIDVars(r)
 		if httpErr != nil {
 			shared.ResHttpError(w, httpErr)
 			return
 		}
 
-		playlist, audios, httpErr := GetPlaylistWithAudios(r.Context(), apiCfg.DB, playlistIDDTO.PlaylistID)
+		playlist, audios, httpErr := GetPlaylistWithAudios(r.Context(), apiCfg.DB, playlistIDDTO.PlaylistID, authPaylad.UserID)
 		if httpErr != nil {
 			shared.ResHttpError(w, httpErr)
 			return
@@ -114,7 +120,7 @@ func handleGetPlaylistWithAudios(apiCfg *shared.ApiConfig) http.HandlerFunc {
 			Audios []*audio.AudioDTO `json:"audios"`
 		}{
 			playlistDTO: playlistEntityToDto(*playlist),
-			Audios:      shared.Map(audios, audio.AudioEntityToDto),
+			Audios:      shared.Map(audios, audio.AudioWithAudioLikeToAudioDTO),
 		}
 
 		shared.ResOK(w, dto)

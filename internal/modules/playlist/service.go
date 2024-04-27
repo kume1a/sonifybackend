@@ -9,19 +9,6 @@ import (
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
-func GetPlaylistAudios(
-	ctx context.Context,
-	db *database.Queries,
-	playlistID uuid.UUID,
-) ([]database.Audio, *shared.HttpError) {
-	audios, err := getPlaylistAudios(ctx, db, playlistID)
-	if err != nil {
-		return nil, shared.HttpErrInternalServerErrorDef()
-	}
-
-	return audios, nil
-}
-
 func GetPlaylistById(
 	ctx context.Context,
 	db *database.Queries,
@@ -56,7 +43,7 @@ func GetPlaylistWithAudios(
 		return nil, nil, shared.HttpErrInternalServerErrorDef()
 	}
 
-	audios, err := getPlaylistAudios(ctx, db, database.GetPlaylistAudiosParams{
+	playlistAudios, err := getPlaylistAudios(ctx, db, database.GetPlaylistAudiosParams{
 		PlaylistID: playlistID,
 		UserID:     authUserID,
 	})
@@ -64,35 +51,35 @@ func GetPlaylistWithAudios(
 		return nil, nil, shared.HttpErrInternalServerErrorDef()
 	}
 
-	audiosWithLike := make([]audio.AudioWithAudioLike, len(audios))
-	for _, audio := range audios {
+	audiosWithLike := make([]audio.AudioWithAudioLike, len(playlistAudios))
+	for index, playlistAudio := range playlistAudios {
 		var audioLike *database.AudioLike
-		if audio.AudioLikesAudioID.Valid && audio.AudioLikesUserID.Valid {
+		if playlistAudio.AudioLikesAudioID.Valid && playlistAudio.AudioLikesUserID.Valid {
 			audioLike = &database.AudioLike{
-				AudioID: audio.AudioLikesAudioID.UUID,
-				UserID:  audio.AudioLikesUserID.UUID,
+				AudioID: playlistAudio.AudioLikesAudioID.UUID,
+				UserID:  playlistAudio.AudioLikesUserID.UUID,
 			}
 		}
 
 		audioWithLike := audio.AudioWithAudioLike{
 			Audio: &database.Audio{
-				ID:             audio.ID,
-				Title:          audio.Title,
-				Author:         audio.Author,
-				DurationMs:     audio.DurationMs,
-				Path:           audio.Path,
-				CreatedAt:      audio.CreatedAt,
-				SizeBytes:      audio.SizeBytes,
-				YoutubeVideoID: audio.YoutubeVideoID,
-				ThumbnailPath:  audio.ThumbnailPath,
-				SpotifyID:      audio.SpotifyID,
-				ThumbnailUrl:   audio.ThumbnailUrl,
-				LocalID:        audio.LocalID,
+				ID:             playlistAudio.ID,
+				Title:          playlistAudio.Title,
+				Author:         playlistAudio.Author,
+				DurationMs:     playlistAudio.DurationMs,
+				Path:           playlistAudio.Path,
+				CreatedAt:      playlistAudio.CreatedAt,
+				SizeBytes:      playlistAudio.SizeBytes,
+				YoutubeVideoID: playlistAudio.YoutubeVideoID,
+				ThumbnailPath:  playlistAudio.ThumbnailPath,
+				SpotifyID:      playlistAudio.SpotifyID,
+				ThumbnailUrl:   playlistAudio.ThumbnailUrl,
+				LocalID:        playlistAudio.LocalID,
 			},
 			AudioLike: audioLike,
 		}
 
-		audiosWithLike = append(audiosWithLike, audioWithLike)
+		audiosWithLike[index] = audioWithLike
 	}
 
 	return playlist, audiosWithLike, nil

@@ -53,7 +53,7 @@ type AudioDTO struct {
 	ThumbnailUrl   string        `json:"thumbnailUrl"`
 	SpotifyID      string        `json:"spotifyId"`
 	LocalID        string        `json:"localId"`
-	AudioLike      *AudioLikeDTO `json:"likePayload"`
+	AudioLike      *AudioLikeDTO `json:"audioLike"`
 }
 
 type UserAudioDTO struct {

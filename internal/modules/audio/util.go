@@ -92,7 +92,7 @@ func ValidateUploadUserLocalMusicDTO(w http.ResponseWriter, r *http.Request) (*u
 	}, nil
 }
 
-func AudioEntityToDto(e database.Audio, like *database.AudioLike) *AudioDTO {
+func AudioEntityToDto(e database.Audio) *AudioDTO {
 	return &AudioDTO{
 		ID:             e.ID,
 		CreatedAt:      e.CreatedAt,
@@ -106,7 +106,25 @@ func AudioEntityToDto(e database.Audio, like *database.AudioLike) *AudioDTO {
 		ThumbnailUrl:   e.ThumbnailUrl.String,
 		SpotifyID:      e.SpotifyID.String,
 		LocalID:        e.LocalID.String,
-		AudioLike:      AudioLikeEntityToDTO(like),
+		AudioLike:      nil,
+	}
+}
+
+func AudioWithAudioLikeToAudioDTO(e AudioWithAudioLike) *AudioDTO {
+	return &AudioDTO{
+		ID:             e.Audio.ID,
+		CreatedAt:      e.Audio.CreatedAt,
+		Title:          e.Audio.Title.String,
+		DurationMs:     e.Audio.DurationMs.Int32,
+		Path:           e.Audio.Path.String,
+		Author:         e.Audio.Author.String,
+		SizeBytes:      e.Audio.SizeBytes.Int64,
+		YoutubeVideoID: e.Audio.YoutubeVideoID.String,
+		ThumbnailPath:  e.Audio.ThumbnailPath.String,
+		ThumbnailUrl:   e.Audio.ThumbnailUrl.String,
+		SpotifyID:      e.Audio.SpotifyID.String,
+		LocalID:        e.Audio.LocalID.String,
+		AudioLike:      AudioLikeEntityToDTO(e.AudioLike),
 	}
 }
 
