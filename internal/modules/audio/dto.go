@@ -32,7 +32,7 @@ type unlikeAudioDTO struct {
 }
 
 type syncAudioLikesDTO struct {
-	AudioIDs []uuid.UUID `json:"audioIds" valid:"required"`
+	AudioIDs []uuid.UUID `json:"audioIds" valid:"sliceNotEmpty,optional"`
 }
 
 type AudioLikeDTO struct {

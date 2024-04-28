@@ -5,19 +5,12 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/asaskevich/govalidator"
 	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/modules"
 	"github.com/kume1a/sonifybackend/internal/shared"
 
 	_ "github.com/lib/pq"
 )
-
-// check lib for http: https://github.com/levigross/grequests?utm_campaign=awesomego&utm_medium=referral&utm_source=awesomego
-
-// TODOs
-// - update playlist changes in db when reimporting from spotify
-// - import all audios and all playlist, use paging of spotify limit is currently 50
 
 func main() {
 	shared.LoadEnv()
@@ -28,7 +21,7 @@ func main() {
 		return
 	}
 
-	govalidator.SetFieldsRequiredByDefault(true)
+	shared.ConfigureGoValidator()
 
 	conn, err := sql.Open("postgres", envVars.DbUrl)
 	if err != nil {
