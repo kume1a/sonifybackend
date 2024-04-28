@@ -13,7 +13,7 @@ func (dto *downloadYoutubeAudioDTO) Validate() error {
 	return err
 }
 
-func (dto *getAudiosByIdsDTO) Validate() error {
+func (dto *audioIDsDTO) Validate() error {
 	_, err := govalidator.ValidateStruct(dto)
 	return err
 }
@@ -24,11 +24,6 @@ func (dto *likeAudioDTO) Validate() error {
 }
 
 func (dto *unlikeAudioDTO) Validate() error {
-	_, err := govalidator.ValidateStruct(dto)
-	return err
-}
-
-func (dto *syncAudioLikesDTO) Validate() error {
 	_, err := govalidator.ValidateStruct(dto)
 	return err
 }

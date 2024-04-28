@@ -50,6 +50,24 @@ func GetAudioLikesByUserID(
 	return entities, err
 }
 
+func GetAudioLikesByUserIDAndAudioIDs(
+	ctx context.Context,
+	db *database.Queries,
+	params database.GetAudioLikesByUserIDAndAudioIDsParams,
+) ([]database.AudioLike, error) {
+	if len(params.AudioIds) == 0 {
+		return []database.AudioLike{}, nil
+	}
+
+	entities, err := db.GetAudioLikesByUserIDAndAudioIDs(ctx, params)
+
+	if err != nil {
+		log.Println("Error getting audio likes by user ID and audio IDs:", err)
+	}
+
+	return entities, err
+}
+
 func DeleteUserAudioLikesByAudioIDs(
 	ctx context.Context,
 	db *database.Queries,

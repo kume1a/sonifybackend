@@ -140,6 +140,10 @@ func GetUserAudiosByAudioIds(
 	db *database.Queries,
 	params database.GetUserAudiosByAudioIdsParams,
 ) ([]database.GetUserAudiosByAudioIdsRow, error) {
+	if len(params.AudioIds) == 0 {
+		return []database.GetUserAudiosByAudioIdsRow{}, nil
+	}
+
 	audios, err := db.GetUserAudiosByAudioIds(ctx, params)
 
 	if err != nil {

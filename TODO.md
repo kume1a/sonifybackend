@@ -2,3 +2,4 @@ check lib for http: https://github.com/levigross/grequests?utm_campaign=awesomeg
 
 - update playlist changes in db when reimporting from spotify
 - import all audios and all playlist, use paging of spotify limit is currently 50
+- migrate validation to validate

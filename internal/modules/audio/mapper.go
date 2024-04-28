@@ -91,3 +91,12 @@ func AudioLikeEntityToDTO(e *database.AudioLike) *AudioLikeDTO {
 		AudioID: e.AudioID,
 	}
 }
+
+func AudioLikeEntityListToDTOList(e []database.AudioLike) []*AudioLikeDTO {
+	res := make([]*AudioLikeDTO, len(e))
+	for i, v := range e {
+		res[i] = AudioLikeEntityToDTO(&v)
+	}
+
+	return res
+}

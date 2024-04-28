@@ -112,7 +112,7 @@ func handleGetAuthUserAudioIds(apiCfg *shared.ApiConfig) http.HandlerFunc {
 	}
 }
 
-func handleGetAuthUserUserAudios(apiCfg *shared.ApiConfig) http.HandlerFunc {
+func handleGetAuthUserUserAudiosByIDs(apiCfg *shared.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authPayload, err := shared.GetAuthPayload(r)
 		if err != nil {
@@ -121,14 +121,9 @@ func handleGetAuthUserUserAudios(apiCfg *shared.ApiConfig) http.HandlerFunc {
 		}
 
 		// user body for big payload
-		body, err := shared.GetRequestBody[getAudiosByIdsDTO](r)
+		body, err := shared.GetRequestBody[audioIDsDTO](r)
 		if err != nil {
 			shared.ResBadRequest(w, err.Error())
-			return
-		}
-
-		if len(body.AudioIDs) == 0 {
-			shared.ResOK(w, []UserAudioWithRelDTO{})
 			return
 		}
 
@@ -209,7 +204,7 @@ func handleUnlikeAudio(apiCfg *shared.ApiConfig) http.HandlerFunc {
 	}
 }
 
-func handleSyncAudioLikes(apiCfg *shared.ApiConfig) http.HandlerFunc {
+func handleGetAuthUserAudioLikes(apiCfg *shared.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authPayload, err := shared.GetAuthPayload(r)
 		if err != nil {
@@ -217,23 +212,40 @@ func handleSyncAudioLikes(apiCfg *shared.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		body, err := shared.ValidateRequestBody[*syncAudioLikesDTO](r)
+		audioLikes, err := GetAudioLikesByUserID(r.Context(), apiCfg.DB, authPayload.UserID)
+		if err != nil {
+			shared.ResInternalServerErrorDef(w)
+			return
+		}
+
+		shared.ResOK(w, AudioLikeEntityListToDTOList(audioLikes))
+	}
+}
+
+func handleGetAuthUserAudioLikesByIDs(apiCfg *shared.ApiConfig) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		authPayload, err := shared.GetAuthPayload(r)
+		if err != nil {
+			shared.ResUnauthorized(w, err.Error())
+			return
+		}
+
+		// user body for big payload
+		body, err := shared.GetRequestBody[audioIDsDTO](r)
 		if err != nil {
 			shared.ResBadRequest(w, err.Error())
 			return
 		}
 
-		err = SyncAudioLikes(SyncAudioLikesParams{
-			Context:  r.Context(),
-			ApiCfg:   apiCfg,
+		audioLikes, err := GetAudioLikesByUserIDAndAudioIDs(r.Context(), apiCfg.DB, database.GetAudioLikesByUserIDAndAudioIDsParams{
+			AudioIds: body.AudioIDs,
 			UserID:   authPayload.UserID,
-			AudioIDs: body.AudioIDs,
 		})
 		if err != nil {
 			shared.ResInternalServerErrorDef(w)
 			return
 		}
 
-		shared.ResNoContent(w)
+		shared.ResOK(w, AudioLikeEntityListToDTOList(audioLikes))
 	}
 }

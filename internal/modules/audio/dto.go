@@ -19,10 +19,6 @@ type uploadUserLocalMusicDTO struct {
 	DurationMs    int32
 }
 
-type getAudiosByIdsDTO struct {
-	AudioIDs []uuid.UUID `json:"audioIds"`
-}
-
 type likeAudioDTO struct {
 	AudioID uuid.UUID `json:"audioId" valid:"required"`
 }
@@ -31,7 +27,7 @@ type unlikeAudioDTO struct {
 	AudioID uuid.UUID `json:"audioId" valid:"required"`
 }
 
-type syncAudioLikesDTO struct {
+type audioIDsDTO struct {
 	AudioIDs []uuid.UUID `json:"audioIds" valid:"sliceNotEmpty,optional"`
 }
 
