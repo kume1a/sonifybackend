@@ -40,7 +40,10 @@ func handleGetPlaylists(apiCfg *shared.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		playlists, err := GetPlaylists(r.Context(), apiCfg.DB, query.LastCreatedAt, query.Limit)
+		playlists, err := GetPlaylists(r.Context(), apiCfg.DB, database.GetPlaylistsParams{
+			CreatedAt: query.LastCreatedAt,
+			Limit:     query.Limit,
+		})
 		if err != nil {
 			shared.ResInternalServerErrorDef(w)
 			return
