@@ -15,6 +15,11 @@ func (dto *createPlaylistAudioDTO) Validate() error {
 	return err
 }
 
+func (dto *getMyPlaylistsDTO) Validate() error {
+	_, err := govalidator.ValidateStruct(dto)
+	return err
+}
+
 func ValidateCreatePlaylistDto(w http.ResponseWriter, r *http.Request) (*createPlaylistDTO, *shared.HttpError) {
 	thumbnailPath, err := shared.HandleUploadFile(shared.HandleUploadFileArgs{
 		ResponseWriter:   w,

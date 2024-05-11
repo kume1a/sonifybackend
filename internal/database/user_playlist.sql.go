@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 )
 
 const createUserPlaylist = `-- name: CreateUserPlaylist :one
@@ -56,16 +57,49 @@ func (q *Queries) DeleteSpotifyUserSavedPlaylistJoins(ctx context.Context, userI
 	return err
 }
 
+const getUserPlaylistIDs = `-- name: GetUserPlaylistIDs :many
+SELECT playlist_id FROM user_playlists WHERE user_id = $1
+`
+
+func (q *Queries) GetUserPlaylistIDs(ctx context.Context, userID uuid.UUID) ([]uuid.UUID, error) {
+	rows, err := q.db.QueryContext(ctx, getUserPlaylistIDs, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []uuid.UUID
+	for rows.Next() {
+		var playlist_id uuid.UUID
+		if err := rows.Scan(&playlist_id); err != nil {
+			return nil, err
+		}
+		items = append(items, playlist_id)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getUserPlaylists = `-- name: GetUserPlaylists :many
 SELECT 
   playlists.id, playlists.name, playlists.thumbnail_path, playlists.created_at, playlists.spotify_id, playlists.thumbnail_url 
 FROM user_playlists
 INNER JOIN playlists ON user_playlists.playlist_id = playlists.id
-WHERE user_playlists.user_id = $1
+WHERE user_playlists.user_id = $1 
+  AND ($2::uuid[] IS NULL OR playlists.id = ANY($2::uuid[]))
 `
 
-func (q *Queries) GetUserPlaylists(ctx context.Context, userID uuid.UUID) ([]Playlist, error) {
-	rows, err := q.db.QueryContext(ctx, getUserPlaylists, userID)
+type GetUserPlaylistsParams struct {
+	UserID uuid.UUID
+	Ids    []uuid.UUID
+}
+
+func (q *Queries) GetUserPlaylists(ctx context.Context, arg GetUserPlaylistsParams) ([]Playlist, error) {
+	rows, err := q.db.QueryContext(ctx, getUserPlaylists, arg.UserID, pq.Array(arg.Ids))
 	if err != nil {
 		return nil, err
 	}
