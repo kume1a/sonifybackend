@@ -1,15 +1,17 @@
 -- name: CreateAudioLike :one
-INSERT INTO audio_likes (
+INSERT INTO audio_likes(
+  id,
   audio_id, 
-  user_id
-) VALUES ($1, $2) 
+  user_id,
+  created_at
+) VALUES ($1, $2, $3, $4) 
 RETURNING *;
 
 -- name: DeleteAudioLike :exec
 DELETE FROM audio_likes 
   WHERE audio_id = $1 AND user_id = $2;
 
--- name: GetAudioLikesByUserId :many
+-- name: GetAudioLikesByUserID :many
 SELECT * FROM audio_likes WHERE user_id = $1;
 
 -- name: DeleteUserAudioLikesByAudioIDs :exec

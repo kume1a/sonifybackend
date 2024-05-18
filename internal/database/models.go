@@ -67,6 +67,7 @@ type Artist struct {
 }
 
 type ArtistAudio struct {
+	ID        uuid.UUID
 	ArtistID  uuid.UUID
 	AudioID   uuid.UUID
 	CreatedAt time.Time
@@ -88,8 +89,10 @@ type Audio struct {
 }
 
 type AudioLike struct {
-	UserID  uuid.UUID
-	AudioID uuid.UUID
+	ID        uuid.UUID
+	UserID    uuid.UUID
+	AudioID   uuid.UUID
+	CreatedAt time.Time
 }
 
 type Playlist struct {
@@ -102,6 +105,7 @@ type Playlist struct {
 }
 
 type PlaylistAudio struct {
+	ID         uuid.UUID
 	PlaylistID uuid.UUID
 	AudioID    uuid.UUID
 	CreatedAt  time.Time
@@ -117,12 +121,14 @@ type User struct {
 }
 
 type UserAudio struct {
+	ID        uuid.UUID
 	UserID    uuid.UUID
 	AudioID   uuid.UUID
 	CreatedAt time.Time
 }
 
 type UserPlaylist struct {
+	ID                     uuid.UUID
 	UserID                 uuid.UUID
 	PlaylistID             uuid.UUID
 	CreatedAt              time.Time

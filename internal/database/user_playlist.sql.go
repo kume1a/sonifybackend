@@ -19,7 +19,8 @@ INSERT INTO user_playlists(
   playlist_id,
   is_spotify_saved_playlist,
   created_at
-) VALUES ($1,$2,$3,$4) RETURNING user_id, playlist_id, created_at, is_spotify_saved_playlist
+) VALUES ($1,$2,$3,$4) 
+RETURNING id, user_id, playlist_id, created_at, is_spotify_saved_playlist
 `
 
 type CreateUserPlaylistParams struct {
@@ -38,6 +39,7 @@ func (q *Queries) CreateUserPlaylist(ctx context.Context, arg CreateUserPlaylist
 	)
 	var i UserPlaylist
 	err := row.Scan(
+		&i.ID,
 		&i.UserID,
 		&i.PlaylistID,
 		&i.CreatedAt,

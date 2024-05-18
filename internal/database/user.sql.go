@@ -25,8 +25,14 @@ func (q *Queries) CountUsersByEmail(ctx context.Context, email sql.NullString) (
 }
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users(id, created_at, name, email, auth_provider, password_hash)
-VALUES ($1,$2,$3,$4,$5,$6)
+INSERT INTO users(
+  id, 
+  created_at, 
+  name, 
+  email, 
+  auth_provider, 
+  password_hash
+) VALUES ($1,$2,$3,$4,$5,$6)
 RETURNING id, created_at, name, email, auth_provider, password_hash
 `
 
@@ -78,12 +84,12 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email sql.NullString) (Use
 	return i, err
 }
 
-const getUserById = `-- name: GetUserById :one
+const getUserByID = `-- name: GetUserByID :one
 SELECT id, created_at, name, email, auth_provider, password_hash FROM users WHERE id = $1
 `
 
-func (q *Queries) GetUserById(ctx context.Context, id uuid.UUID) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUserById, id)
+func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByID, id)
 	var i User
 	err := row.Scan(
 		&i.ID,

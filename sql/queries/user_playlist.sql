@@ -4,7 +4,8 @@ INSERT INTO user_playlists(
   playlist_id,
   is_spotify_saved_playlist,
   created_at
-) VALUES ($1,$2,$3,$4) RETURNING *;
+) VALUES ($1,$2,$3,$4) 
+RETURNING *;
 
 -- name: GetUserPlaylists :many
 SELECT 

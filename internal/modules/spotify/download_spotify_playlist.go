@@ -81,7 +81,7 @@ func downloadSpotifyPlaylist(
 		}
 		playlistAudioCreateParams := shared.Map(
 			dbPlaylistAudioSpotifyIds,
-			func(e database.GetAudioSpotifyIdsBySpotifyIdsRow) database.CreatePlaylistAudioParams {
+			func(e database.GetAudioSpotifyIDsBySpotifyIDsRow) database.CreatePlaylistAudioParams {
 				return database.CreatePlaylistAudioParams{
 					PlaylistID: playlistEntityCreateParams.ID,
 					AudioID:    e.ID,

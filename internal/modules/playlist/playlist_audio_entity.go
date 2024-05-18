@@ -5,7 +5,6 @@ import (
 	"log"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/kume1a/sonifybackend/internal/database"
 )
 
@@ -30,11 +29,9 @@ func CreatePlaylistAudio(
 func GetPlaylistAudioJoins(
 	ctx context.Context,
 	db *database.Queries,
-	playlistID uuid.UUID,
+	params database.GetPlaylistAudioJoinsParams,
 ) ([]database.GetPlaylistAudioJoinsRow, error) {
-	audios, err := db.GetPlaylistAudioJoins(ctx, database.GetPlaylistAudioJoinsParams{
-		PlaylistID: playlistID,
-	})
+	audios, err := db.GetPlaylistAudioJoins(ctx, params)
 
 	if err != nil {
 		log.Println("Error getting playlist audios:", err)
@@ -46,9 +43,9 @@ func GetPlaylistAudioJoins(
 func DeletePlaylistAudiosByIds(
 	ctx context.Context,
 	db *database.Queries,
-	params database.DeletePlaylistAudiosByIdsParams,
+	params database.DeletePlaylistAudiosByIDsParams,
 ) error {
-	err := db.DeletePlaylistAudiosByIds(ctx, params)
+	err := db.DeletePlaylistAudiosByIDs(ctx, params)
 
 	if err != nil {
 		log.Println("Error deleting playlist audios by ids:", err)
@@ -60,9 +57,9 @@ func DeletePlaylistAudiosByIds(
 func GetPlaylistAudioJoinsBySpotifyIds(
 	ctx context.Context,
 	db *database.Queries,
-	params database.GetPlaylistAudioJoinsBySpotifyIdsParams,
-) ([]database.GetPlaylistAudioJoinsBySpotifyIdsRow, error) {
-	entities, err := db.GetPlaylistAudioJoinsBySpotifyIds(ctx, params)
+	params database.GetPlaylistAudioJoinsBySpotifyIDsParams,
+) ([]database.GetPlaylistAudioJoinsBySpotifyIDsRow, error) {
+	entities, err := db.GetPlaylistAudioJoinsBySpotifyIDs(ctx, params)
 
 	if err != nil {
 		log.Println("Error getting playlist audio joins by spotify ids:", err)

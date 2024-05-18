@@ -46,12 +46,12 @@ func (q *Queries) CreateUserSyncDatum(ctx context.Context, arg CreateUserSyncDat
 	return i, err
 }
 
-const getUserSyncDatumByUserId = `-- name: GetUserSyncDatumByUserId :one
+const getUserSyncDatumByUserID = `-- name: GetUserSyncDatumByUserID :one
 SELECT id, user_id, spotify_last_synced_at, user_audio_last_synced_at FROM user_sync_data WHERE user_id = $1
 `
 
-func (q *Queries) GetUserSyncDatumByUserId(ctx context.Context, userID uuid.UUID) (UserSyncDatum, error) {
-	row := q.db.QueryRowContext(ctx, getUserSyncDatumByUserId, userID)
+func (q *Queries) GetUserSyncDatumByUserID(ctx context.Context, userID uuid.UUID) (UserSyncDatum, error) {
+	row := q.db.QueryRowContext(ctx, getUserSyncDatumByUserID, userID)
 	var i UserSyncDatum
 	err := row.Scan(
 		&i.ID,
@@ -62,22 +62,22 @@ func (q *Queries) GetUserSyncDatumByUserId(ctx context.Context, userID uuid.UUID
 	return i, err
 }
 
-const updateUserSyncDatumByUserId = `-- name: UpdateUserSyncDatumByUserId :one
+const updateUserSyncDatumByUserID = `-- name: UpdateUserSyncDatumByUserID :one
 UPDATE user_sync_data
   SET spotify_last_synced_at = COALESCE($1, spotify_last_synced_at),
       user_audio_last_synced_at = COALESCE($2, user_audio_last_synced_at)
-  WHERE user_id = $3
-  RETURNING id, user_id, spotify_last_synced_at, user_audio_last_synced_at
+WHERE user_id = $3
+RETURNING id, user_id, spotify_last_synced_at, user_audio_last_synced_at
 `
 
-type UpdateUserSyncDatumByUserIdParams struct {
+type UpdateUserSyncDatumByUserIDParams struct {
 	SpotifyLastSyncedAt   sql.NullTime
 	UserAudioLastSyncedAt sql.NullTime
 	UserID                uuid.UUID
 }
 
-func (q *Queries) UpdateUserSyncDatumByUserId(ctx context.Context, arg UpdateUserSyncDatumByUserIdParams) (UserSyncDatum, error) {
-	row := q.db.QueryRowContext(ctx, updateUserSyncDatumByUserId, arg.SpotifyLastSyncedAt, arg.UserAudioLastSyncedAt, arg.UserID)
+func (q *Queries) UpdateUserSyncDatumByUserID(ctx context.Context, arg UpdateUserSyncDatumByUserIDParams) (UserSyncDatum, error) {
+	row := q.db.QueryRowContext(ctx, updateUserSyncDatumByUserID, arg.SpotifyLastSyncedAt, arg.UserAudioLastSyncedAt, arg.UserID)
 	var i UserSyncDatum
 	err := row.Scan(
 		&i.ID,

@@ -43,10 +43,14 @@ func handleMarkUserAudioLastUpdatedAtAsNow(apiCfg *shared.ApiConfig) http.Handle
 			return
 		}
 
-		_, httpErr = UpdateUserSyncDatumByUserId(r.Context(), apiCfg.DB, database.UpdateUserSyncDatumByUserIdParams{
-			UserID:                tokenPayload.UserID,
-			UserAudioLastSyncedAt: sql.NullTime{Time: time.Now().UTC(), Valid: true},
-		})
+		_, httpErr = UpdateUserSyncDatumByUserId(
+			r.Context(),
+			apiCfg.DB,
+			database.UpdateUserSyncDatumByUserIDParams{
+				UserID:                tokenPayload.UserID,
+				UserAudioLastSyncedAt: sql.NullTime{Time: time.Now().UTC(), Valid: true},
+			},
+		)
 		if httpErr != nil {
 			shared.ResHttpError(w, httpErr)
 			return

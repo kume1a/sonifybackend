@@ -1,5 +1,5 @@
 -- name: CreateAudio :one 
-INSERT INTO audio(
+INSERT INTO audios(
   id, 
   created_at,
   title,
@@ -14,21 +14,21 @@ INSERT INTO audio(
   local_id
 ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING *;
 
--- name: GetAudiosByUserId :many
+-- name: GetAudiosByUserID :many
 SELECT 
-  audio.*
+  audios.*
   FROM user_audios
-  INNER JOIN audio ON user_audios.audio_id = audio.id
+  INNER JOIN audios ON user_audios.audio_id = audios.id
   WHERE user_id = $1;
 
 -- name: DeleteAudioById :exec
-DELETE FROM audio WHERE id = $1;
+DELETE FROM audios WHERE id = $1;
 
 -- name: GetAudioById :one
-SELECT * FROM audio WHERE id = $1;
+SELECT * FROM audios WHERE id = $1;
 
 -- name: UpdateAudio :one
-UPDATE audio SET 
+UPDATE audios SET 
   title = $1, 
   author = $2, 
   duration_ms = $3, 
@@ -37,62 +37,14 @@ UPDATE audio SET
 WHERE id = $6 
 RETURNING *;
 
--- name: GetUserAudioByVideoId :one
-SELECT * FROM user_audios
-  INNER JOIN audio ON user_audios.audio_id = audio.id
-  WHERE user_audios.user_id = $1 AND audio.youtube_video_id = $2;
-
--- name: CreateUserAudio :one
-INSERT INTO user_audios(
-  created_at,
-  user_id, 
-  audio_id
-) VALUES ($1,$2,$3) RETURNING *;
-
--- name: GetPlaylistAudiosBySpotifyIds :many
-SELECT 
-  audio.*
-  FROM playlist_audios
-  INNER JOIN audio ON playlist_audios.audio_id = audio.id
-  WHERE playlist_audios.playlist_id = sqlc.arg(playlist_id) AND audio.spotify_id = ANY(sqlc.arg(spotify_ids)::text[]);
-
--- name: GetAudioSpotifyIdsBySpotifyIds :many
+-- name: GetAudioSpotifyIDsBySpotifyIDs :many
 SELECT 
   id, spotify_id 
-FROM audio 
+FROM audios
 WHERE spotify_id = ANY(sqlc.arg(spotify_ids)::text[]);
 
--- name: GetAudioIdsBySpotifyIds :many
+-- name: GetAudioIDsBySpotifyIDs :many
 SELECT 
   id
-FROM audio
+FROM audios
 WHERE spotify_id = ANY(sqlc.arg(spotify_ids)::text[]);
-
--- name: CountUserAudioByLocalId :one
-SELECT COUNT(*) FROM user_audios 
-  INNER JOIN audio ON user_audios.audio_id = audio.id 
-  WHERE user_audios.user_id = $1 AND audio.local_id = $2;
-
--- name: GetUserAudioIds :many
-SELECT audio_id FROM user_audios WHERE user_id = $1;
-
--- name: GetUserAudiosByAudioIds :many
-SELECT user_audios.*,
-  audio_likes.user_id as audio_likes_user_id,
-  audio_likes.audio_id as audio_likes_audio_id,
-  audio.id as audio_id,
-  audio.created_at as audio_created_at,
-  audio.title as audio_title,
-  audio.author as audio_author,
-  audio.duration_ms as audio_duration_ms,
-  audio.path as audio_path,
-  audio.size_bytes as audio_size_bytes,
-  audio.youtube_video_id as audio_youtube_video_id,
-  audio.thumbnail_path as audio_thumbnail_path,
-  audio.spotify_id as audio_spotify_id,
-  audio.thumbnail_url as audio_thumbnail_url,
-  audio.local_id as audio_local_id
-FROM user_audios
-INNER JOIN audio ON user_audios.audio_id = audio.id
-LEFT JOIN audio_likes ON audio_likes.audio_id = audio.id
-WHERE user_audios.user_id = sqlc.arg(user_id) AND audio.id = ANY(sqlc.arg(audio_ids)::uuid[]);

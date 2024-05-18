@@ -49,7 +49,7 @@ func getPlaylistById(
 	db *database.Queries,
 	playlistID uuid.UUID,
 ) (*database.Playlist, error) {
-	playlist, err := db.GetPlaylistById(ctx, playlistID)
+	playlist, err := db.GetPlaylistByID(ctx, playlistID)
 
 	if err != nil {
 		log.Println("Error getting playlist by id:", err)
@@ -63,7 +63,7 @@ func GetSpotifyUserSavedPlaylistIds(
 	db *database.Queries,
 	userId uuid.UUID,
 ) (uuid.UUIDs, error) {
-	playlistIds, err := db.GetSpotifyUserSavedPlaylistIds(ctx, userId)
+	playlistIds, err := db.GetSpotifyUserSavedPlaylistIDs(ctx, userId)
 
 	if err != nil {
 		log.Println("Error getting spotify user saved playlist ids:", err)
@@ -91,7 +91,7 @@ func DeletePlaylistsByIds(
 	db *database.Queries,
 	playlistIds uuid.UUIDs,
 ) error {
-	err := db.DeletePlaylistsByIds(ctx, playlistIds)
+	err := db.DeletePlaylistsByIDs(ctx, playlistIds)
 
 	if err != nil {
 		log.Println("Error deleting playlists by ids:", err)

@@ -7,28 +7,43 @@ package database
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/lib/pq"
 )
 
 const createAudioLike = `-- name: CreateAudioLike :one
-INSERT INTO audio_likes (
+INSERT INTO audio_likes(
+  id,
   audio_id, 
-  user_id
-) VALUES ($1, $2) 
-RETURNING user_id, audio_id
+  user_id,
+  created_at
+) VALUES ($1, $2, $3, $4) 
+RETURNING id, user_id, audio_id, created_at
 `
 
 type CreateAudioLikeParams struct {
-	AudioID uuid.UUID
-	UserID  uuid.UUID
+	ID        uuid.UUID
+	AudioID   uuid.UUID
+	UserID    uuid.UUID
+	CreatedAt time.Time
 }
 
 func (q *Queries) CreateAudioLike(ctx context.Context, arg CreateAudioLikeParams) (AudioLike, error) {
-	row := q.db.QueryRowContext(ctx, createAudioLike, arg.AudioID, arg.UserID)
+	row := q.db.QueryRowContext(ctx, createAudioLike,
+		arg.ID,
+		arg.AudioID,
+		arg.UserID,
+		arg.CreatedAt,
+	)
 	var i AudioLike
-	err := row.Scan(&i.UserID, &i.AudioID)
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.AudioID,
+		&i.CreatedAt,
+	)
 	return i, err
 }
 
@@ -61,8 +76,40 @@ func (q *Queries) DeleteUserAudioLikesByAudioIDs(ctx context.Context, arg Delete
 	return err
 }
 
+const getAudioLikesByUserID = `-- name: GetAudioLikesByUserID :many
+SELECT id, user_id, audio_id, created_at FROM audio_likes WHERE user_id = $1
+`
+
+func (q *Queries) GetAudioLikesByUserID(ctx context.Context, userID uuid.UUID) ([]AudioLike, error) {
+	rows, err := q.db.QueryContext(ctx, getAudioLikesByUserID, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []AudioLike
+	for rows.Next() {
+		var i AudioLike
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.AudioID,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getAudioLikesByUserIDAndAudioIDs = `-- name: GetAudioLikesByUserIDAndAudioIDs :many
-SELECT user_id, audio_id FROM audio_likes 
+SELECT id, user_id, audio_id, created_at FROM audio_likes 
   WHERE user_id = $1 AND audio_id = ANY($2::uuid[])
 `
 
@@ -80,34 +127,12 @@ func (q *Queries) GetAudioLikesByUserIDAndAudioIDs(ctx context.Context, arg GetA
 	var items []AudioLike
 	for rows.Next() {
 		var i AudioLike
-		if err := rows.Scan(&i.UserID, &i.AudioID); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getAudioLikesByUserId = `-- name: GetAudioLikesByUserId :many
-SELECT user_id, audio_id FROM audio_likes WHERE user_id = $1
-`
-
-func (q *Queries) GetAudioLikesByUserId(ctx context.Context, userID uuid.UUID) ([]AudioLike, error) {
-	rows, err := q.db.QueryContext(ctx, getAudioLikesByUserId, userID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []AudioLike
-	for rows.Next() {
-		var i AudioLike
-		if err := rows.Scan(&i.UserID, &i.AudioID); err != nil {
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.AudioID,
+			&i.CreatedAt,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

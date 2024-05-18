@@ -52,8 +52,8 @@ func GetUserAudioByYoutubeVideoId(
 	db *database.Queries,
 	userId uuid.UUID,
 	youtubeVideoId string,
-) (*database.GetUserAudioByVideoIdRow, error) {
-	audio, err := db.GetUserAudioByVideoId(ctx, database.GetUserAudioByVideoIdParams{
+) (*database.GetUserAudioByVideoIDRow, error) {
+	audio, err := db.GetUserAudioByVideoID(ctx, database.GetUserAudioByVideoIDParams{
 		UserID:         userId,
 		YoutubeVideoID: sql.NullString{String: youtubeVideoId, Valid: true},
 	})
@@ -83,8 +83,8 @@ func GetAudioSpotifyIdsBySpotifyIds(
 	ctx context.Context,
 	db *database.Queries,
 	spotifyIds []string,
-) ([]database.GetAudioSpotifyIdsBySpotifyIdsRow, error) {
-	ids, err := db.GetAudioSpotifyIdsBySpotifyIds(ctx, spotifyIds)
+) ([]database.GetAudioSpotifyIDsBySpotifyIDsRow, error) {
+	ids, err := db.GetAudioSpotifyIDsBySpotifyIDs(ctx, spotifyIds)
 
 	if err != nil {
 		log.Println("Error getting audios spotify ids by spotify ids: ", err)
@@ -98,7 +98,7 @@ func GetAudioIdsBySpotifyIds(
 	db *database.Queries,
 	spotifyIds []string,
 ) (uuid.UUIDs, error) {
-	ids, err := db.GetAudioIdsBySpotifyIds(ctx, spotifyIds)
+	ids, err := db.GetAudioIDsBySpotifyIDs(ctx, spotifyIds)
 
 	if err != nil {
 		log.Println("Error getting audio ids by spotify ids: ", err)
@@ -110,9 +110,9 @@ func GetAudioIdsBySpotifyIds(
 func CountUserAudioByLocalId(
 	ctx context.Context,
 	db *database.Queries,
-	params database.CountUserAudioByLocalIdParams,
+	params database.CountUserAudioByLocalIDParams,
 ) (int64, error) {
-	count, err := db.CountUserAudioByLocalId(ctx, params)
+	count, err := db.CountUserAudioByLocalID(ctx, params)
 
 	if err != nil {
 		log.Println("Error getting audio by local id: ", err)
@@ -126,7 +126,7 @@ func GetUserAudioIds(
 	db *database.Queries,
 	userId uuid.UUID,
 ) (uuid.UUIDs, error) {
-	ids, err := db.GetUserAudioIds(ctx, userId)
+	ids, err := db.GetUserAudioIDs(ctx, userId)
 
 	if err != nil {
 		log.Println("Error getting user audio ids: ", err)

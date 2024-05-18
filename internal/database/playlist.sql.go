@@ -22,7 +22,8 @@ INSERT INTO playlists(
   thumbnail_path,
   spotify_id,
   thumbnail_url
-) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id, name, thumbnail_path, created_at, spotify_id, thumbnail_url
+) VALUES ($1,$2,$3,$4,$5,$6) 
+RETURNING id, name, thumbnail_path, created_at, spotify_id, thumbnail_url
 `
 
 type CreatePlaylistParams struct {
@@ -55,30 +56,30 @@ func (q *Queries) CreatePlaylist(ctx context.Context, arg CreatePlaylistParams) 
 	return i, err
 }
 
-const deletePlaylistById = `-- name: DeletePlaylistById :exec
+const deletePlaylistByID = `-- name: DeletePlaylistByID :exec
 DELETE FROM playlists WHERE id = $1
 `
 
-func (q *Queries) DeletePlaylistById(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.ExecContext(ctx, deletePlaylistById, id)
+func (q *Queries) DeletePlaylistByID(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deletePlaylistByID, id)
 	return err
 }
 
-const deletePlaylistsByIds = `-- name: DeletePlaylistsByIds :exec
+const deletePlaylistsByIDs = `-- name: DeletePlaylistsByIDs :exec
 DELETE FROM playlists WHERE id = ANY($1::uuid[])
 `
 
-func (q *Queries) DeletePlaylistsByIds(ctx context.Context, ids []uuid.UUID) error {
-	_, err := q.db.ExecContext(ctx, deletePlaylistsByIds, pq.Array(ids))
+func (q *Queries) DeletePlaylistsByIDs(ctx context.Context, ids []uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deletePlaylistsByIDs, pq.Array(ids))
 	return err
 }
 
-const getPlaylistById = `-- name: GetPlaylistById :one
+const getPlaylistByID = `-- name: GetPlaylistByID :one
 SELECT id, name, thumbnail_path, created_at, spotify_id, thumbnail_url FROM playlists WHERE id = $1
 `
 
-func (q *Queries) GetPlaylistById(ctx context.Context, id uuid.UUID) (Playlist, error) {
-	row := q.db.QueryRowContext(ctx, getPlaylistById, id)
+func (q *Queries) GetPlaylistByID(ctx context.Context, id uuid.UUID) (Playlist, error) {
+	row := q.db.QueryRowContext(ctx, getPlaylistByID, id)
 	var i Playlist
 	err := row.Scan(
 		&i.ID,
@@ -133,15 +134,15 @@ func (q *Queries) GetPlaylists(ctx context.Context, arg GetPlaylistsParams) ([]P
 	return items, nil
 }
 
-const getSpotifyUserSavedPlaylistIds = `-- name: GetSpotifyUserSavedPlaylistIds :many
-SELECT id FROM playlists
+const getSpotifyUserSavedPlaylistIDs = `-- name: GetSpotifyUserSavedPlaylistIDs :many
+SELECT playlists.id FROM playlists
   INNER JOIN user_playlists ON playlists.id = user_playlists.playlist_id
   WHERE user_playlists.user_id = $1 
   AND user_playlists.is_spotify_saved_playlist = true
 `
 
-func (q *Queries) GetSpotifyUserSavedPlaylistIds(ctx context.Context, userID uuid.UUID) ([]uuid.UUID, error) {
-	rows, err := q.db.QueryContext(ctx, getSpotifyUserSavedPlaylistIds, userID)
+func (q *Queries) GetSpotifyUserSavedPlaylistIDs(ctx context.Context, userID uuid.UUID) ([]uuid.UUID, error) {
+	rows, err := q.db.QueryContext(ctx, getSpotifyUserSavedPlaylistIDs, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -163,22 +164,22 @@ func (q *Queries) GetSpotifyUserSavedPlaylistIds(ctx context.Context, userID uui
 	return items, nil
 }
 
-const updatePlaylistById = `-- name: UpdatePlaylistById :one
+const updatePlaylistByID = `-- name: UpdatePlaylistByID :one
 UPDATE playlists
-  SET name = COALESCE($1, name),
-      thumbnail_path = COALESCE($2, thumbnail_path)
-  WHERE id = $3
-  RETURNING id, name, thumbnail_path, created_at, spotify_id, thumbnail_url
+SET name = COALESCE($1, name),
+    thumbnail_path = COALESCE($2, thumbnail_path)
+WHERE id = $3
+RETURNING id, name, thumbnail_path, created_at, spotify_id, thumbnail_url
 `
 
-type UpdatePlaylistByIdParams struct {
+type UpdatePlaylistByIDParams struct {
 	Name          string
 	ThumbnailPath sql.NullString
 	ID            uuid.UUID
 }
 
-func (q *Queries) UpdatePlaylistById(ctx context.Context, arg UpdatePlaylistByIdParams) (Playlist, error) {
-	row := q.db.QueryRowContext(ctx, updatePlaylistById, arg.Name, arg.ThumbnailPath, arg.ID)
+func (q *Queries) UpdatePlaylistByID(ctx context.Context, arg UpdatePlaylistByIDParams) (Playlist, error) {
+	row := q.db.QueryRowContext(ctx, updatePlaylistByID, arg.Name, arg.ThumbnailPath, arg.ID)
 	var i Playlist
 	err := row.Scan(
 		&i.ID,

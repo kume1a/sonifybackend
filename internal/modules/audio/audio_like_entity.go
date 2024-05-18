@@ -41,7 +41,7 @@ func GetAudioLikesByUserID(
 	db *database.Queries,
 	userId uuid.UUID,
 ) ([]database.AudioLike, error) {
-	entities, err := db.GetAudioLikesByUserId(ctx, userId)
+	entities, err := db.GetAudioLikesByUserID(ctx, userId)
 
 	if err != nil {
 		log.Println("Error getting audio likes by user ID:", err)

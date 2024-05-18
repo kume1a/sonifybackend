@@ -14,26 +14,8 @@ import (
 	"github.com/lib/pq"
 )
 
-const countUserAudioByLocalId = `-- name: CountUserAudioByLocalId :one
-SELECT COUNT(*) FROM user_audios 
-  INNER JOIN audio ON user_audios.audio_id = audio.id 
-  WHERE user_audios.user_id = $1 AND audio.local_id = $2
-`
-
-type CountUserAudioByLocalIdParams struct {
-	UserID  uuid.UUID
-	LocalID sql.NullString
-}
-
-func (q *Queries) CountUserAudioByLocalId(ctx context.Context, arg CountUserAudioByLocalIdParams) (int64, error) {
-	row := q.db.QueryRowContext(ctx, countUserAudioByLocalId, arg.UserID, arg.LocalID)
-	var count int64
-	err := row.Scan(&count)
-	return count, err
-}
-
 const createAudio = `-- name: CreateAudio :one
-INSERT INTO audio(
+INSERT INTO audios(
   id, 
   created_at,
   title,
@@ -97,29 +79,8 @@ func (q *Queries) CreateAudio(ctx context.Context, arg CreateAudioParams) (Audio
 	return i, err
 }
 
-const createUserAudio = `-- name: CreateUserAudio :one
-INSERT INTO user_audios(
-  created_at,
-  user_id, 
-  audio_id
-) VALUES ($1,$2,$3) RETURNING user_id, audio_id, created_at
-`
-
-type CreateUserAudioParams struct {
-	CreatedAt time.Time
-	UserID    uuid.UUID
-	AudioID   uuid.UUID
-}
-
-func (q *Queries) CreateUserAudio(ctx context.Context, arg CreateUserAudioParams) (UserAudio, error) {
-	row := q.db.QueryRowContext(ctx, createUserAudio, arg.CreatedAt, arg.UserID, arg.AudioID)
-	var i UserAudio
-	err := row.Scan(&i.UserID, &i.AudioID, &i.CreatedAt)
-	return i, err
-}
-
 const deleteAudioById = `-- name: DeleteAudioById :exec
-DELETE FROM audio WHERE id = $1
+DELETE FROM audios WHERE id = $1
 `
 
 func (q *Queries) DeleteAudioById(ctx context.Context, id uuid.UUID) error {
@@ -128,7 +89,7 @@ func (q *Queries) DeleteAudioById(ctx context.Context, id uuid.UUID) error {
 }
 
 const getAudioById = `-- name: GetAudioById :one
-SELECT id, title, author, duration_ms, path, created_at, size_bytes, youtube_video_id, thumbnail_path, spotify_id, thumbnail_url, local_id FROM audio WHERE id = $1
+SELECT id, title, author, duration_ms, path, created_at, size_bytes, youtube_video_id, thumbnail_path, spotify_id, thumbnail_url, local_id FROM audios WHERE id = $1
 `
 
 func (q *Queries) GetAudioById(ctx context.Context, id uuid.UUID) (Audio, error) {
@@ -151,15 +112,15 @@ func (q *Queries) GetAudioById(ctx context.Context, id uuid.UUID) (Audio, error)
 	return i, err
 }
 
-const getAudioIdsBySpotifyIds = `-- name: GetAudioIdsBySpotifyIds :many
+const getAudioIDsBySpotifyIDs = `-- name: GetAudioIDsBySpotifyIDs :many
 SELECT 
   id
-FROM audio
+FROM audios
 WHERE spotify_id = ANY($1::text[])
 `
 
-func (q *Queries) GetAudioIdsBySpotifyIds(ctx context.Context, spotifyIds []string) ([]uuid.UUID, error) {
-	rows, err := q.db.QueryContext(ctx, getAudioIdsBySpotifyIds, pq.Array(spotifyIds))
+func (q *Queries) GetAudioIDsBySpotifyIDs(ctx context.Context, spotifyIds []string) ([]uuid.UUID, error) {
+	rows, err := q.db.QueryContext(ctx, getAudioIDsBySpotifyIDs, pq.Array(spotifyIds))
 	if err != nil {
 		return nil, err
 	}
@@ -181,27 +142,27 @@ func (q *Queries) GetAudioIdsBySpotifyIds(ctx context.Context, spotifyIds []stri
 	return items, nil
 }
 
-const getAudioSpotifyIdsBySpotifyIds = `-- name: GetAudioSpotifyIdsBySpotifyIds :many
+const getAudioSpotifyIDsBySpotifyIDs = `-- name: GetAudioSpotifyIDsBySpotifyIDs :many
 SELECT 
   id, spotify_id 
-FROM audio 
+FROM audios
 WHERE spotify_id = ANY($1::text[])
 `
 
-type GetAudioSpotifyIdsBySpotifyIdsRow struct {
+type GetAudioSpotifyIDsBySpotifyIDsRow struct {
 	ID        uuid.UUID
 	SpotifyID sql.NullString
 }
 
-func (q *Queries) GetAudioSpotifyIdsBySpotifyIds(ctx context.Context, spotifyIds []string) ([]GetAudioSpotifyIdsBySpotifyIdsRow, error) {
-	rows, err := q.db.QueryContext(ctx, getAudioSpotifyIdsBySpotifyIds, pq.Array(spotifyIds))
+func (q *Queries) GetAudioSpotifyIDsBySpotifyIDs(ctx context.Context, spotifyIds []string) ([]GetAudioSpotifyIDsBySpotifyIDsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAudioSpotifyIDsBySpotifyIDs, pq.Array(spotifyIds))
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetAudioSpotifyIdsBySpotifyIdsRow
+	var items []GetAudioSpotifyIDsBySpotifyIDsRow
 	for rows.Next() {
-		var i GetAudioSpotifyIdsBySpotifyIdsRow
+		var i GetAudioSpotifyIDsBySpotifyIDsRow
 		if err := rows.Scan(&i.ID, &i.SpotifyID); err != nil {
 			return nil, err
 		}
@@ -216,16 +177,16 @@ func (q *Queries) GetAudioSpotifyIdsBySpotifyIds(ctx context.Context, spotifyIds
 	return items, nil
 }
 
-const getAudiosByUserId = `-- name: GetAudiosByUserId :many
+const getAudiosByUserID = `-- name: GetAudiosByUserID :many
 SELECT 
-  audio.id, audio.title, audio.author, audio.duration_ms, audio.path, audio.created_at, audio.size_bytes, audio.youtube_video_id, audio.thumbnail_path, audio.spotify_id, audio.thumbnail_url, audio.local_id
+  audios.id, audios.title, audios.author, audios.duration_ms, audios.path, audios.created_at, audios.size_bytes, audios.youtube_video_id, audios.thumbnail_path, audios.spotify_id, audios.thumbnail_url, audios.local_id
   FROM user_audios
-  INNER JOIN audio ON user_audios.audio_id = audio.id
+  INNER JOIN audios ON user_audios.audio_id = audios.id
   WHERE user_id = $1
 `
 
-func (q *Queries) GetAudiosByUserId(ctx context.Context, userID uuid.UUID) ([]Audio, error) {
-	rows, err := q.db.QueryContext(ctx, getAudiosByUserId, userID)
+func (q *Queries) GetAudiosByUserID(ctx context.Context, userID uuid.UUID) ([]Audio, error) {
+	rows, err := q.db.QueryContext(ctx, getAudiosByUserID, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -246,222 +207,6 @@ func (q *Queries) GetAudiosByUserId(ctx context.Context, userID uuid.UUID) ([]Au
 			&i.SpotifyID,
 			&i.ThumbnailUrl,
 			&i.LocalID,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getPlaylistAudiosBySpotifyIds = `-- name: GetPlaylistAudiosBySpotifyIds :many
-SELECT 
-  audio.id, audio.title, audio.author, audio.duration_ms, audio.path, audio.created_at, audio.size_bytes, audio.youtube_video_id, audio.thumbnail_path, audio.spotify_id, audio.thumbnail_url, audio.local_id
-  FROM playlist_audios
-  INNER JOIN audio ON playlist_audios.audio_id = audio.id
-  WHERE playlist_audios.playlist_id = $1 AND audio.spotify_id = ANY($2::text[])
-`
-
-type GetPlaylistAudiosBySpotifyIdsParams struct {
-	PlaylistID uuid.UUID
-	SpotifyIds []string
-}
-
-func (q *Queries) GetPlaylistAudiosBySpotifyIds(ctx context.Context, arg GetPlaylistAudiosBySpotifyIdsParams) ([]Audio, error) {
-	rows, err := q.db.QueryContext(ctx, getPlaylistAudiosBySpotifyIds, arg.PlaylistID, pq.Array(arg.SpotifyIds))
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Audio
-	for rows.Next() {
-		var i Audio
-		if err := rows.Scan(
-			&i.ID,
-			&i.Title,
-			&i.Author,
-			&i.DurationMs,
-			&i.Path,
-			&i.CreatedAt,
-			&i.SizeBytes,
-			&i.YoutubeVideoID,
-			&i.ThumbnailPath,
-			&i.SpotifyID,
-			&i.ThumbnailUrl,
-			&i.LocalID,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getUserAudioByVideoId = `-- name: GetUserAudioByVideoId :one
-SELECT user_id, audio_id, user_audios.created_at, id, title, author, duration_ms, path, audio.created_at, size_bytes, youtube_video_id, thumbnail_path, spotify_id, thumbnail_url, local_id FROM user_audios
-  INNER JOIN audio ON user_audios.audio_id = audio.id
-  WHERE user_audios.user_id = $1 AND audio.youtube_video_id = $2
-`
-
-type GetUserAudioByVideoIdParams struct {
-	UserID         uuid.UUID
-	YoutubeVideoID sql.NullString
-}
-
-type GetUserAudioByVideoIdRow struct {
-	UserID         uuid.UUID
-	AudioID        uuid.UUID
-	CreatedAt      time.Time
-	ID             uuid.UUID
-	Title          sql.NullString
-	Author         sql.NullString
-	DurationMs     sql.NullInt32
-	Path           sql.NullString
-	CreatedAt_2    time.Time
-	SizeBytes      sql.NullInt64
-	YoutubeVideoID sql.NullString
-	ThumbnailPath  sql.NullString
-	SpotifyID      sql.NullString
-	ThumbnailUrl   sql.NullString
-	LocalID        sql.NullString
-}
-
-func (q *Queries) GetUserAudioByVideoId(ctx context.Context, arg GetUserAudioByVideoIdParams) (GetUserAudioByVideoIdRow, error) {
-	row := q.db.QueryRowContext(ctx, getUserAudioByVideoId, arg.UserID, arg.YoutubeVideoID)
-	var i GetUserAudioByVideoIdRow
-	err := row.Scan(
-		&i.UserID,
-		&i.AudioID,
-		&i.CreatedAt,
-		&i.ID,
-		&i.Title,
-		&i.Author,
-		&i.DurationMs,
-		&i.Path,
-		&i.CreatedAt_2,
-		&i.SizeBytes,
-		&i.YoutubeVideoID,
-		&i.ThumbnailPath,
-		&i.SpotifyID,
-		&i.ThumbnailUrl,
-		&i.LocalID,
-	)
-	return i, err
-}
-
-const getUserAudioIds = `-- name: GetUserAudioIds :many
-SELECT audio_id FROM user_audios WHERE user_id = $1
-`
-
-func (q *Queries) GetUserAudioIds(ctx context.Context, userID uuid.UUID) ([]uuid.UUID, error) {
-	rows, err := q.db.QueryContext(ctx, getUserAudioIds, userID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []uuid.UUID
-	for rows.Next() {
-		var audio_id uuid.UUID
-		if err := rows.Scan(&audio_id); err != nil {
-			return nil, err
-		}
-		items = append(items, audio_id)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getUserAudiosByAudioIds = `-- name: GetUserAudiosByAudioIds :many
-SELECT user_audios.user_id, user_audios.audio_id, user_audios.created_at,
-  audio_likes.user_id as audio_likes_user_id,
-  audio_likes.audio_id as audio_likes_audio_id,
-  audio.id as audio_id,
-  audio.created_at as audio_created_at,
-  audio.title as audio_title,
-  audio.author as audio_author,
-  audio.duration_ms as audio_duration_ms,
-  audio.path as audio_path,
-  audio.size_bytes as audio_size_bytes,
-  audio.youtube_video_id as audio_youtube_video_id,
-  audio.thumbnail_path as audio_thumbnail_path,
-  audio.spotify_id as audio_spotify_id,
-  audio.thumbnail_url as audio_thumbnail_url,
-  audio.local_id as audio_local_id
-FROM user_audios
-INNER JOIN audio ON user_audios.audio_id = audio.id
-LEFT JOIN audio_likes ON audio_likes.audio_id = audio.id
-WHERE user_audios.user_id = $1 AND audio.id = ANY($2::uuid[])
-`
-
-type GetUserAudiosByAudioIdsParams struct {
-	UserID   uuid.UUID
-	AudioIds []uuid.UUID
-}
-
-type GetUserAudiosByAudioIdsRow struct {
-	UserID              uuid.UUID
-	AudioID             uuid.UUID
-	CreatedAt           time.Time
-	AudioLikesUserID    uuid.NullUUID
-	AudioLikesAudioID   uuid.NullUUID
-	AudioID_2           uuid.UUID
-	AudioCreatedAt      time.Time
-	AudioTitle          sql.NullString
-	AudioAuthor         sql.NullString
-	AudioDurationMs     sql.NullInt32
-	AudioPath           sql.NullString
-	AudioSizeBytes      sql.NullInt64
-	AudioYoutubeVideoID sql.NullString
-	AudioThumbnailPath  sql.NullString
-	AudioSpotifyID      sql.NullString
-	AudioThumbnailUrl   sql.NullString
-	AudioLocalID        sql.NullString
-}
-
-func (q *Queries) GetUserAudiosByAudioIds(ctx context.Context, arg GetUserAudiosByAudioIdsParams) ([]GetUserAudiosByAudioIdsRow, error) {
-	rows, err := q.db.QueryContext(ctx, getUserAudiosByAudioIds, arg.UserID, pq.Array(arg.AudioIds))
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []GetUserAudiosByAudioIdsRow
-	for rows.Next() {
-		var i GetUserAudiosByAudioIdsRow
-		if err := rows.Scan(
-			&i.UserID,
-			&i.AudioID,
-			&i.CreatedAt,
-			&i.AudioLikesUserID,
-			&i.AudioLikesAudioID,
-			&i.AudioID_2,
-			&i.AudioCreatedAt,
-			&i.AudioTitle,
-			&i.AudioAuthor,
-			&i.AudioDurationMs,
-			&i.AudioPath,
-			&i.AudioSizeBytes,
-			&i.AudioYoutubeVideoID,
-			&i.AudioThumbnailPath,
-			&i.AudioSpotifyID,
-			&i.AudioThumbnailUrl,
-			&i.AudioLocalID,
 		); err != nil {
 			return nil, err
 		}
@@ -477,7 +222,7 @@ func (q *Queries) GetUserAudiosByAudioIds(ctx context.Context, arg GetUserAudios
 }
 
 const updateAudio = `-- name: UpdateAudio :one
-UPDATE audio SET 
+UPDATE audios SET 
   title = $1, 
   author = $2, 
   duration_ms = $3, 

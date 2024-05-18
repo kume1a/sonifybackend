@@ -73,7 +73,7 @@ func DownloadSpotifyAudios(
 	filteredInputs := shared.Where(inputs, func(input DownloadSpotifyAudioInput) bool {
 		return !shared.ContainsWhereP(
 			dbSpotifyIDs,
-			func(dbSpotifyID *database.GetAudioSpotifyIdsBySpotifyIdsRow) bool {
+			func(dbSpotifyID *database.GetAudioSpotifyIDsBySpotifyIDsRow) bool {
 				return dbSpotifyID.SpotifyID.String == input.SpotifyID
 			})
 	})

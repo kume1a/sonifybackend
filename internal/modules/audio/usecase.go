@@ -93,7 +93,7 @@ func DownloadYoutubeAudio(params DownloadYoutubeAudioParams) (*database.UserAudi
 }
 
 func DoesAudioExistByLocalId(ctx context.Context, db *database.Queries, userID uuid.UUID, localID string) (bool, error) {
-	count, err := CountUserAudioByLocalId(ctx, db, database.CountUserAudioByLocalIdParams{
+	count, err := CountUserAudioByLocalId(ctx, db, database.CountUserAudioByLocalIDParams{
 		LocalID: sql.NullString{String: localID, Valid: true},
 		UserID:  userID,
 	})

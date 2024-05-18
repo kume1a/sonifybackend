@@ -39,7 +39,7 @@ func GetOrCreateUserSyncDatumByUserId(
 func UpdateUserSyncDatumByUserId(
 	ctx context.Context,
 	db *database.Queries,
-	params database.UpdateUserSyncDatumByUserIdParams,
+	params database.UpdateUserSyncDatumByUserIDParams,
 ) (*database.UserSyncDatum, *shared.HttpError) {
 	entity, err := updateUserSyncDatumByUserId(ctx, db, params)
 
