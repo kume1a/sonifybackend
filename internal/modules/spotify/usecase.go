@@ -51,7 +51,7 @@ func BulkWriteDownloadedSpotifyAudios(
 		},
 	)
 
-	_, err := audio.BulkWriteAudios(ctx, apiCfg, params)
+	_, err := audio.BulkCreateAudios(ctx, apiCfg, params)
 
 	return err
 }

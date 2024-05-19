@@ -7,34 +7,10 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/kume1a/sonifybackend/internal/database"
+	"github.com/kume1a/sonifybackend/internal/modules/useraudio"
 	"github.com/kume1a/sonifybackend/internal/modules/youtube"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
-
-func BulkWriteAudios(
-	ctx context.Context,
-	apiCfg *shared.ApiConfig,
-	params []database.CreateAudioParams,
-) ([]database.Audio, error) {
-	return shared.RunDBTransaction(
-		ctx,
-		apiCfg,
-		func(tx *database.Queries) ([]database.Audio, error) {
-			audios := make([]database.Audio, 0, len(params))
-
-			for _, param := range params {
-				audio, err := CreateAudio(ctx, tx, param)
-				if err != nil {
-					return nil, err
-				}
-
-				audios = append(audios, *audio)
-			}
-
-			return audios, nil
-		},
-	)
-}
 
 type DownloadYoutubeAudioParams struct {
 	ApiConfig *shared.ApiConfig
@@ -43,9 +19,20 @@ type DownloadYoutubeAudioParams struct {
 	VideoID   string
 }
 
-func DownloadYoutubeAudio(params DownloadYoutubeAudioParams) (*database.UserAudio, *database.Audio, *shared.HttpError) {
+func DownloadYoutubeAudio(params DownloadYoutubeAudioParams) (
+	*database.UserAudio,
+	*database.Audio,
+	*shared.HttpError,
+) {
 	// check if the user already has the audio
-	if _, err := GetUserAudioByYoutubeVideoId(params.Context, params.ApiConfig.DB, params.UserID, params.VideoID); err == nil {
+	if _, err := useraudio.GetUserAudioByYoutubeVideoId(
+		params.Context,
+		params.ApiConfig.DB,
+		database.GetUserAudioByVideoIDParams{
+			UserID:         params.UserID,
+			YoutubeVideoID: sql.NullString{String: params.VideoID, Valid: true},
+		},
+	); err == nil {
 		return nil, nil, shared.HttpErrConflict(shared.ErrAudioAlreadyExists)
 	}
 
@@ -81,7 +68,7 @@ func DownloadYoutubeAudio(params DownloadYoutubeAudioParams) (*database.UserAudi
 		return nil, nil, shared.HttpErrInternalServerErrorDef()
 	}
 
-	userAudio, err := CreateUserAudio(params.Context, params.ApiConfig.DB, database.CreateUserAudioParams{
+	userAudio, err := useraudio.CreateUserAudio(params.Context, params.ApiConfig.DB, database.CreateUserAudioParams{
 		UserID:  params.UserID,
 		AudioID: newAudio.ID,
 	})
@@ -90,21 +77,6 @@ func DownloadYoutubeAudio(params DownloadYoutubeAudioParams) (*database.UserAudi
 	}
 
 	return userAudio, newAudio, nil
-}
-
-func DoesAudioExistByLocalId(ctx context.Context, db *database.Queries, userID uuid.UUID, localID string) (bool, error) {
-	count, err := CountUserAudioByLocalId(ctx, db, database.CountUserAudioByLocalIDParams{
-		LocalID: sql.NullString{String: localID, Valid: true},
-		UserID:  userID,
-	})
-	if err != nil {
-		if shared.IsDBErrorNotFound(err) {
-			return false, nil
-		}
-		return false, err
-	}
-
-	return count > 0, nil
 }
 
 type WriteUserImportedLocalMusicParams struct {
@@ -146,7 +118,7 @@ func WriteUserImportedLocalMusic(params WriteUserImportedLocalMusicParams) (*Use
 				return nil, err
 			}
 
-			userAudio, err := CreateUserAudio(
+			userAudio, err := useraudio.CreateUserAudio(
 				params.Context,
 				tx,
 				database.CreateUserAudioParams{

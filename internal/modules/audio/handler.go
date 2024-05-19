@@ -4,6 +4,8 @@ import (
 	"net/http"
 
 	"github.com/kume1a/sonifybackend/internal/database"
+	"github.com/kume1a/sonifybackend/internal/modules/audiolike"
+	"github.com/kume1a/sonifybackend/internal/modules/useraudio"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
@@ -102,7 +104,7 @@ func handleGetAuthUserAudioIds(apiCfg *shared.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		userAudioIds, err := GetUserAudioIds(r.Context(), apiCfg.DB, authPayload.UserID)
+		userAudioIds, err := useraudio.GetUserAudioIds(r.Context(), apiCfg.DB, authPayload.UserID)
 		if err != nil {
 			shared.ResInternalServerErrorDef(w)
 			return
@@ -127,7 +129,7 @@ func handleGetAuthUserUserAudiosByIDs(apiCfg *shared.ApiConfig) http.HandlerFunc
 			return
 		}
 
-		audios, err := GetUserAudiosByAudioIds(r.Context(), apiCfg.DB, database.GetUserAudiosByAudioIdsParams{
+		audios, err := useraudio.GetUserAudiosByAudioIds(r.Context(), apiCfg.DB, database.GetUserAudiosByAudioIdsParams{
 			UserID:   authPayload.UserID,
 			AudioIds: body.AudioIDs,
 		})
@@ -159,7 +161,7 @@ func handleLikeAudio(apiCfg *shared.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		audioLike, err := CreateAudioLike(r.Context(), apiCfg.DB, database.CreateAudioLikeParams{
+		newAudioLike, err := audiolike.CreateAudioLike(r.Context(), apiCfg.DB, database.CreateAudioLikeParams{
 			UserID:  authPayload.UserID,
 			AudioID: body.AudioID,
 		})
@@ -168,7 +170,7 @@ func handleLikeAudio(apiCfg *shared.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		audioLikeDTO := AudioLikeEntityToDTO(audioLike)
+		audioLikeDTO := AudioLikeEntityToDTO(newAudioLike)
 
 		shared.ResOK(w, audioLikeDTO)
 	}
@@ -188,7 +190,7 @@ func handleUnlikeAudio(apiCfg *shared.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		err = DeleteAudioLike(r.Context(), apiCfg.DB, database.DeleteAudioLikeParams{
+		err = audiolike.DeleteAudioLike(r.Context(), apiCfg.DB, database.DeleteAudioLikeParams{
 			UserID:  authPayload.UserID,
 			AudioID: body.AudioID,
 		})
@@ -212,7 +214,7 @@ func handleGetAuthUserAudioLikes(apiCfg *shared.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		audioLikes, err := GetAudioLikesByUserID(r.Context(), apiCfg.DB, authPayload.UserID)
+		audioLikes, err := audiolike.GetAudioLikesByUserID(r.Context(), apiCfg.DB, authPayload.UserID)
 		if err != nil {
 			shared.ResInternalServerErrorDef(w)
 			return
@@ -237,7 +239,7 @@ func handleGetAuthUserAudioLikesByIDs(apiCfg *shared.ApiConfig) http.HandlerFunc
 			return
 		}
 
-		audioLikes, err := GetAudioLikesByUserIDAndAudioIDs(r.Context(), apiCfg.DB, database.GetAudioLikesByUserIDAndAudioIDsParams{
+		audioLikes, err := audiolike.GetAudioLikesByUserIDAndAudioIDs(r.Context(), apiCfg.DB, database.GetAudioLikesByUserIDAndAudioIDsParams{
 			AudioIds: body.AudioIDs,
 			UserID:   authPayload.UserID,
 		})
