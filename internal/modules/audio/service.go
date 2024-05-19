@@ -20,7 +20,7 @@ func CreateAudio(
 
 	if err != nil {
 		log.Println("Error creating audio:", err)
-		return nil, shared.HttpErrInternalServerErrorDef()
+		return nil, shared.InternalServerErrorDef()
 	}
 
 	return entity, err
@@ -41,7 +41,7 @@ func BulkCreateAudios(
 				audio, err := createAudio(ctx, tx, param)
 				if err != nil {
 					log.Println("Error creating audio:", err)
-					return nil, shared.HttpErrInternalServerErrorDef()
+					return nil, shared.InternalServerErrorDef()
 				}
 
 				audios = append(audios, *audio)
@@ -60,7 +60,7 @@ func DoesAudioExistByLocalId(ctx context.Context, db *database.Queries, userID u
 
 	if err != nil {
 		log.Println("Error counting user audio by local id: ", err)
-		return false, shared.HttpErrInternalServerErrorDef()
+		return false, shared.InternalServerErrorDef()
 	}
 
 	return count > 0, nil
@@ -75,7 +75,7 @@ func GetAudioSpotifyIdsBySpotifyIds(
 
 	if err != nil {
 		log.Println("Error getting audios spotify ids by spotify ids: ", err)
-		return nil, shared.HttpErrInternalServerErrorDef()
+		return nil, shared.InternalServerErrorDef()
 	}
 
 	return ids, err
@@ -90,7 +90,7 @@ func GetAudioIdsBySpotifyIds(
 
 	if err != nil {
 		log.Println("Error getting audio ids by spotify ids: ", err)
-		return nil, shared.HttpErrInternalServerErrorDef()
+		return nil, shared.InternalServerErrorDef()
 	}
 
 	return ids, err

@@ -12,7 +12,7 @@ import (
 func AuthWithEmail(apiCfg shared.ApiConfig, ctx context.Context, email string, password string) (*tokenPayloadDTO, *shared.HttpError) {
 	userExistsByEmail, err := user.UserExistsByEmail(ctx, apiCfg.DB, email)
 	if err != nil {
-		return nil, shared.HttpErrInternalServerErrorDef()
+		return nil, shared.InternalServerErrorDef()
 	}
 
 	var authUser *database.User
@@ -29,7 +29,7 @@ func AuthWithEmail(apiCfg shared.ApiConfig, ctx context.Context, email string, p
 
 	tokenPayload, err := getTokenPayloadDtoFromUserEntity(authUser)
 	if err != nil {
-		return nil, shared.HttpErrInternalServerErrorDef()
+		return nil, shared.InternalServerErrorDef()
 	}
 
 	return tokenPayload, nil
@@ -39,15 +39,15 @@ func signInWithEmail(apiCfg shared.ApiConfig, ctx context.Context, email string,
 	authUser, err := user.GetUserByEmail(ctx, apiCfg.DB, email)
 
 	if err != nil {
-		return nil, shared.HttpErrUnauthorized(shared.ErrInvalidEmailOrPassword)
+		return nil, shared.Unauthorized(shared.ErrInvalidEmailOrPassword)
 	}
 
 	if authUser.AuthProvider != database.AuthProviderEMAIL {
-		return nil, shared.HttpErrBadRequest(shared.ErrInvalidAuthMethod)
+		return nil, shared.BadRequest(shared.ErrInvalidAuthMethod)
 	}
 
 	if !ComparePasswordHash(password, authUser.PasswordHash.String) {
-		return nil, shared.HttpErrUnauthorized(shared.ErrInvalidEmailOrPassword)
+		return nil, shared.Unauthorized(shared.ErrInvalidEmailOrPassword)
 	}
 
 	return authUser, nil
@@ -56,7 +56,7 @@ func signInWithEmail(apiCfg shared.ApiConfig, ctx context.Context, email string,
 func signUpWithEmail(apiCfg shared.ApiConfig, ctx context.Context, email string, password string) (*database.User, *shared.HttpError) {
 	passwordHash, err := HashPassword(password)
 	if err != nil {
-		return nil, shared.HttpErrInternalServerErrorDef()
+		return nil, shared.InternalServerErrorDef()
 	}
 
 	newUser, err := user.CreateUser(ctx, apiCfg.DB, database.CreateUserParams{
@@ -66,7 +66,7 @@ func signUpWithEmail(apiCfg shared.ApiConfig, ctx context.Context, email string,
 		AuthProvider: database.AuthProviderEMAIL,
 	})
 	if err != nil {
-		return nil, shared.HttpErrInternalServerErrorDef()
+		return nil, shared.InternalServerErrorDef()
 	}
 
 	return newUser, nil

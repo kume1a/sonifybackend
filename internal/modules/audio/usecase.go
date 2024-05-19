@@ -33,22 +33,22 @@ func DownloadYoutubeAudio(params DownloadYoutubeAudioParams) (
 			YoutubeVideoID: sql.NullString{String: params.VideoID, Valid: true},
 		},
 	); err == nil {
-		return nil, nil, shared.HttpErrConflict(shared.ErrAudioAlreadyExists)
+		return nil, nil, shared.Conflict(shared.ErrAudioAlreadyExists)
 	}
 
 	videoInfo, err := youtube.GetYoutubeVideoInfo(params.VideoID)
 	if err != nil {
-		return nil, nil, shared.HttpErrInternalServerErrorDef()
+		return nil, nil, shared.InternalServerErrorDef()
 	}
 
 	filePath, thumbnailPath, err := youtube.DownloadYoutubeAudioWithThumbnail(params.VideoID)
 	if err != nil {
-		return nil, nil, shared.HttpErrInternalServerErrorDef()
+		return nil, nil, shared.InternalServerErrorDef()
 	}
 
 	fileSize, err := shared.GetFileSize(filePath)
 	if err != nil {
-		return nil, nil, shared.HttpErrInternalServerErrorDef()
+		return nil, nil, shared.InternalServerErrorDef()
 	}
 
 	newAudio, err := CreateAudio(
@@ -65,7 +65,7 @@ func DownloadYoutubeAudio(params DownloadYoutubeAudioParams) (
 		},
 	)
 	if err != nil {
-		return nil, nil, shared.HttpErrInternalServerErrorDef()
+		return nil, nil, shared.InternalServerErrorDef()
 	}
 
 	userAudio, err := useraudio.CreateUserAudio(params.Context, params.ApiConfig.DB, database.CreateUserAudioParams{
@@ -73,7 +73,7 @@ func DownloadYoutubeAudio(params DownloadYoutubeAudioParams) (
 		AudioID: newAudio.ID,
 	})
 	if err != nil {
-		return nil, nil, shared.HttpErrInternalServerErrorDef()
+		return nil, nil, shared.InternalServerErrorDef()
 	}
 
 	return userAudio, newAudio, nil
@@ -94,7 +94,7 @@ type WriteUserImportedLocalMusicParams struct {
 func WriteUserImportedLocalMusic(params WriteUserImportedLocalMusicParams) (*UserAudioWithAudio, *shared.HttpError) {
 	audioFileSize, err := shared.GetFileSize(params.AudioPath)
 	if err != nil {
-		return nil, shared.HttpErrInternalServerErrorDef()
+		return nil, shared.InternalServerErrorDef()
 	}
 
 	res, err := shared.RunDBTransaction(
@@ -138,7 +138,7 @@ func WriteUserImportedLocalMusic(params WriteUserImportedLocalMusicParams) (*Use
 	)
 
 	if err != nil {
-		return nil, shared.HttpErrInternalServerErrorDef()
+		return nil, shared.InternalServerErrorDef()
 	}
 
 	return res, nil

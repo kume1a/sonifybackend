@@ -59,18 +59,18 @@ func ValidateUploadUserLocalMusicDTO(w http.ResponseWriter, r *http.Request) (*u
 	durationMs := r.FormValue("durationMs")
 
 	if localId == "" {
-		return nil, shared.HttpErrBadRequest("localId must be provided")
+		return nil, shared.BadRequest("localId must be provided")
 	}
 
 	if !govalidator.IsByteLength(title, 1, 255) {
-		return nil, shared.HttpErrBadRequest("title must be between 1 and 255 characters")
+		return nil, shared.BadRequest("title must be between 1 and 255 characters")
 	}
 
 	intDurationMs := 0
 	if durationMs != "" {
 		intDurationMsValue, err := strconv.Atoi(durationMs)
 		if err != nil {
-			return nil, shared.HttpErrBadRequest("durationMs must be an integer")
+			return nil, shared.BadRequest("durationMs must be an integer")
 		}
 
 		intDurationMs = intDurationMsValue

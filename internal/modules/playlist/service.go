@@ -17,11 +17,11 @@ func GetPlaylistById(
 	playlist, err := getPlaylistById(ctx, db, playlistID)
 
 	if err != nil && shared.IsDBErrorNotFound(err) {
-		return nil, shared.HttpErrNotFound(shared.ErrPlaylistNotFound)
+		return nil, shared.NotFound(shared.ErrPlaylistNotFound)
 	}
 
 	if err != nil {
-		return nil, shared.HttpErrInternalServerErrorDef()
+		return nil, shared.InternalServerErrorDef()
 	}
 
 	return playlist, nil
@@ -37,10 +37,10 @@ func GetPlaylistWithAudios(
 
 	if err != nil {
 		if shared.IsDBErrorNotFound(err) {
-			return nil, nil, shared.HttpErrNotFound(shared.ErrPlaylistNotFound)
+			return nil, nil, shared.NotFound(shared.ErrPlaylistNotFound)
 		}
 
-		return nil, nil, shared.HttpErrInternalServerErrorDef()
+		return nil, nil, shared.InternalServerErrorDef()
 	}
 
 	playlistAudios, err := getPlaylistAudios(ctx, db, database.GetPlaylistAudiosParams{
@@ -48,7 +48,7 @@ func GetPlaylistWithAudios(
 		UserID:     authUserID,
 	})
 	if err != nil {
-		return nil, nil, shared.HttpErrInternalServerErrorDef()
+		return nil, nil, shared.InternalServerErrorDef()
 	}
 
 	audiosWithLike := make([]audio.AudioWithAudioLike, len(playlistAudios))

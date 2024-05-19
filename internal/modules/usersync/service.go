@@ -23,14 +23,14 @@ func GetOrCreateUserSyncDatumByUserId(
 			UserAudioLastSyncedAt: sql.NullTime{},
 		})
 		if err != nil {
-			return nil, shared.HttpErrInternalServerErrorDef()
+			return nil, shared.InternalServerErrorDef()
 		}
 
 		return entity, nil
 	}
 
 	if err != nil {
-		return nil, shared.HttpErrInternalServerErrorDef()
+		return nil, shared.InternalServerErrorDef()
 	}
 
 	return entity, nil
@@ -44,11 +44,11 @@ func UpdateUserSyncDatumByUserId(
 	entity, err := updateUserSyncDatumByUserId(ctx, db, params)
 
 	if err != nil && shared.IsDBErrorNotFound(err) {
-		return nil, shared.HttpErrNotFound(shared.ErrUserSyncDatumNotFound)
+		return nil, shared.NotFound(shared.ErrUserSyncDatumNotFound)
 	}
 
 	if err != nil {
-		return nil, shared.HttpErrInternalServerErrorDef()
+		return nil, shared.InternalServerErrorDef()
 	}
 
 	return entity, nil

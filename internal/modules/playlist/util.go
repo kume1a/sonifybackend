@@ -36,7 +36,7 @@ func ValidateCreatePlaylistDto(w http.ResponseWriter, r *http.Request) (*createP
 	name := r.FormValue("name")
 
 	if !govalidator.IsByteLength(name, 1, 255) {
-		return nil, shared.HttpErrBadRequest("Name must be between 1 and 255 characters")
+		return nil, shared.BadRequest("Name must be between 1 and 255 characters")
 	}
 
 	return &createPlaylistDTO{
@@ -50,12 +50,12 @@ func ValidateGetPlaylistByIDVars(r *http.Request) (*playlistIDDTO, *shared.HttpE
 
 	playlistID, ok := vars["playlistID"]
 	if !ok {
-		return nil, shared.HttpErrBadRequest("playlistID is required")
+		return nil, shared.BadRequest("playlistID is required")
 	}
 
 	playlistIDUUID, err := uuid.Parse(playlistID)
 	if err != nil {
-		return nil, shared.HttpErrBadRequest("playlistId is not a valid UUID")
+		return nil, shared.BadRequest("playlistId is not a valid UUID")
 	}
 
 	return &playlistIDDTO{PlaylistID: playlistIDUUID}, nil

@@ -28,7 +28,7 @@ type GoogleClaims struct {
 func AuthWithGoogle(apiCfg shared.ApiConfig, ctx context.Context, token string) (*tokenPayloadDTO, *shared.HttpError) {
 	claims, err := validateGoogleJWT(token)
 	if err != nil {
-		return nil, shared.HttpErrUnauthorized(shared.ErrInvalidGoogleToken)
+		return nil, shared.Unauthorized(shared.ErrInvalidGoogleToken)
 	}
 
 	authUser, err := user.GetUserByEmail(ctx, apiCfg.DB, claims.Email)
@@ -41,7 +41,7 @@ func AuthWithGoogle(apiCfg shared.ApiConfig, ctx context.Context, token string) 
 		})
 
 		if err != nil {
-			return nil, shared.HttpErrInternalServerErrorDef()
+			return nil, shared.InternalServerErrorDef()
 		}
 
 		authUser = newUser
@@ -49,7 +49,7 @@ func AuthWithGoogle(apiCfg shared.ApiConfig, ctx context.Context, token string) 
 
 	tokenPayload, err := getTokenPayloadDtoFromUserEntity(authUser)
 	if err != nil {
-		return nil, shared.HttpErrInternalServerErrorDef()
+		return nil, shared.InternalServerErrorDef()
 	}
 
 	return tokenPayload, nil

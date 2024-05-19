@@ -32,18 +32,6 @@ type HandleUploadFileArgs struct {
 	IsOptional       bool
 }
 
-func GetRequestBody[T interface{}](r *http.Request) (T, error) {
-	defer r.Body.Close()
-
-	var body T
-
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		return body, errors.New(ErrInvalidJSON)
-	}
-
-	return body, nil
-}
-
 func XWWWFormUrlencoded(params XWWWFormUrlencodedParams) (
 	httpResp *http.Response,
 	respBody string,
@@ -78,16 +66,16 @@ func XWWWFormUrlencoded(params XWWWFormUrlencodedParams) (
 func HandleUploadFile(args HandleUploadFileArgs) (string, *HttpError) {
 	env, err := ParseEnv()
 	if err != nil {
-		return "", HttpErrInternalServerErrorDef()
+		return "", InternalServerErrorDef()
 	}
 
 	if args.Request.Method != "POST" {
-		return "", HttpErrMethodNotAllowed(ErrMethodNotAllowed)
+		return "", MethodNotAllowed(ErrMethodNotAllowed)
 	}
 
 	args.Request.Body = http.MaxBytesReader(args.ResponseWriter, args.Request.Body, env.MaxUploadSizeBytes)
 	if err := args.Request.ParseMultipartForm(env.MaxUploadSizeBytes); err != nil {
-		return "", HttpErrBadRequest(ErrExceededMaxUploadSize)
+		return "", BadRequest(ErrExceededMaxUploadSize)
 	}
 
 	file, fileHeader, err := args.Request.FormFile(args.FieldName)
@@ -98,7 +86,7 @@ func HandleUploadFile(args HandleUploadFileArgs) (string, *HttpError) {
 		}
 
 		log.Println("error parsing form file: ", err)
-		return "", HttpErrBadRequest("field " + args.FieldName + " is required")
+		return "", BadRequest("field " + args.FieldName + " is required")
 	}
 
 	defer file.Close()
@@ -113,22 +101,34 @@ func HandleUploadFile(args HandleUploadFileArgs) (string, *HttpError) {
 		Extension: extension,
 	})
 	if err != nil {
-		return "", HttpErrInternalServerErrorDef()
+		return "", InternalServerErrorDef()
 	}
 
 	dst, err := os.Create(location)
 	if err != nil {
-		return "", HttpErrInternalServerErrorDef()
+		return "", InternalServerErrorDef()
 	}
 
 	defer dst.Close()
 
 	_, err = io.Copy(dst, file)
 	if err != nil {
-		return "", HttpErrInternalServerErrorDef()
+		return "", InternalServerErrorDef()
 	}
 
 	return location, nil
+}
+
+func GetRequestBody[T interface{}](r *http.Request) (T, error) {
+	defer r.Body.Close()
+
+	var body T
+
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		return body, errors.New(ErrInvalidJSON)
+	}
+
+	return body, nil
 }
 
 func ValidateRequestBody[T Validatable](r *http.Request) (T, error) {
@@ -170,17 +170,17 @@ func ValidateRequestQuery[T Validatable](r *http.Request) (T, error) {
 func validateMimeType(file multipart.File, allowedMimeTypes []string) *HttpError {
 	buff := make([]byte, 512)
 	if _, err := file.Read(buff); err != nil {
-		return HttpErrInternalServerErrorDef()
+		return InternalServerErrorDef()
 	}
 
 	filetype := http.DetectContentType(buff)
 	if !Contains(allowedMimeTypes, filetype) {
 		log.Println("Invalid mime type: ", filetype, ", allowed = ", allowedMimeTypes)
-		return HttpErrBadRequest(ErrInvalidMimeType)
+		return BadRequest(ErrInvalidMimeType)
 	}
 
 	if _, err := file.Seek(0, io.SeekStart); err != nil {
-		return HttpErrInternalServerErrorDef()
+		return InternalServerErrorDef()
 	}
 
 	return nil
