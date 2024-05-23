@@ -96,18 +96,22 @@ func handleUploadUserLocalMusic(apiCfg *shared.ApiConfig) http.HandlerFunc {
 	}
 }
 
-func handleGetAuthUserAudioIds(r *http.Request, apiCfg *shared.ApiConfig) (*shared.HttpRes, error) {
-	authPayload, err := shared.GetAuthPayload(r)
-	if err != nil {
-		return nil, shared.Unauthorized(err.Error())
-	}
+func handleGetAuthUserAudioIds(apiCfg *shared.ApiConfig) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		authPayload, err := shared.GetAuthPayload(r)
+		if err != nil {
+			shared.ResUnauthorized(w, err.Error())
+			return
+		}
 
-	userAudioIds, err := useraudio.GetUserAudioIds(r.Context(), apiCfg.DB, authPayload.UserID)
-	if err != nil {
-		return nil, shared.InternalServerErrorDef()
-	}
+		userAudioIds, err := useraudio.GetUserAudioIds(r.Context(), apiCfg.DB, authPayload.UserID)
+		if err != nil {
+			shared.ResInternalServerErrorDef(w)
+			return
+		}
 
-	return shared.OK(userAudioIds), nil
+		shared.ResOK(w, userAudioIds)
+	}
 }
 
 func handleGetAuthUserUserAudiosByIDs(apiCfg *shared.ApiConfig) http.HandlerFunc {
