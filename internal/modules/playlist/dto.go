@@ -34,7 +34,3 @@ type playlistAudioDTO struct {
 type playlistIDDTO struct {
 	PlaylistID uuid.UUID
 }
-
-type getMyPlaylistsDTO struct {
-	IDs uuid.UUIDs `json:"ids" valid:"-"`
-}

@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/modules/audio"
+	"github.com/kume1a/sonifybackend/internal/modules/playlistaudio"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
@@ -43,7 +44,7 @@ func GetPlaylistWithAudios(
 		return nil, nil, shared.InternalServerErrorDef()
 	}
 
-	playlistAudios, err := getPlaylistAudios(ctx, db, database.GetPlaylistAudiosParams{
+	playlistAudios, err := playlistaudio.GetPlaylistAudios(ctx, db, database.GetPlaylistAudiosParams{
 		PlaylistID: playlistID,
 		UserID:     authUserID,
 	})

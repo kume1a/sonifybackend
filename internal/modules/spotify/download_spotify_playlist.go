@@ -8,6 +8,8 @@ import (
 	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/modules/audio"
 	"github.com/kume1a/sonifybackend/internal/modules/playlist"
+	"github.com/kume1a/sonifybackend/internal/modules/playlistaudio"
+	"github.com/kume1a/sonifybackend/internal/modules/userplaylist"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
@@ -106,14 +108,14 @@ func downloadSpotifyPlaylist(
 			}
 
 			for _, params := range createPlaylistAudioParams {
-				_, err := playlist.CreatePlaylistAudio(ctx, queries, params)
+				_, err := playlistaudio.CreatePlaylistAudio(ctx, queries, params)
 				if err != nil {
 					return nil, err
 				}
 			}
 
 			for _, params := range createUserPlaylistParams {
-				_, err := playlist.CreateUserPlaylist(ctx, queries, params)
+				_, err := userplaylist.CreateUserPlaylist(ctx, queries, params)
 				if err != nil {
 					return nil, err
 				}

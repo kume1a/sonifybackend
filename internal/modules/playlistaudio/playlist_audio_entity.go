@@ -1,4 +1,4 @@
-package playlist
+package playlistaudio
 
 import (
 	"context"
@@ -68,7 +68,7 @@ func GetPlaylistAudioJoinsBySpotifyIds(
 	return entities, err
 }
 
-func getPlaylistAudios(
+func GetPlaylistAudios(
 	ctx context.Context,
 	db *database.Queries,
 	params database.GetPlaylistAudiosParams,

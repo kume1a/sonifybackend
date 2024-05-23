@@ -6,6 +6,7 @@ import (
 
 	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/modules/audio"
+	"github.com/kume1a/sonifybackend/internal/modules/playlistaudio"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
@@ -26,7 +27,7 @@ func handleCreatePlaylist(apiCfg *shared.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		dto := playlistEntityToDto(*playlist)
+		dto := PlaylistEntityToDto(*playlist)
 
 		shared.ResCreated(w, dto)
 	}
@@ -49,7 +50,7 @@ func handleGetPlaylists(apiCfg *shared.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		dtos := shared.Map(playlists, playlistEntityToDto)
+		dtos := shared.Map(playlists, PlaylistEntityToDto)
 
 		shared.ResOK(w, dtos)
 	}
@@ -63,7 +64,7 @@ func handleCreatePlaylistAudio(apiCfg *shared.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		playlistAudio, err := CreatePlaylistAudio(r.Context(), apiCfg.DB, database.CreatePlaylistAudioParams{
+		playlistAudio, err := playlistaudio.CreatePlaylistAudio(r.Context(), apiCfg.DB, database.CreatePlaylistAudioParams{
 			PlaylistID: body.PlaylistID,
 			AudioID:    body.AudioID,
 		})
@@ -75,35 +76,6 @@ func handleCreatePlaylistAudio(apiCfg *shared.ApiConfig) http.HandlerFunc {
 		dto := playlistAudioEntityToDto(playlistAudio)
 
 		shared.ResCreated(w, dto)
-	}
-}
-
-func handleGetAuthUserPlaylists(apiCfg *shared.ApiConfig) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		authPayload, err := shared.GetAuthPayload(r)
-		if err != nil {
-			shared.ResUnauthorized(w, shared.ErrUnauthorized)
-			return
-		}
-
-		query, err := shared.ValidateRequestQuery[*getMyPlaylistsDTO](r)
-		if err != nil {
-			shared.ResBadRequest(w, err.Error())
-			return
-		}
-
-		playlists, err := GetUserPlaylists(r.Context(), apiCfg.DB, database.GetUserPlaylistsParams{
-			UserID: authPayload.UserID,
-			Ids:    query.IDs,
-		})
-		if err != nil {
-			shared.ResInternalServerErrorDef(w)
-			return
-		}
-
-		dtos := shared.Map(playlists, playlistEntityToDto)
-
-		shared.ResOK(w, dtos)
 	}
 }
 
@@ -131,28 +103,10 @@ func handleGetPlaylistWithAudios(apiCfg *shared.ApiConfig) http.HandlerFunc {
 			playlistDTO
 			Audios []*audio.AudioDTO `json:"audios"`
 		}{
-			playlistDTO: playlistEntityToDto(*playlist),
+			playlistDTO: PlaylistEntityToDto(*playlist),
 			Audios:      shared.Map(audios, audio.AudioWithAudioLikeToAudioDTO),
 		}
 
 		shared.ResOK(w, dto)
-	}
-}
-
-func handleGetAuthUserPlaylistIDs(apiCfg *shared.ApiConfig) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		authPayload, err := shared.GetAuthPayload(r)
-		if err != nil {
-			shared.ResUnauthorized(w, shared.ErrUnauthorized)
-			return
-		}
-
-		ids, err := GetUserPlaylistIDs(r.Context(), apiCfg.DB, authPayload.UserID)
-		if err != nil {
-			shared.ResInternalServerErrorDef(w)
-			return
-		}
-
-		shared.ResOK(w, ids)
 	}
 }
