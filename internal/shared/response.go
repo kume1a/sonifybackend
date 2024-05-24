@@ -35,6 +35,13 @@ func ResJson(w http.ResponseWriter, res *HttpRes) {
 
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(res.Code)
+
+	// reflectValue := reflect.ValueOf(res.Payload)
+	// if reflectValue.Kind() == reflect.Slice && reflectValue.Len() == 0 {
+	// 	w.Write([]byte("[]"))
+	// 	return
+	// }
+
 	w.Write(data)
 }
 
