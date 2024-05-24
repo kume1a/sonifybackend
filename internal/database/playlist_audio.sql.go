@@ -20,7 +20,7 @@ INSERT INTO playlist_audios(
   audio_id,
   created_at
 ) VALUES ($1,$2,$3) 
-RETURNING id, playlist_id, audio_id, created_at
+RETURNING id, created_at, playlist_id, audio_id
 `
 
 type CreatePlaylistAudioParams struct {
@@ -34,9 +34,9 @@ func (q *Queries) CreatePlaylistAudio(ctx context.Context, arg CreatePlaylistAud
 	var i PlaylistAudio
 	err := row.Scan(
 		&i.ID,
+		&i.CreatedAt,
 		&i.PlaylistID,
 		&i.AudioID,
-		&i.CreatedAt,
 	)
 	return i, err
 }
@@ -58,7 +58,7 @@ func (q *Queries) DeletePlaylistAudiosByIDs(ctx context.Context, arg DeletePlayl
 }
 
 const getPlaylistAudioJoins = `-- name: GetPlaylistAudioJoins :many
-SELECT playlist_audios.id, playlist_id, audio_id, playlist_audios.created_at, audios.id, title, author, duration_ms, path, audios.created_at, size_bytes, youtube_video_id, thumbnail_path, spotify_id, thumbnail_url, local_id FROM playlist_audios
+SELECT playlist_audios.id, playlist_audios.created_at, playlist_id, audio_id, audios.id, audios.created_at, title, author, duration_ms, path, size_bytes, youtube_video_id, thumbnail_path, spotify_id, thumbnail_url, local_id FROM playlist_audios
   INNER JOIN audios ON playlist_audios.audio_id = audios.id
 WHERE (playlist_id = $1 or $1 IS NULL) 
   AND playlist_audios.created_at > $2
@@ -74,15 +74,15 @@ type GetPlaylistAudioJoinsParams struct {
 
 type GetPlaylistAudioJoinsRow struct {
 	ID             uuid.UUID
+	CreatedAt      time.Time
 	PlaylistID     uuid.UUID
 	AudioID        uuid.UUID
-	CreatedAt      time.Time
 	ID_2           uuid.UUID
+	CreatedAt_2    time.Time
 	Title          sql.NullString
 	Author         sql.NullString
 	DurationMs     sql.NullInt32
 	Path           sql.NullString
-	CreatedAt_2    time.Time
 	SizeBytes      sql.NullInt64
 	YoutubeVideoID sql.NullString
 	ThumbnailPath  sql.NullString
@@ -102,15 +102,15 @@ func (q *Queries) GetPlaylistAudioJoins(ctx context.Context, arg GetPlaylistAudi
 		var i GetPlaylistAudioJoinsRow
 		if err := rows.Scan(
 			&i.ID,
+			&i.CreatedAt,
 			&i.PlaylistID,
 			&i.AudioID,
-			&i.CreatedAt,
 			&i.ID_2,
+			&i.CreatedAt_2,
 			&i.Title,
 			&i.Author,
 			&i.DurationMs,
 			&i.Path,
-			&i.CreatedAt_2,
 			&i.SizeBytes,
 			&i.YoutubeVideoID,
 			&i.ThumbnailPath,
@@ -133,7 +133,7 @@ func (q *Queries) GetPlaylistAudioJoins(ctx context.Context, arg GetPlaylistAudi
 
 const getPlaylistAudioJoinsBySpotifyIDs = `-- name: GetPlaylistAudioJoinsBySpotifyIDs :many
 SELECT 
-  playlist_audios.id, playlist_audios.playlist_id, playlist_audios.audio_id, playlist_audios.created_at,
+  playlist_audios.id, playlist_audios.created_at, playlist_audios.playlist_id, playlist_audios.audio_id,
   audios.spotify_id AS spotify_id
 FROM playlist_audios
 INNER JOIN audios ON playlist_audios.audio_id = audios.id
@@ -147,9 +147,9 @@ type GetPlaylistAudioJoinsBySpotifyIDsParams struct {
 
 type GetPlaylistAudioJoinsBySpotifyIDsRow struct {
 	ID         uuid.UUID
+	CreatedAt  time.Time
 	PlaylistID uuid.UUID
 	AudioID    uuid.UUID
-	CreatedAt  time.Time
 	SpotifyID  sql.NullString
 }
 
@@ -164,9 +164,9 @@ func (q *Queries) GetPlaylistAudioJoinsBySpotifyIDs(ctx context.Context, arg Get
 		var i GetPlaylistAudioJoinsBySpotifyIDsRow
 		if err := rows.Scan(
 			&i.ID,
+			&i.CreatedAt,
 			&i.PlaylistID,
 			&i.AudioID,
-			&i.CreatedAt,
 			&i.SpotifyID,
 		); err != nil {
 			return nil, err
@@ -184,7 +184,7 @@ func (q *Queries) GetPlaylistAudioJoinsBySpotifyIDs(ctx context.Context, arg Get
 
 const getPlaylistAudios = `-- name: GetPlaylistAudios :many
 SELECT 
-  audios.id, audios.title, audios.author, audios.duration_ms, audios.path, audios.created_at, audios.size_bytes, audios.youtube_video_id, audios.thumbnail_path, audios.spotify_id, audios.thumbnail_url, audios.local_id,
+  audios.id, audios.created_at, audios.title, audios.author, audios.duration_ms, audios.path, audios.size_bytes, audios.youtube_video_id, audios.thumbnail_path, audios.spotify_id, audios.thumbnail_url, audios.local_id,
   audio_likes.audio_id AS audio_likes_audio_id,
   audio_likes.user_id AS audio_likes_user_id
 FROM playlist_audios 
@@ -202,11 +202,11 @@ type GetPlaylistAudiosParams struct {
 
 type GetPlaylistAudiosRow struct {
 	ID                uuid.UUID
+	CreatedAt         time.Time
 	Title             sql.NullString
 	Author            sql.NullString
 	DurationMs        sql.NullInt32
 	Path              sql.NullString
-	CreatedAt         time.Time
 	SizeBytes         sql.NullInt64
 	YoutubeVideoID    sql.NullString
 	ThumbnailPath     sql.NullString
@@ -228,11 +228,11 @@ func (q *Queries) GetPlaylistAudios(ctx context.Context, arg GetPlaylistAudiosPa
 		var i GetPlaylistAudiosRow
 		if err := rows.Scan(
 			&i.ID,
+			&i.CreatedAt,
 			&i.Title,
 			&i.Author,
 			&i.DurationMs,
 			&i.Path,
-			&i.CreatedAt,
 			&i.SizeBytes,
 			&i.YoutubeVideoID,
 			&i.ThumbnailPath,

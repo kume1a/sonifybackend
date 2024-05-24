@@ -38,7 +38,7 @@ INSERT INTO user_audios(
   user_id, 
   audio_id
 ) VALUES ($1,$2,$3) 
-RETURNING id, user_id, audio_id, created_at
+RETURNING id, created_at, user_id, audio_id
 `
 
 type CreateUserAudioParams struct {
@@ -52,15 +52,15 @@ func (q *Queries) CreateUserAudio(ctx context.Context, arg CreateUserAudioParams
 	var i UserAudio
 	err := row.Scan(
 		&i.ID,
+		&i.CreatedAt,
 		&i.UserID,
 		&i.AudioID,
-		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const getUserAudioByVideoID = `-- name: GetUserAudioByVideoID :one
-SELECT user_audios.id, user_id, audio_id, user_audios.created_at, audios.id, title, author, duration_ms, path, audios.created_at, size_bytes, youtube_video_id, thumbnail_path, spotify_id, thumbnail_url, local_id FROM user_audios
+SELECT user_audios.id, user_audios.created_at, user_id, audio_id, audios.id, audios.created_at, title, author, duration_ms, path, size_bytes, youtube_video_id, thumbnail_path, spotify_id, thumbnail_url, local_id FROM user_audios
   INNER JOIN audios ON user_audios.audio_id = audios.id
   WHERE user_audios.user_id = $1 AND audios.youtube_video_id = $2
 `
@@ -72,15 +72,15 @@ type GetUserAudioByVideoIDParams struct {
 
 type GetUserAudioByVideoIDRow struct {
 	ID             uuid.UUID
+	CreatedAt      time.Time
 	UserID         uuid.UUID
 	AudioID        uuid.UUID
-	CreatedAt      time.Time
 	ID_2           uuid.UUID
+	CreatedAt_2    time.Time
 	Title          sql.NullString
 	Author         sql.NullString
 	DurationMs     sql.NullInt32
 	Path           sql.NullString
-	CreatedAt_2    time.Time
 	SizeBytes      sql.NullInt64
 	YoutubeVideoID sql.NullString
 	ThumbnailPath  sql.NullString
@@ -94,15 +94,15 @@ func (q *Queries) GetUserAudioByVideoID(ctx context.Context, arg GetUserAudioByV
 	var i GetUserAudioByVideoIDRow
 	err := row.Scan(
 		&i.ID,
+		&i.CreatedAt,
 		&i.UserID,
 		&i.AudioID,
-		&i.CreatedAt,
 		&i.ID_2,
+		&i.CreatedAt_2,
 		&i.Title,
 		&i.Author,
 		&i.DurationMs,
 		&i.Path,
-		&i.CreatedAt_2,
 		&i.SizeBytes,
 		&i.YoutubeVideoID,
 		&i.ThumbnailPath,
@@ -141,7 +141,7 @@ func (q *Queries) GetUserAudioIDs(ctx context.Context, userID uuid.UUID) ([]uuid
 }
 
 const getUserAudiosByAudioIds = `-- name: GetUserAudiosByAudioIds :many
-SELECT user_audios.id, user_audios.user_id, user_audios.audio_id, user_audios.created_at,
+SELECT user_audios.id, user_audios.created_at, user_audios.user_id, user_audios.audio_id,
   audio_likes.user_id as audio_likes_user_id,
   audio_likes.audio_id as audio_likes_audio_id,
   audios.id as audio_id,
@@ -169,9 +169,9 @@ type GetUserAudiosByAudioIdsParams struct {
 
 type GetUserAudiosByAudioIdsRow struct {
 	ID                  uuid.UUID
+	CreatedAt           time.Time
 	UserID              uuid.UUID
 	AudioID             uuid.UUID
-	CreatedAt           time.Time
 	AudioLikesUserID    uuid.NullUUID
 	AudioLikesAudioID   uuid.NullUUID
 	AudioID_2           uuid.UUID
@@ -199,9 +199,9 @@ func (q *Queries) GetUserAudiosByAudioIds(ctx context.Context, arg GetUserAudios
 		var i GetUserAudiosByAudioIdsRow
 		if err := rows.Scan(
 			&i.ID,
+			&i.CreatedAt,
 			&i.UserID,
 			&i.AudioID,
-			&i.CreatedAt,
 			&i.AudioLikesUserID,
 			&i.AudioLikesAudioID,
 			&i.AudioID_2,

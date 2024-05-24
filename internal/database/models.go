@@ -59,27 +59,27 @@ func (ns NullAuthProvider) Value() (driver.Value, error) {
 
 type Artist struct {
 	ID        uuid.UUID
+	CreatedAt time.Time
 	Name      string
 	ImagePath string
-	CreatedAt time.Time
 	SpotifyID sql.NullString
 	ImageUrl  sql.NullString
 }
 
 type ArtistAudio struct {
 	ID        uuid.UUID
+	CreatedAt time.Time
 	ArtistID  uuid.UUID
 	AudioID   uuid.UUID
-	CreatedAt time.Time
 }
 
 type Audio struct {
 	ID             uuid.UUID
+	CreatedAt      time.Time
 	Title          sql.NullString
 	Author         sql.NullString
 	DurationMs     sql.NullInt32
 	Path           sql.NullString
-	CreatedAt      time.Time
 	SizeBytes      sql.NullInt64
 	YoutubeVideoID sql.NullString
 	ThumbnailPath  sql.NullString
@@ -90,25 +90,25 @@ type Audio struct {
 
 type AudioLike struct {
 	ID        uuid.UUID
+	CreatedAt time.Time
 	UserID    uuid.UUID
 	AudioID   uuid.UUID
-	CreatedAt time.Time
 }
 
 type Playlist struct {
 	ID            uuid.UUID
+	CreatedAt     time.Time
 	Name          string
 	ThumbnailPath sql.NullString
-	CreatedAt     time.Time
 	SpotifyID     sql.NullString
 	ThumbnailUrl  sql.NullString
 }
 
 type PlaylistAudio struct {
 	ID         uuid.UUID
+	CreatedAt  time.Time
 	PlaylistID uuid.UUID
 	AudioID    uuid.UUID
-	CreatedAt  time.Time
 }
 
 type User struct {
@@ -122,16 +122,16 @@ type User struct {
 
 type UserAudio struct {
 	ID        uuid.UUID
+	CreatedAt time.Time
 	UserID    uuid.UUID
 	AudioID   uuid.UUID
-	CreatedAt time.Time
 }
 
 type UserPlaylist struct {
 	ID                     uuid.UUID
+	CreatedAt              time.Time
 	UserID                 uuid.UUID
 	PlaylistID             uuid.UUID
-	CreatedAt              time.Time
 	IsSpotifySavedPlaylist bool
 }
 

@@ -20,7 +20,7 @@ INSERT INTO audio_likes(
   user_id,
   created_at
 ) VALUES ($1, $2, $3, $4) 
-RETURNING id, user_id, audio_id, created_at
+RETURNING id, created_at, user_id, audio_id
 `
 
 type CreateAudioLikeParams struct {
@@ -40,9 +40,9 @@ func (q *Queries) CreateAudioLike(ctx context.Context, arg CreateAudioLikeParams
 	var i AudioLike
 	err := row.Scan(
 		&i.ID,
+		&i.CreatedAt,
 		&i.UserID,
 		&i.AudioID,
-		&i.CreatedAt,
 	)
 	return i, err
 }
@@ -76,12 +76,21 @@ func (q *Queries) DeleteUserAudioLikesByAudioIDs(ctx context.Context, arg Delete
 	return err
 }
 
-const getAudioLikesByUserID = `-- name: GetAudioLikesByUserID :many
-SELECT id, user_id, audio_id, created_at FROM audio_likes WHERE user_id = $1
+const getAudioLikes = `-- name: GetAudioLikes :many
+SELECT id, created_at, user_id, audio_id 
+FROM audio_likes 
+WHERE 
+  ($1 IS NULL OR user_id = $1) AND 
+  ($2 IS NULL OR id = ANY($2::uuid[]))
 `
 
-func (q *Queries) GetAudioLikesByUserID(ctx context.Context, userID uuid.UUID) ([]AudioLike, error) {
-	rows, err := q.db.QueryContext(ctx, getAudioLikesByUserID, userID)
+type GetAudioLikesParams struct {
+	UserID interface{}
+	Ids    interface{}
+}
+
+func (q *Queries) GetAudioLikes(ctx context.Context, arg GetAudioLikesParams) ([]AudioLike, error) {
+	rows, err := q.db.QueryContext(ctx, getAudioLikes, arg.UserID, arg.Ids)
 	if err != nil {
 		return nil, err
 	}
@@ -91,47 +100,9 @@ func (q *Queries) GetAudioLikesByUserID(ctx context.Context, userID uuid.UUID) (
 		var i AudioLike
 		if err := rows.Scan(
 			&i.ID,
+			&i.CreatedAt,
 			&i.UserID,
 			&i.AudioID,
-			&i.CreatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getAudioLikesByUserIDAndAudioIDs = `-- name: GetAudioLikesByUserIDAndAudioIDs :many
-SELECT id, user_id, audio_id, created_at FROM audio_likes 
-  WHERE user_id = $1 AND audio_id = ANY($2::uuid[])
-`
-
-type GetAudioLikesByUserIDAndAudioIDsParams struct {
-	UserID   uuid.UUID
-	AudioIds []uuid.UUID
-}
-
-func (q *Queries) GetAudioLikesByUserIDAndAudioIDs(ctx context.Context, arg GetAudioLikesByUserIDAndAudioIDsParams) ([]AudioLike, error) {
-	rows, err := q.db.QueryContext(ctx, getAudioLikesByUserIDAndAudioIDs, arg.UserID, pq.Array(arg.AudioIds))
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []AudioLike
-	for rows.Next() {
-		var i AudioLike
-		if err := rows.Scan(
-			&i.ID,
-			&i.UserID,
-			&i.AudioID,
-			&i.CreatedAt,
 		); err != nil {
 			return nil, err
 		}

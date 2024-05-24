@@ -23,7 +23,7 @@ INSERT INTO playlists(
   spotify_id,
   thumbnail_url
 ) VALUES ($1,$2,$3,$4,$5,$6) 
-RETURNING id, name, thumbnail_path, created_at, spotify_id, thumbnail_url
+RETURNING id, created_at, name, thumbnail_path, spotify_id, thumbnail_url
 `
 
 type CreatePlaylistParams struct {
@@ -47,9 +47,9 @@ func (q *Queries) CreatePlaylist(ctx context.Context, arg CreatePlaylistParams) 
 	var i Playlist
 	err := row.Scan(
 		&i.ID,
+		&i.CreatedAt,
 		&i.Name,
 		&i.ThumbnailPath,
-		&i.CreatedAt,
 		&i.SpotifyID,
 		&i.ThumbnailUrl,
 	)
@@ -75,7 +75,7 @@ func (q *Queries) DeletePlaylistsByIDs(ctx context.Context, ids []uuid.UUID) err
 }
 
 const getPlaylistByID = `-- name: GetPlaylistByID :one
-SELECT id, name, thumbnail_path, created_at, spotify_id, thumbnail_url FROM playlists WHERE id = $1
+SELECT id, created_at, name, thumbnail_path, spotify_id, thumbnail_url FROM playlists WHERE id = $1
 `
 
 func (q *Queries) GetPlaylistByID(ctx context.Context, id uuid.UUID) (Playlist, error) {
@@ -83,9 +83,9 @@ func (q *Queries) GetPlaylistByID(ctx context.Context, id uuid.UUID) (Playlist, 
 	var i Playlist
 	err := row.Scan(
 		&i.ID,
+		&i.CreatedAt,
 		&i.Name,
 		&i.ThumbnailPath,
-		&i.CreatedAt,
 		&i.SpotifyID,
 		&i.ThumbnailUrl,
 	)
@@ -93,7 +93,7 @@ func (q *Queries) GetPlaylistByID(ctx context.Context, id uuid.UUID) (Playlist, 
 }
 
 const getPlaylists = `-- name: GetPlaylists :many
-SELECT id, name, thumbnail_path, created_at, spotify_id, thumbnail_url FROM playlists 
+SELECT id, created_at, name, thumbnail_path, spotify_id, thumbnail_url FROM playlists 
   WHERE created_at > $1
   ORDER BY created_at DESC
   LIMIT $2
@@ -115,9 +115,9 @@ func (q *Queries) GetPlaylists(ctx context.Context, arg GetPlaylistsParams) ([]P
 		var i Playlist
 		if err := rows.Scan(
 			&i.ID,
+			&i.CreatedAt,
 			&i.Name,
 			&i.ThumbnailPath,
-			&i.CreatedAt,
 			&i.SpotifyID,
 			&i.ThumbnailUrl,
 		); err != nil {
@@ -169,7 +169,7 @@ UPDATE playlists
 SET name = COALESCE($1, name),
     thumbnail_path = COALESCE($2, thumbnail_path)
 WHERE id = $3
-RETURNING id, name, thumbnail_path, created_at, spotify_id, thumbnail_url
+RETURNING id, created_at, name, thumbnail_path, spotify_id, thumbnail_url
 `
 
 type UpdatePlaylistByIDParams struct {
@@ -183,9 +183,9 @@ func (q *Queries) UpdatePlaylistByID(ctx context.Context, arg UpdatePlaylistByID
 	var i Playlist
 	err := row.Scan(
 		&i.ID,
+		&i.CreatedAt,
 		&i.Name,
 		&i.ThumbnailPath,
-		&i.CreatedAt,
 		&i.SpotifyID,
 		&i.ThumbnailUrl,
 	)

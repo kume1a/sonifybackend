@@ -3,6 +3,7 @@ package audiolike
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/kume1a/sonifybackend/internal/database"
@@ -13,6 +14,13 @@ func CreateAudioLike(
 	db *database.Queries,
 	params database.CreateAudioLikeParams,
 ) (*database.AudioLike, error) {
+	if params.ID == uuid.Nil {
+		params.ID = uuid.New()
+	}
+	if params.CreatedAt.IsZero() {
+		params.CreatedAt = time.Now().UTC()
+	}
+
 	entity, err := db.CreateAudioLike(ctx, params)
 
 	if err != nil {
@@ -36,33 +44,15 @@ func DeleteAudioLike(
 	return err
 }
 
-func GetAudioLikesByUserID(
+func GetAudioLikes(
 	ctx context.Context,
 	db *database.Queries,
-	userId uuid.UUID,
+	params database.GetAudioLikesParams,
 ) ([]database.AudioLike, error) {
-	entities, err := db.GetAudioLikesByUserID(ctx, userId)
+	entities, err := db.GetAudioLikes(ctx, params)
 
 	if err != nil {
 		log.Println("Error getting audio likes by user ID:", err)
-	}
-
-	return entities, err
-}
-
-func GetAudioLikesByUserIDAndAudioIDs(
-	ctx context.Context,
-	db *database.Queries,
-	params database.GetAudioLikesByUserIDAndAudioIDsParams,
-) ([]database.AudioLike, error) {
-	if len(params.AudioIds) == 0 {
-		return []database.AudioLike{}, nil
-	}
-
-	entities, err := db.GetAudioLikesByUserIDAndAudioIDs(ctx, params)
-
-	if err != nil {
-		log.Println("Error getting audio likes by user ID and audio IDs:", err)
 	}
 
 	return entities, err

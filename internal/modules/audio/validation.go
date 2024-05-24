@@ -18,16 +18,6 @@ func (dto *audioIDsDTO) Validate() error {
 	return err
 }
 
-func (dto *likeAudioDTO) Validate() error {
-	_, err := govalidator.ValidateStruct(dto)
-	return err
-}
-
-func (dto *unlikeAudioDTO) Validate() error {
-	_, err := govalidator.ValidateStruct(dto)
-	return err
-}
-
 func ValidateUploadUserLocalMusicDTO(w http.ResponseWriter, r *http.Request) (*uploadUserLocalMusicDTO, *shared.HttpError) {
 	thumbnailPath, httpErr := shared.HandleUploadFile(shared.HandleUploadFileArgs{
 		ResponseWriter:   w,

@@ -1,6 +1,9 @@
 package audio
 
-import "github.com/kume1a/sonifybackend/internal/database"
+import (
+	"github.com/kume1a/sonifybackend/internal/database"
+	"github.com/kume1a/sonifybackend/internal/modules/audiolike"
+)
 
 func AudioEntityToDto(e database.Audio) *AudioDTO {
 	return &AudioDTO{
@@ -34,7 +37,7 @@ func AudioWithAudioLikeToAudioDTO(e AudioWithAudioLike) *AudioDTO {
 		ThumbnailUrl:   e.Audio.ThumbnailUrl.String,
 		SpotifyID:      e.Audio.SpotifyID.String,
 		LocalID:        e.Audio.LocalID.String,
-		AudioLike:      AudioLikeEntityToDTO(e.AudioLike),
+		AudioLike:      audiolike.AudioLikeEntityToDTO(e.AudioLike),
 	}
 }
 
@@ -49,9 +52,9 @@ func UserAudioEntityToDto(e *database.UserAudio) *UserAudioDTO {
 func GetUserAudiosByAudioIdsRowToUserAudioWithRelDTO(
 	e database.GetUserAudiosByAudioIdsRow,
 ) *UserAudioWithRelDTO {
-	var audioLike *AudioLikeDTO
+	var audioLike *audiolike.AudioLikeDTO
 	if e.AudioLikesUserID.Valid && e.AudioLikesAudioID.Valid {
-		audioLike = &AudioLikeDTO{
+		audioLike = &audiolike.AudioLikeDTO{
 			AudioID: e.AudioLikesAudioID.UUID,
 			UserID:  e.AudioLikesUserID.UUID,
 		}
@@ -79,24 +82,4 @@ func GetUserAudiosByAudioIdsRowToUserAudioWithRelDTO(
 			AudioLike:      audioLike,
 		},
 	}
-}
-
-func AudioLikeEntityToDTO(e *database.AudioLike) *AudioLikeDTO {
-	if e == nil {
-		return nil
-	}
-
-	return &AudioLikeDTO{
-		UserID:  e.UserID,
-		AudioID: e.AudioID,
-	}
-}
-
-func AudioLikeEntityListToDTOList(e []database.AudioLike) []*AudioLikeDTO {
-	res := make([]*AudioLikeDTO, len(e))
-	for i, v := range e {
-		res[i] = AudioLikeEntityToDTO(&v)
-	}
-
-	return res
 }

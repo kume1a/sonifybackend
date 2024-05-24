@@ -20,7 +20,7 @@ INSERT INTO user_playlists(
   is_spotify_saved_playlist,
   created_at
 ) VALUES ($1,$2,$3,$4) 
-RETURNING id, user_id, playlist_id, created_at, is_spotify_saved_playlist
+RETURNING id, created_at, user_id, playlist_id, is_spotify_saved_playlist
 `
 
 type CreateUserPlaylistParams struct {
@@ -40,9 +40,9 @@ func (q *Queries) CreateUserPlaylist(ctx context.Context, arg CreateUserPlaylist
 	var i UserPlaylist
 	err := row.Scan(
 		&i.ID,
+		&i.CreatedAt,
 		&i.UserID,
 		&i.PlaylistID,
-		&i.CreatedAt,
 		&i.IsSpotifySavedPlaylist,
 	)
 	return i, err
@@ -88,7 +88,7 @@ func (q *Queries) GetUserPlaylistIDs(ctx context.Context, userID uuid.UUID) ([]u
 
 const getUserPlaylists = `-- name: GetUserPlaylists :many
 SELECT 
-  playlists.id, playlists.name, playlists.thumbnail_path, playlists.created_at, playlists.spotify_id, playlists.thumbnail_url 
+  playlists.id, playlists.created_at, playlists.name, playlists.thumbnail_path, playlists.spotify_id, playlists.thumbnail_url 
 FROM user_playlists
 INNER JOIN playlists ON user_playlists.playlist_id = playlists.id
 WHERE user_playlists.user_id = $1 
@@ -111,9 +111,9 @@ func (q *Queries) GetUserPlaylists(ctx context.Context, arg GetUserPlaylistsPara
 		var i Playlist
 		if err := rows.Scan(
 			&i.ID,
+			&i.CreatedAt,
 			&i.Name,
 			&i.ThumbnailPath,
-			&i.CreatedAt,
 			&i.SpotifyID,
 			&i.ThumbnailUrl,
 		); err != nil {

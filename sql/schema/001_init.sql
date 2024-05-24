@@ -13,8 +13,9 @@ create type auth_provider as enum (
 ----------------- USERS -----------------
 CREATE TABLE users
 (
-  id            UUID NOT NULL PRIMARY KEY,
+  id            UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
   created_at    TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
+
   name          VARCHAR(255),
   email         VARCHAR(255),
   auth_provider auth_provider NOT NULL,
@@ -31,9 +32,10 @@ CREATE INDEX idx_users_created_at
 CREATE TABLE artists
 (
     id         UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
+
     name       VARCHAR(255) NOT NULL,
     image_path VARCHAR(255) NOT NULL,
-    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
     spotify_id VARCHAR(255),
     image_url  VARCHAR(255)
 );
@@ -45,11 +47,12 @@ CREATE INDEX idx_artists_created_at
 CREATE TABLE audios
 (
     id               UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
+    created_at       TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
+
     title            VARCHAR(255),
     author           VARCHAR(255),
     duration_ms      INTEGER,
     path             VARCHAR(1023),
-    created_at       TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
     size_bytes       BIGINT,
     youtube_video_id VARCHAR(255),
     thumbnail_path   VARCHAR(1023),
@@ -68,9 +71,10 @@ CREATE INDEX idx_audios_created_at
 CREATE TABLE playlists
 (
   id             UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
+  created_at     TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
+
   name           VARCHAR(255) NOT NULL,
   thumbnail_path VARCHAR(255),
-  created_at     TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
   spotify_id     VARCHAR(255),
   thumbnail_url  VARCHAR(255)
 );
@@ -85,9 +89,10 @@ CREATE UNIQUE INDEX idx_playlist_spotify_id
 CREATE TABLE artist_audios
 (
   id         UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
+  created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
+
   artist_id  UUID NOT NULL REFERENCES artists,
   audio_id   UUID NOT NULL REFERENCES audios,
-  created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
   UNIQUE (artist_id, audio_id)
 );
 
@@ -98,9 +103,10 @@ CREATE INDEX idx_artist_audios_created_at
 CREATE TABLE audio_likes
 (
   id       UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
+  created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
+
   user_id  UUID NOT NULL REFERENCES users,
   audio_id UUID NOT NULL REFERENCES audios,
-  created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
   UNIQUE (user_id, audio_id)
 );
 
@@ -111,9 +117,10 @@ CREATE INDEX idx_audio_likes_created_at
 CREATE TABLE playlist_audios
 (
   id          UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
+  created_at  TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
+
   playlist_id UUID NOT NULL REFERENCES playlists,
   audio_id    UUID NOT NULL REFERENCES audios,
-  created_at  TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
   UNIQUE (playlist_id, audio_id)
 );
 
@@ -124,9 +131,10 @@ CREATE INDEX idx_playlist_audios_created_at
 CREATE TABLE user_audios
 (
   id         UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
+  created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
+
   user_id    UUID NOT NULL REFERENCES users,
   audio_id   UUID NOT NULL REFERENCES audios,
-  created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
   UNIQUE (user_id, audio_id)
 );
 
@@ -137,9 +145,10 @@ CREATE INDEX idx_user_audios_created_at
 CREATE TABLE user_playlists
 (
   id                        UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
+  created_at                TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  
   user_id                   UUID NOT NULL REFERENCES users,
   playlist_id               UUID NOT NULL REFERENCES playlists,
-  created_at                TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
   is_spotify_saved_playlist BOOLEAN NOT NULL,
   UNIQUE (user_id, playlist_id)
 );
