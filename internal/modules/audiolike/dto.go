@@ -16,5 +16,5 @@ type unlikeAudioDTO struct {
 }
 
 type getAudioLikesDTO struct {
-	IDs uuid.UUIDs `json:"ids" valid:"required"`
+	IDs uuid.UUIDs `json:"ids" valid:"-"`
 }

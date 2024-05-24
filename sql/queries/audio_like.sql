@@ -14,9 +14,13 @@ DELETE FROM audio_likes
 -- name: DeleteUserAudioLikesByAudioIDs :exec
 DELETE FROM audio_likes WHERE user_id = sqlc.arg(user_id) AND audio_id = ANY(sqlc.arg(audio_ids)::uuid[]);
 
--- name: GetAudioLikes :many
+-- name: GetAudioLikesByUserID :many
 SELECT * 
 FROM audio_likes 
-WHERE 
-  (sqlc.arg(user_id) IS NULL OR user_id = sqlc.arg(user_id)) AND 
-  (sqlc.arg(ids) IS NULL OR id = ANY(sqlc.arg(ids)::uuid[]));
+WHERE user_id = sqlc.arg(user_id)::uuid;
+
+-- name: GetAudioLikesByUserIDAndAudioIDs :many
+SELECT *
+FROM audio_likes
+WHERE user_id = sqlc.arg(user_id)::uuid AND 
+  audio_id = ANY(sqlc.arg(audio_ids)::uuid[]);

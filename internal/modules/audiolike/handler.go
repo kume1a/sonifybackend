@@ -81,13 +81,26 @@ func handleGetAuthUserAudioLikes(apiCfg *shared.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		audioLikes, err := GetAudioLikes(r.Context(), apiCfg.DB, database.GetAudioLikesParams{
-			Ids:    body.IDs,
-			UserID: authPayload.UserID,
-		})
-		if err != nil {
-			shared.ResInternalServerErrorDef(w)
-			return
+		var audioLikes []database.AudioLike
+		if len(body.IDs) == 0 {
+			audioLikes, err = GetAudioLikesByUserID(r.Context(), apiCfg.DB, authPayload.UserID)
+			if err != nil {
+				shared.ResInternalServerErrorDef(w)
+				return
+			}
+		} else {
+			audioLikes, err = GetAudioLikesByUserIDAndAudioIDs(
+				r.Context(),
+				apiCfg.DB,
+				database.GetAudioLikesByUserIDAndAudioIDsParams{
+					UserID:   authPayload.UserID,
+					AudioIds: body.IDs,
+				},
+			)
+			if err != nil {
+				shared.ResInternalServerErrorDef(w)
+				return
+			}
 		}
 
 		shared.ResOK(w, AudioLikeEntityListToDTOList(audioLikes))

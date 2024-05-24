@@ -44,15 +44,29 @@ func DeleteAudioLike(
 	return err
 }
 
-func GetAudioLikes(
+func GetAudioLikesByUserID(
 	ctx context.Context,
 	db *database.Queries,
-	params database.GetAudioLikesParams,
+	userID uuid.UUID,
 ) ([]database.AudioLike, error) {
-	entities, err := db.GetAudioLikes(ctx, params)
+	entities, err := db.GetAudioLikesByUserID(ctx, userID)
 
 	if err != nil {
 		log.Println("Error getting audio likes by user ID:", err)
+	}
+
+	return entities, err
+}
+
+func GetAudioLikesByUserIDAndAudioIDs(
+	ctx context.Context,
+	db *database.Queries,
+	params database.GetAudioLikesByUserIDAndAudioIDsParams,
+) ([]database.AudioLike, error) {
+	entities, err := db.GetAudioLikesByUserIDAndAudioIDs(ctx, params)
+
+	if err != nil {
+		log.Println("Error getting audio likes by user ID and audio IDs:", err)
 	}
 
 	return entities, err

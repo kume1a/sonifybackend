@@ -7,10 +7,12 @@ import (
 	"github.com/go-chi/cors"
 	"github.com/gorilla/mux"
 	"github.com/kume1a/sonifybackend/internal/modules/audio"
+	"github.com/kume1a/sonifybackend/internal/modules/audiolike"
 	"github.com/kume1a/sonifybackend/internal/modules/auth"
 	"github.com/kume1a/sonifybackend/internal/modules/playlist"
 	"github.com/kume1a/sonifybackend/internal/modules/spotify"
 	"github.com/kume1a/sonifybackend/internal/modules/user"
+	"github.com/kume1a/sonifybackend/internal/modules/userplaylist"
 	"github.com/kume1a/sonifybackend/internal/modules/usersync"
 	"github.com/kume1a/sonifybackend/internal/modules/youtube"
 	"github.com/kume1a/sonifybackend/internal/shared"
@@ -56,6 +58,8 @@ func CreateRouter(apiCfg *shared.ApiConfig) *mux.Router {
 	v1Router.Handle("", playlist.Router(apiCfg, v1Router))
 	v1Router.Handle("", spotify.Router(apiCfg, v1Router))
 	v1Router.Handle("", usersync.Router(apiCfg, v1Router))
+	v1Router.Handle("", audiolike.Router(apiCfg, v1Router))
+	v1Router.Handle("", userplaylist.Router(apiCfg, v1Router))
 
 	router.Handle("", v1Router)
 
