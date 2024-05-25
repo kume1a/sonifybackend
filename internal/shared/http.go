@@ -96,7 +96,7 @@ func HandleUploadFile(args HandleUploadFileArgs) (string, *HttpError) {
 	}
 
 	extension := filepath.Ext(fileHeader.Filename)
-	location, err := NewPublicFileLocation(PublicFileLocationArgs{
+	location, err := NewFileLocation(FileLocationArgs{
 		Dir:       args.Dir,
 		Extension: extension,
 	})

@@ -8,11 +8,6 @@ import (
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
-func (dto *downloadYoutubeAudioDTO) Validate() error {
-	_, err := govalidator.ValidateStruct(dto)
-	return err
-}
-
 func (dto *audioIDsDTO) Validate() error {
 	_, err := govalidator.ValidateStruct(dto)
 	return err

@@ -6,6 +6,10 @@ import (
 	"github.com/asaskevich/govalidator"
 )
 
+type downloadYoutubeAudioDTO struct {
+	VideoID string `json:"videoId" valid:"required"`
+}
+
 type getYoutubeMusicUrlDto struct {
 	VideoID []string `json:"videoId" valid:"required"`
 }

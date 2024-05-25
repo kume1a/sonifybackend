@@ -18,7 +18,7 @@ type FileSize struct {
 	MegaBytes float64
 }
 
-type PublicFileLocationArgs struct {
+type FileLocationArgs struct {
 	Extension string
 	Dir       string
 }
@@ -32,7 +32,7 @@ var AudioMimeTypes = []string{
 
 var ImageMimeTypes = []string{"image/jpeg", "image/png"}
 
-func NewPublicFileLocation(args PublicFileLocationArgs) (string, error) {
+func NewFileLocation(args FileLocationArgs) (string, error) {
 	if err := ensureDir(args.Dir); err != nil {
 		log.Println("error ensuring dir: ", err)
 		return "", err

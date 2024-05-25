@@ -3,6 +3,7 @@ package youtube
 import (
 	"net/http"
 
+	"github.com/kume1a/sonifybackend/internal/modules/audio"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
@@ -38,4 +39,38 @@ func handleGetYoutubeSearchSuggestions(w http.ResponseWriter, r *http.Request) {
 	}
 
 	shared.ResOK(w, res)
+}
+
+func handleDownloadYoutubeAudio(apiCfg *shared.ApiConfig) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		authPayload, err := shared.GetAuthPayload(r)
+		if err != nil {
+			shared.ResUnauthorized(w, err.Error())
+			return
+		}
+
+		body, err := shared.ValidateRequestBody[*downloadYoutubeAudioDTO](r)
+		if err != nil {
+			shared.ResBadRequest(w, err.Error())
+			return
+		}
+
+		userAudio, savedAudio, httpErr := DownloadYoutubeAudioAndSave(DownloadYoutubeAudioParams{
+			ApiConfig: apiCfg,
+			Context:   r.Context(),
+			UserID:    authPayload.UserID,
+			VideoID:   body.VideoID,
+		})
+		if httpErr != nil {
+			shared.ResHttpError(w, httpErr)
+			return
+		}
+
+		res := audio.UserAudioWithRelDTO{
+			UserAudioDTO: audio.UserAudioEntityToDto(userAudio),
+			Audio:        audio.AudioEntityToDto(*savedAudio),
+		}
+
+		shared.ResCreated(w, res)
+	}
 }

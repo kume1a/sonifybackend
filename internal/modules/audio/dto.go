@@ -7,10 +7,6 @@ import (
 	"github.com/kume1a/sonifybackend/internal/modules/sharedmodule"
 )
 
-type downloadYoutubeAudioDTO struct {
-	VideoID string `json:"videoId" valid:"required"`
-}
-
 type uploadUserLocalMusicDTO struct {
 	LocalID       string
 	Title         string
