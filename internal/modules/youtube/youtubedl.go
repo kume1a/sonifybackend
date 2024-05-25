@@ -29,10 +29,10 @@ type DownloadYoutubeAudioOptions struct {
 }
 
 func DownloadYoutubeAudio(videoID string, options DownloadYoutubeAudioOptions) (outputPath string, thumbnailPath string, err error) {
-	tempOutputDirectory := shared.DirTempYoutubeAudios + "/" + videoID
+	tempOutputDir := shared.DirTempYoutubeAudios + "/" + videoID
 
 	tempOutputPath, err := shared.NewFileLocation(shared.FileLocationArgs{
-		Dir:       tempOutputDirectory,
+		Dir:       tempOutputDir,
 		Extension: "",
 	})
 	if err != nil {
@@ -53,70 +53,30 @@ func DownloadYoutubeAudio(videoID string, options DownloadYoutubeAudioOptions) (
 		return "", "", err
 	}
 
-	downloadedAudioFileName, err := shared.FindFirstFile(tempOutputDirectory, shared.AudioExtensions)
-	if err != nil {
-		return "", "", err
-	}
-
-	audioAsMp3Path := tempOutputDirectory + "/" + shared.ReplaceFilenameExtension(downloadedAudioFileName, shared.AudioExtMp3)
-	nonMp3AudioPath := tempOutputDirectory + "/" + downloadedAudioFileName
-	if !strings.HasSuffix(downloadedAudioFileName, shared.AudioExtMp3) {
-		if err := shared.ConvertMedia(nonMp3AudioPath, audioAsMp3Path); err != nil {
-			return "", "", err
-		}
-
-		if err := os.Remove(nonMp3AudioPath); err != nil {
-			log.Println("Error removing non-mp3 audio: ", err)
-			return "", "", err
-		}
-	}
-
-	audioOutputLocation, err := shared.NewFileLocation(shared.FileLocationArgs{
-		Dir:       shared.DirYoutubeAudios,
-		Extension: shared.AudioExtMp3,
+	audioOutputLocation, err := shared.ProcessUnknownExtMediaFile(shared.ProcessUnknownExtMediaFileParams{
+		TempOutputDir:      tempOutputDir,
+		PossibleExtensions: shared.AudioExtensions,
+		DesiredExtension:   shared.AudioExtMp3,
+		OutputDir:          shared.DirYoutubeAudios,
 	})
 	if err != nil {
 		return "", "", err
 	}
 
-	if err := shared.MoveFile(audioAsMp3Path, audioOutputLocation); err != nil {
-		return "", "", err
-	}
-
 	thumbnailOutputLocation := ""
 	if options.DownloadThumbnail {
-		downloadedThumbnailFileName, err := shared.FindFirstFile(tempOutputDirectory, shared.ImageExtensions)
-		if err != nil {
-			return "", "", err
-		}
-
-		thumbnailAsJpgPath := tempOutputDirectory + "/" + shared.ReplaceFilenameExtension(downloadedThumbnailFileName, shared.ImageExtJpg)
-		nonJpgThumbnailPath := tempOutputDirectory + "/" + downloadedThumbnailFileName
-		if !strings.HasSuffix(downloadedThumbnailFileName, shared.ImageExtJpg) {
-			if err := shared.ConvertMedia(nonJpgThumbnailPath, thumbnailAsJpgPath); err != nil {
-				return "", "", err
-			}
-
-			if err := os.Remove(nonJpgThumbnailPath); err != nil {
-				log.Println("Error removing non-jpg thumbnail: ", err)
-				return "", "", err
-			}
-		}
-
-		thumbnailOutputLocation, err = shared.NewFileLocation(shared.FileLocationArgs{
-			Dir:       shared.DirYoutubeAudioThumbnails,
-			Extension: shared.ImageExtJpg,
+		thumbnailOutputLocation, err = shared.ProcessUnknownExtMediaFile(shared.ProcessUnknownExtMediaFileParams{
+			TempOutputDir:      tempOutputDir,
+			PossibleExtensions: shared.ImageExtensions,
+			DesiredExtension:   shared.ImageExtJpg,
+			OutputDir:          shared.DirYoutubeAudioThumbnails,
 		})
 		if err != nil {
 			return "", "", err
 		}
-
-		if err := shared.MoveFile(thumbnailAsJpgPath, thumbnailOutputLocation); err != nil {
-			return "", "", err
-		}
 	}
 
-	if err := os.Remove(tempOutputDirectory); err != nil {
+	if err := os.Remove(tempOutputDir); err != nil {
 		log.Println("Error removing temp output directory: ", err)
 		return "", "", err
 	}
