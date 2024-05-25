@@ -6,7 +6,7 @@ import (
 )
 
 func Router(apiCfg *shared.ApiConfig, router *mux.Router) *mux.Router {
-	r := router.PathPrefix("/audio").Subrouter()
+	r := router.PathPrefix("/audiolike").Subrouter()
 
 	r.HandleFunc("/myLikes", shared.AuthMW(handleGetAuthUserAudioLikes(apiCfg))).Methods("GET")
 
