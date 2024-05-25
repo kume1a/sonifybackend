@@ -14,6 +14,17 @@ import (
 	"github.com/lib/pq"
 )
 
+const countAudioByID = `-- name: CountAudioByID :one
+SELECT COUNT(*) FROM audios WHERE id = $1
+`
+
+func (q *Queries) CountAudioByID(ctx context.Context, id uuid.UUID) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countAudioByID, id)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createAudio = `-- name: CreateAudio :one
 INSERT INTO audios(
   id, 

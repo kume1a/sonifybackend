@@ -2,7 +2,7 @@ package audio
 
 import (
 	"github.com/kume1a/sonifybackend/internal/database"
-	"github.com/kume1a/sonifybackend/internal/modules/audiolike"
+	"github.com/kume1a/sonifybackend/internal/modules/sharedmodule"
 )
 
 func AudioEntityToDto(e database.Audio) *AudioDTO {
@@ -37,7 +37,7 @@ func AudioWithAudioLikeToAudioDTO(e AudioWithAudioLike) *AudioDTO {
 		ThumbnailUrl:   e.Audio.ThumbnailUrl.String,
 		SpotifyID:      e.Audio.SpotifyID.String,
 		LocalID:        e.Audio.LocalID.String,
-		AudioLike:      audiolike.AudioLikeEntityToDTO(e.AudioLike),
+		AudioLike:      sharedmodule.AudioLikeEntityToDTO(e.AudioLike),
 	}
 }
 
@@ -52,9 +52,9 @@ func UserAudioEntityToDto(e *database.UserAudio) *UserAudioDTO {
 func GetUserAudiosByAudioIdsRowToUserAudioWithRelDTO(
 	e database.GetUserAudiosByAudioIdsRow,
 ) *UserAudioWithRelDTO {
-	var audioLike *audiolike.AudioLikeDTO
+	var audioLike *sharedmodule.AudioLikeDTO
 	if e.AudioLikesUserID.Valid && e.AudioLikesAudioID.Valid {
-		audioLike = &audiolike.AudioLikeDTO{
+		audioLike = &sharedmodule.AudioLikeDTO{
 			AudioID: e.AudioLikesAudioID.UUID,
 			UserID:  e.AudioLikesUserID.UUID,
 		}

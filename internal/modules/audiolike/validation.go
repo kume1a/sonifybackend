@@ -2,12 +2,7 @@ package audiolike
 
 import "github.com/asaskevich/govalidator"
 
-func (dto *likeAudioDTO) Validate() error {
-	_, err := govalidator.ValidateStruct(dto)
-	return err
-}
-
-func (dto *unlikeAudioDTO) Validate() error {
+func (dto *likeUnlikeAudioDTO) Validate() error {
 	_, err := govalidator.ValidateStruct(dto)
 	return err
 }

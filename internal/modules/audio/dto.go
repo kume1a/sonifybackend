@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/kume1a/sonifybackend/internal/modules/audiolike"
+	"github.com/kume1a/sonifybackend/internal/modules/sharedmodule"
 )
 
 type downloadYoutubeAudioDTO struct {
@@ -25,19 +25,19 @@ type audioIDsDTO struct {
 }
 
 type AudioDTO struct {
-	ID             uuid.UUID               `json:"id"`
-	CreatedAt      time.Time               `json:"createdAt"`
-	Title          string                  `json:"title"`
-	DurationMs     int32                   `json:"durationMs"`
-	Path           string                  `json:"path"`
-	Author         string                  `json:"author"`
-	SizeBytes      int64                   `json:"sizeBytes"`
-	YoutubeVideoID string                  `json:"youtubeVideoId"`
-	ThumbnailPath  string                  `json:"thumbnailPath"`
-	ThumbnailUrl   string                  `json:"thumbnailUrl"`
-	SpotifyID      string                  `json:"spotifyId"`
-	LocalID        string                  `json:"localId"`
-	AudioLike      *audiolike.AudioLikeDTO `json:"audioLike"`
+	ID             uuid.UUID                  `json:"id"`
+	CreatedAt      time.Time                  `json:"createdAt"`
+	Title          string                     `json:"title"`
+	DurationMs     int32                      `json:"durationMs"`
+	Path           string                     `json:"path"`
+	Author         string                     `json:"author"`
+	SizeBytes      int64                      `json:"sizeBytes"`
+	YoutubeVideoID string                     `json:"youtubeVideoId"`
+	ThumbnailPath  string                     `json:"thumbnailPath"`
+	ThumbnailUrl   string                     `json:"thumbnailUrl"`
+	SpotifyID      string                     `json:"spotifyId"`
+	LocalID        string                     `json:"localId"`
+	AudioLike      *sharedmodule.AudioLikeDTO `json:"audioLike"`
 }
 
 type UserAudioDTO struct {

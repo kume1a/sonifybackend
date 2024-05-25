@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/kume1a/sonifybackend/internal/database"
+	"github.com/kume1a/sonifybackend/internal/modules/sharedmodule"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
@@ -15,22 +16,22 @@ func handleLikeAudio(apiCfg *shared.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		body, err := shared.ValidateRequestBody[*likeAudioDTO](r)
+		body, err := shared.ValidateRequestBody[*likeUnlikeAudioDTO](r)
 		if err != nil {
 			shared.ResBadRequest(w, err.Error())
 			return
 		}
 
-		newAudioLike, err := CreateAudioLike(r.Context(), apiCfg.DB, database.CreateAudioLikeParams{
+		newAudioLike, err := LikeAudio(r.Context(), apiCfg.DB, LikeUnlikeAudioParams{
 			UserID:  authPayload.UserID,
 			AudioID: body.AudioID,
 		})
 		if err != nil {
-			shared.ResInternalServerErrorDef(w)
+			shared.ResTryHttpError(w, err)
 			return
 		}
 
-		audioLikeDTO := AudioLikeEntityToDTO(newAudioLike)
+		audioLikeDTO := sharedmodule.AudioLikeEntityToDTO(newAudioLike)
 
 		shared.ResOK(w, audioLikeDTO)
 	}
@@ -44,21 +45,18 @@ func handleUnlikeAudio(apiCfg *shared.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		body, err := shared.ValidateRequestBody[*unlikeAudioDTO](r)
+		body, err := shared.ValidateRequestBody[*likeUnlikeAudioDTO](r)
 		if err != nil {
 			shared.ResBadRequest(w, err.Error())
 			return
 		}
 
-		err = DeleteAudioLike(r.Context(), apiCfg.DB, database.DeleteAudioLikeParams{
+		err = UnlikeAudio(r.Context(), apiCfg.DB, LikeUnlikeAudioParams{
 			UserID:  authPayload.UserID,
 			AudioID: body.AudioID,
 		})
-		if shared.IsDBErrorNotFound(err) {
-			shared.ResNotFound(w, shared.ErrAudioLikeNotFound)
-			return
-		} else if err != nil {
-			shared.ResInternalServerErrorDef(w)
+		if err != nil {
+			shared.ResTryHttpError(w, err)
 			return
 		}
 
@@ -82,8 +80,10 @@ func handleGetAuthUserAudioLikes(apiCfg *shared.ApiConfig) http.HandlerFunc {
 		}
 
 		var audioLikes []database.AudioLike
+
 		if len(body.IDs) == 0 {
 			audioLikes, err = GetAudioLikesByUserID(r.Context(), apiCfg.DB, authPayload.UserID)
+
 			if err != nil {
 				shared.ResInternalServerErrorDef(w)
 				return
@@ -97,12 +97,13 @@ func handleGetAuthUserAudioLikes(apiCfg *shared.ApiConfig) http.HandlerFunc {
 					AudioIds: body.IDs,
 				},
 			)
+
 			if err != nil {
 				shared.ResInternalServerErrorDef(w)
 				return
 			}
 		}
 
-		shared.ResOK(w, AudioLikeEntityListToDTOList(audioLikes))
+		shared.ResOK(w, sharedmodule.AudioLikeEntityListToDTOList(audioLikes))
 	}
 }

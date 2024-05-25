@@ -7,41 +7,58 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/kume1a/sonifybackend/internal/database"
+	"github.com/kume1a/sonifybackend/internal/modules/sharedmodule"
+	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
-func CreateAudioLike(
-	ctx context.Context,
-	db *database.Queries,
-	params database.CreateAudioLikeParams,
-) (*database.AudioLike, error) {
-	if params.ID == uuid.Nil {
-		params.ID = uuid.New()
-	}
-	if params.CreatedAt.IsZero() {
-		params.CreatedAt = time.Now().UTC()
-	}
-
-	entity, err := db.CreateAudioLike(ctx, params)
-
-	if err != nil {
-		log.Println("Error creating audio like:", err)
-	}
-
-	return &entity, err
+type LikeUnlikeAudioParams struct {
+	UserID  uuid.UUID
+	AudioID uuid.UUID
 }
 
-func DeleteAudioLike(
+func LikeAudio(
 	ctx context.Context,
 	db *database.Queries,
-	params database.DeleteAudioLikeParams,
-) error {
-	err := db.DeleteAudioLike(ctx, params)
-
+	params LikeUnlikeAudioParams,
+) (*database.AudioLike, error) {
+	err := sharedmodule.ValidateAudioExistsByID(ctx, db, params.AudioID)
 	if err != nil {
-		log.Println("Error deleting audio like:", err)
+		return nil, err
 	}
 
-	return err
+	newAudioLike, err := db.CreateAudioLike(ctx, database.CreateAudioLikeParams{
+		UserID:    params.UserID,
+		AudioID:   params.AudioID,
+		ID:        uuid.New(),
+		CreatedAt: time.Now().UTC(),
+	})
+	if err != nil {
+		log.Println("Error creating audio like: ", err)
+		return nil, shared.InternalServerErrorDef()
+	}
+
+	return &newAudioLike, nil
+}
+
+func UnlikeAudio(
+	ctx context.Context,
+	db *database.Queries,
+	params LikeUnlikeAudioParams,
+) error {
+	err := db.DeleteAudioLike(ctx, database.DeleteAudioLikeParams{
+		UserID:  params.UserID,
+		AudioID: params.AudioID,
+	})
+	if shared.IsDBErrorNotFound(err) {
+		return shared.NotFound(shared.ErrAudioLikeNotFound)
+	}
+
+	if err != nil {
+		log.Println("Error deleting audio like: ", err)
+		return shared.InternalServerErrorDef()
+	}
+
+	return nil
 }
 
 func GetAudioLikesByUserID(

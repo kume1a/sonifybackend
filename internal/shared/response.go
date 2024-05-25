@@ -136,6 +136,16 @@ func ResHttpError(w http.ResponseWriter, httpError *HttpError) {
 	ResError(w, httpError.Code, httpError.Message)
 }
 
+func ResTryHttpError(w http.ResponseWriter, err error) {
+	httpError, ok := err.(*HttpError)
+	if !ok {
+		ResInternalServerErrorDef(w)
+		return
+	}
+
+	ResError(w, httpError.Code, httpError.Message)
+}
+
 func ResBadRequest(w http.ResponseWriter, msg string) {
 	ResError(w, http.StatusBadRequest, msg)
 }

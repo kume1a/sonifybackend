@@ -48,3 +48,6 @@ SELECT
   id
 FROM audios
 WHERE spotify_id = ANY(sqlc.arg(spotify_ids)::text[]);
+
+-- name: CountAudioByID :one
+SELECT COUNT(*) FROM audios WHERE id = $1;

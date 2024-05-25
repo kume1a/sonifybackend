@@ -1,6 +1,14 @@
-package audiolike
+package sharedmodule
 
-import "github.com/kume1a/sonifybackend/internal/database"
+import (
+	"github.com/google/uuid"
+	"github.com/kume1a/sonifybackend/internal/database"
+)
+
+type AudioLikeDTO struct {
+	UserID  uuid.UUID `json:"userId"`
+	AudioID uuid.UUID `json:"audioId"`
+}
 
 func AudioLikeEntityToDTO(e *database.AudioLike) *AudioLikeDTO {
 	if e == nil {
