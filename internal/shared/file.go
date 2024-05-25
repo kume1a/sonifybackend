@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/google/uuid"
@@ -22,15 +23,6 @@ type FileLocationArgs struct {
 	Extension string
 	Dir       string
 }
-
-var AudioMimeTypes = []string{
-	"audio/mpeg", "audio/mp3", "audio/x-m4a",
-	"audio/x-wav", "audio/x-aiff", "audio/x-flac",
-	"audio/ogg", "audio/x-ms-wma", "audio/x-ms-wmv",
-	"audio/x-ms-wav", "audio/webm", "video/webm",
-}
-
-var ImageMimeTypes = []string{"image/jpeg", "image/png"}
 
 func NewFileLocation(args FileLocationArgs) (string, error) {
 	if err := ensureDir(args.Dir); err != nil {
@@ -96,6 +88,45 @@ func DeleteFiles(filepaths []string) error {
 		}
 	}
 	return nil
+}
+
+func ReplaceFilenameExtension(filename string, newExtension string) string {
+	extension := filepath.Ext(filename)
+
+	return strings.TrimSuffix(filename, extension) + newExtension
+}
+
+func MoveFile(oldPath string, newPath string) error {
+	err := os.Rename(oldPath, newPath)
+
+	if err != nil {
+		log.Println(err)
+	}
+
+	return err
+}
+
+func FindFirstFile(dir string, extensions []string) (string, error) {
+	files, err := os.ReadDir(dir)
+	if err != nil {
+		return "", err
+	}
+
+	for _, file := range files {
+		if file.IsDir() {
+			continue
+		}
+
+		for _, ext := range extensions {
+			fileName := file.Name()
+
+			if strings.HasSuffix(fileName, ext) {
+				return fileName, nil
+			}
+		}
+	}
+
+	return "", fmt.Errorf("no file with ext: %s, found in directory: %s", extensions, dir)
 }
 
 func ensureDir(dirName string) error {

@@ -41,7 +41,9 @@ func DownloadYoutubeAudioAndSave(params DownloadYoutubeAudioParams) (
 		return nil, nil, shared.InternalServerErrorDef()
 	}
 
-	filePath, thumbnailPath, err := DownloadYoutubeAudioWithThumbnail(params.VideoID)
+	filePath, thumbnailPath, err := DownloadYoutubeAudio(params.VideoID, DownloadYoutubeAudioOptions{
+		DownloadThumbnail: true,
+	})
 	if err != nil {
 		return nil, nil, shared.InternalServerErrorDef()
 	}

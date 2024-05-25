@@ -89,7 +89,9 @@ func DownloadSpotifyAudios(
 				return DownloadedSpotifyAudio{}, err
 			}
 
-			audioOutputPath, err := youtube.DownloadYoutubeAudio(ytVideoID)
+			audioOutputPath, _, err := youtube.DownloadYoutubeAudio(ytVideoID, youtube.DownloadYoutubeAudioOptions{
+				DownloadThumbnail: false,
+			})
 			if err != nil {
 				return DownloadedSpotifyAudio{}, err
 			}
