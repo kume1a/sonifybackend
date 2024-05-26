@@ -79,7 +79,7 @@ func DownloadSpotifyAudios(
 	})
 
 	return shared.ExecuteParallel(
-		8,
+		3,
 		filteredInputs,
 		func(input DownloadSpotifyAudioInput) (DownloadedSpotifyAudio, error) {
 			searchQuery := input.TrackName + " " + input.ArtistName + "\"topic\""
