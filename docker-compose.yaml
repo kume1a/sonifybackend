@@ -10,7 +10,8 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - sonifydb
+      sonifydb:
+        condition: service_healthy
     volumes:
       - /root/sonifybackendpublic:/app/public
 
@@ -24,4 +25,9 @@ services:
       - POSTGRES_DB=sonify
     volumes:
       - sonify_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 

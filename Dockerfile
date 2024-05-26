@@ -14,19 +14,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o /sonifybin
 ## Install goose
 RUN go install github.com/pressly/goose/v3/cmd/goose@latest
 
-## Setup sudo
-# RUN apt update
-# RUN apt install sudo
-
-# RUN adduser --disabled-password --gecos '' admin
-# RUN adduser admin sudo
-# RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-
-# USER admin
-
-## Install packages
-# RUN sudo apt -y install software-properties-common
-
+# Install dependencies
 RUN apt update
 RUN apt install yt-dlp -y
 RUN apt-get -y install make
