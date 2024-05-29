@@ -2,9 +2,6 @@ package bgwork
 
 import (
 	"log"
-	"os"
-	"os/signal"
-	"syscall"
 
 	"github.com/gocraft/work"
 	"github.com/gomodule/redigo/redis"
@@ -12,12 +9,13 @@ import (
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
-func ConfigureBackgroundWork(resourceConfig *config.ResourceConfig) *work.Enqueuer {
+func ConfigureBackgroundWork(resourceConfig *config.ResourceConfig) (*work.Enqueuer, *work.WorkerPool) {
 	redisPool := createRedisPool()
 
-	registerWorkerPool(resourceConfig, redisPool)
+	pool := registerWorkerPool(resourceConfig, redisPool)
+	enqueuer := work.NewEnqueuer(shared.BackgroundJobNamespace, redisPool)
 
-	return work.NewEnqueuer(shared.BackgroundJobNamespace, redisPool)
+	return enqueuer, pool
 }
 
 func createRedisPool() *redis.Pool {
@@ -36,16 +34,12 @@ func createRedisPool() *redis.Pool {
 	}
 }
 
-func registerWorkerPool(resourceConfig *config.ResourceConfig, redisPool *redis.Pool) {
+func registerWorkerPool(resourceConfig *config.ResourceConfig, redisPool *redis.Pool) *work.WorkerPool {
 	pool := work.NewWorkerPool(struct{}{}, 2, shared.BackgroundJobNamespace, redisPool)
 
 	pool.Job(shared.BackgroundJobDownloadPlaylistAudios, CreateHandleDownloadPlaylistAudios(resourceConfig))
 
 	pool.Start()
 
-	signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM)
-	<-signalChan
-
-	pool.Stop()
+	return pool
 }

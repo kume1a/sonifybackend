@@ -99,7 +99,7 @@ func downloadSpotifyPlaylist(
 	authUserID uuid.UUID,
 	spotifyAccessToken string,
 ) error {
-	playlists, err := GetSavedSpotifyPlaylists(spotifyAccessToken)
+	spotifyPlaylists, err := GetSavedSpotifyPlaylists(spotifyAccessToken)
 	if err != nil {
 		return err
 	}
@@ -109,7 +109,7 @@ func downloadSpotifyPlaylist(
 	createPlaylistParams := []database.CreatePlaylistParams{}
 	createUserPlaylistParams := []database.CreateUserPlaylistParams{}
 
-	for _, playlist := range playlists.Items {
+	for _, playlist := range spotifyPlaylists.Items {
 		playlistEntityCreateParams := spotifyPlaylistDTOToCreatePlaylistParams(&playlist)
 		userPlaylistEntityCreateParams := database.CreateUserPlaylistParams{
 			PlaylistID:             playlistEntityCreateParams.ID,
@@ -145,10 +145,13 @@ func downloadSpotifyPlaylist(
 		return err
 	}
 
-	for _, playlist := range playlists.Items {
+	for _, spotifyPlaylist := range spotifyPlaylists.Items {
 		if _, err := apiCfg.WorkEnqueuer.Enqueue(
 			shared.BackgroundJobDownloadPlaylistAudios,
-			work.Q{"playlistId": playlist.ID},
+			work.Q{
+				"playlistSpotifyID":  spotifyPlaylist.ID,
+				"spotifyAccessToken": spotifyAccessToken,
+			},
 		); err != nil {
 			return err
 		}

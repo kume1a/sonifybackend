@@ -5,16 +5,16 @@ volumes:
   local_redis_data:
 
 services:
-  # sonify:
-  #   build: ./
-  #   # network_mode: host
-  #   ports:
-  #     - "8000:8000"
-  #   depends_on:
-  #     sonifydb:
-  #       condition: service_healthy
-  #   volumes:
-  #     - /root/sonifybackendpublic:/app/public
+  sonify:
+    build: ./
+    # network_mode: host
+    ports:
+      - "8000:8000"
+    depends_on:
+      sonifydb:
+        condition: service_healthy
+    volumes:
+      - /root/sonifybackendpublic:/app/public
 
   sonifydb:
     image: postgres:14.5-alpine

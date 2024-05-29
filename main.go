@@ -4,6 +4,9 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/modules"
@@ -38,7 +41,7 @@ func main() {
 		SqlDB: conn,
 	}
 
-	workEnqueuer := bgwork.ConfigureBackgroundWork(resouceConfig)
+	workEnqueuer, workPool := bgwork.ConfigureBackgroundWork(resouceConfig)
 
 	apiCfg := config.ApiConfig{
 		ResourceConfig: resouceConfig,
@@ -53,9 +56,14 @@ func main() {
 		Addr:    ":" + envVars.Port,
 	}
 
-	log.Printf("Starting server on port %s", envVars.Port)
-
+	log.Println("Server is running on port:", envVars.Port)
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
+
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM)
+
+	<-signalChan
+	workPool.Stop()
 }
