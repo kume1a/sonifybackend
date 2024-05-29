@@ -16,21 +16,28 @@ import (
 
 const createPlaylistAudio = `-- name: CreatePlaylistAudio :one
 INSERT INTO playlist_audios(
+  id,
   playlist_id,
   audio_id,
   created_at
-) VALUES ($1,$2,$3) 
+) VALUES ($1,$2,$3,$4) 
 RETURNING id, created_at, playlist_id, audio_id
 `
 
 type CreatePlaylistAudioParams struct {
+	ID         uuid.UUID
 	PlaylistID uuid.UUID
 	AudioID    uuid.UUID
 	CreatedAt  time.Time
 }
 
 func (q *Queries) CreatePlaylistAudio(ctx context.Context, arg CreatePlaylistAudioParams) (PlaylistAudio, error) {
-	row := q.db.QueryRowContext(ctx, createPlaylistAudio, arg.PlaylistID, arg.AudioID, arg.CreatedAt)
+	row := q.db.QueryRowContext(ctx, createPlaylistAudio,
+		arg.ID,
+		arg.PlaylistID,
+		arg.AudioID,
+		arg.CreatedAt,
+	)
 	var i PlaylistAudio
 	err := row.Scan(
 		&i.ID,

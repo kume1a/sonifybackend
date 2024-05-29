@@ -11,15 +11,15 @@ import (
 
 func DeleteSpotifyUserSavedPlaylists(
 	ctx context.Context,
-	apiCfg *config.ApiConfig,
+	resourceConfig *config.ResourceConfig,
 	userId uuid.UUID,
 ) error {
-	playlistIds, err := GetSpotifyUserSavedPlaylistIds(ctx, apiCfg.DB, userId)
+	playlistIds, err := GetSpotifyUserSavedPlaylistIds(ctx, resourceConfig.DB, userId)
 	if err != nil {
 		return err
 	}
 
-	if _, err := shared.RunDBTransaction(ctx, apiCfg, func(tx *database.Queries) (any, error) {
+	if _, err := shared.RunDBTransaction(ctx, resourceConfig, func(tx *database.Queries) (any, error) {
 		err = DeleteSpotifyUserSavedPlaylistJoins(ctx, tx, userId)
 		if err != nil {
 			return nil, err

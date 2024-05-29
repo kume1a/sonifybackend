@@ -28,6 +28,9 @@ DELETE FROM playlists WHERE id = $1;
 -- name: GetPlaylistByID :one
 SELECT * FROM playlists WHERE id = $1;
 
+-- name: GetPlaylistIDBySpotifyID :one
+SELECT id FROM playlists WHERE spotify_id = sqlc.arg(spotify_id)::text;
+
 -- name: GetSpotifyUserSavedPlaylistIDs :many
 SELECT playlists.id FROM playlists
   INNER JOIN user_playlists ON playlists.id = user_playlists.playlist_id

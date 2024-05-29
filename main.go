@@ -7,6 +7,7 @@ import (
 
 	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/modules"
+	"github.com/kume1a/sonifybackend/internal/modules/bgwork"
 
 	"github.com/kume1a/sonifybackend/internal/config"
 
@@ -30,12 +31,18 @@ func main() {
 		return
 	}
 
-	workEnqueuer := config.ConfigureBackgroundWork()
+	db := database.New(conn)
+
+	resouceConfig := &config.ResourceConfig{
+		DB:    db,
+		SqlDB: conn,
+	}
+
+	workEnqueuer := bgwork.ConfigureBackgroundWork(resouceConfig)
 
 	apiCfg := config.ApiConfig{
-		DB:           database.New(conn),
-		SqlDB:        conn,
-		WorkEnqueuer: workEnqueuer,
+		ResourceConfig: resouceConfig,
+		WorkEnqueuer:   workEnqueuer,
 	}
 
 	router := modules.CreateRouter(&apiCfg)

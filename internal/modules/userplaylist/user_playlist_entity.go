@@ -10,6 +10,9 @@ import (
 )
 
 func CreateUserPlaylist(ctx context.Context, db *database.Queries, params database.CreateUserPlaylistParams) (*database.UserPlaylist, error) {
+	if params.ID == uuid.Nil {
+		params.ID = uuid.New()
+	}
 	if params.CreatedAt.IsZero() {
 		params.CreatedAt = time.Now().UTC()
 	}

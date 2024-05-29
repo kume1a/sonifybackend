@@ -37,7 +37,7 @@ func handleUploadUserLocalMusic(apiCfg *config.ApiConfig) http.HandlerFunc {
 		}
 
 		userAudioWithAudio, httpErr := WriteUserImportedLocalMusic(WriteUserImportedLocalMusicParams{
-			ApiConfig:          apiCfg,
+			ResourceConfig:     apiCfg.ResourceConfig,
 			Context:            r.Context(),
 			UserID:             authPayload.UserID,
 			AudioTitle:         form.Title,

@@ -5,7 +5,10 @@ import (
 	"log"
 	"time"
 
+	"github.com/google/uuid"
+	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
+	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
 func CreatePlaylistAudio(
@@ -13,6 +16,9 @@ func CreatePlaylistAudio(
 	db *database.Queries,
 	params database.CreatePlaylistAudioParams,
 ) (*database.PlaylistAudio, error) {
+	if params.ID == uuid.Nil {
+		params.ID = uuid.New()
+	}
 	if params.CreatedAt.IsZero() {
 		params.CreatedAt = time.Now().UTC()
 	}
@@ -24,6 +30,32 @@ func CreatePlaylistAudio(
 	}
 
 	return &entity, err
+}
+
+func BulkCreatePlaylistAudios(
+	ctx context.Context,
+	resourceConfig *config.ResourceConfig,
+	params []database.CreatePlaylistAudioParams,
+) ([]database.PlaylistAudio, error) {
+	return shared.RunDBTransaction(
+		ctx,
+		resourceConfig,
+		func(tx *database.Queries) ([]database.PlaylistAudio, error) {
+			entities := make([]database.PlaylistAudio, 0, len(params))
+
+			for _, param := range params {
+				entity, err := CreatePlaylistAudio(ctx, tx, param)
+				if err != nil {
+					log.Println("Error creating playlist audio:", err)
+					return nil, shared.InternalServerErrorDef()
+				}
+
+				entities = append(entities, *entity)
+			}
+
+			return entities, nil
+		},
+	)
 }
 
 func GetPlaylistAudioJoins(

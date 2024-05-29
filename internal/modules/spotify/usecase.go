@@ -33,7 +33,7 @@ type DownloadedSpotifyAudio struct {
 
 func BulkWriteDownloadedSpotifyAudios(
 	ctx context.Context,
-	apiCfg *config.ApiConfig,
+	resourceConfig *config.ResourceConfig,
 	downloadedSpotifyAudios []DownloadedSpotifyAudio,
 ) error {
 	params := shared.Map(
@@ -52,21 +52,21 @@ func BulkWriteDownloadedSpotifyAudios(
 		},
 	)
 
-	_, err := audio.BulkCreateAudios(ctx, apiCfg, params)
+	_, err := audio.BulkCreateAudios(ctx, resourceConfig, params)
 
 	return err
 }
 
 func DownloadSpotifyAudios(
 	ctx context.Context,
-	apiCfg *config.ApiConfig,
+	resouceConfig *config.ResourceConfig,
 	inputs []DownloadSpotifyAudioInput,
 ) ([]DownloadedSpotifyAudio, error) {
 	spotifyIDs := shared.Map(inputs, func(input DownloadSpotifyAudioInput) string {
 		return input.SpotifyID
 	})
 
-	dbSpotifyIDs, err := audio.GetAudioSpotifyIdsBySpotifyIds(ctx, apiCfg.DB, spotifyIDs)
+	dbSpotifyIDs, err := audio.GetAudioSpotifyIdsBySpotifyIds(ctx, resouceConfig.DB, spotifyIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -79,56 +79,57 @@ func DownloadSpotifyAudios(
 			})
 	})
 
-	return shared.ExecuteParallel(
-		3,
-		filteredInputs,
-		func(input DownloadSpotifyAudioInput) (DownloadedSpotifyAudio, error) {
-			searchQuery := input.TrackName + " " + input.ArtistName + "\"topic\""
+	downloadedSpotifyAudios := []DownloadedSpotifyAudio{}
+	for _, input := range filteredInputs {
+		searchQuery := input.TrackName + " " + input.ArtistName + "\"topic\""
 
-			ytVideoID, err := youtube.GetYoutubeSearchBestMatchVideoID(searchQuery)
-			if err != nil {
-				return DownloadedSpotifyAudio{}, err
-			}
+		ytVideoID, err := youtube.GetYoutubeSearchBestMatchVideoID(searchQuery)
+		if err != nil {
+			return []DownloadedSpotifyAudio{}, err
+		}
 
-			audioOutputPath, _, err := youtube.DownloadYoutubeAudio(ytVideoID, youtube.DownloadYoutubeAudioOptions{
-				DownloadThumbnail: false,
-			})
-			if err != nil {
-				return DownloadedSpotifyAudio{}, err
-			}
+		audioOutputPath, _, err := youtube.DownloadYoutubeAudio(ytVideoID, youtube.DownloadYoutubeAudioOptions{
+			DownloadThumbnail: false,
+		})
+		if err != nil {
+			return []DownloadedSpotifyAudio{}, err
+		}
 
-			audioFileSize, err := shared.GetFileSize(audioOutputPath)
-			if err != nil {
-				return DownloadedSpotifyAudio{}, err
-			}
+		audioFileSize, err := shared.GetFileSize(audioOutputPath)
+		if err != nil {
+			return []DownloadedSpotifyAudio{}, err
+		}
 
-			return DownloadedSpotifyAudio{
-				AudioPath:      audioOutputPath,
-				AudioFileSize:  audioFileSize,
-				YoutubeVideoID: ytVideoID,
-				SpotifyID:      input.SpotifyID,
-				DurationMs:     input.DurationMs,
-				ThumbnailURL:   input.ThumbnailURL,
-				TrackName:      input.TrackName,
-				ArtistName:     input.ArtistName,
-			}, nil
-		},
-	)
+		downloadedSpotifyAudio := DownloadedSpotifyAudio{
+			AudioPath:      audioOutputPath,
+			AudioFileSize:  audioFileSize,
+			YoutubeVideoID: ytVideoID,
+			SpotifyID:      input.SpotifyID,
+			DurationMs:     input.DurationMs,
+			ThumbnailURL:   input.ThumbnailURL,
+			TrackName:      input.TrackName,
+			ArtistName:     input.ArtistName,
+		}
+
+		downloadedSpotifyAudios = append(downloadedSpotifyAudios, downloadedSpotifyAudio)
+	}
+
+	return downloadedSpotifyAudios, nil
 }
 
 func DownloadWriteSpotifyAudios(
 	ctx context.Context,
-	apiCfg *config.ApiConfig,
+	resouceConfig *config.ResourceConfig,
 	inputs []DownloadSpotifyAudioInput,
 ) error {
 	downloadedSpotifyAudios, err := DownloadSpotifyAudios(
 		ctx,
-		apiCfg,
+		resouceConfig,
 		inputs,
 	)
 	if err != nil {
 		return err
 	}
 
-	return BulkWriteDownloadedSpotifyAudios(ctx, apiCfg, downloadedSpotifyAudios)
+	return BulkWriteDownloadedSpotifyAudios(ctx, resouceConfig, downloadedSpotifyAudios)
 }

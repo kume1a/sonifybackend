@@ -1,9 +1,10 @@
 -- name: CreatePlaylistAudio :one
 INSERT INTO playlist_audios(
+  id,
   playlist_id,
   audio_id,
   created_at
-) VALUES ($1,$2,$3) 
+) VALUES ($1,$2,$3,$4) 
 RETURNING *;
 
 -- name: GetPlaylistAudios :many

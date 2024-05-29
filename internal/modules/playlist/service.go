@@ -28,6 +28,24 @@ func GetPlaylistById(
 	return playlist, nil
 }
 
+func GetPlaylistIDBySpotifyID(
+	ctx context.Context,
+	db *database.Queries,
+	spotifyID string,
+) (uuid.UUID, error) {
+	playlistID, err := db.GetPlaylistIDBySpotifyID(ctx, spotifyID)
+
+	if err != nil && shared.IsDBErrorNotFound(err) {
+		return uuid.Nil, shared.NotFound(shared.ErrPlaylistNotFound)
+	}
+
+	if err != nil {
+		return uuid.Nil, shared.InternalServerErrorDef()
+	}
+
+	return playlistID, nil
+}
+
 func GetPlaylistWithAudios(
 	ctx context.Context,
 	db *database.Queries,

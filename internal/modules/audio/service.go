@@ -17,29 +17,33 @@ func CreateAudio(
 	db *database.Queries,
 	params database.CreateAudioParams,
 ) (*database.Audio, error) {
-	entity, err := createAudio(ctx, db, params)
+	if params.ID == uuid.Nil {
+		params.ID = uuid.New()
+	}
+
+	entity, err := db.CreateAudio(ctx, params)
 
 	if err != nil {
 		log.Println("Error creating audio:", err)
 		return nil, shared.InternalServerErrorDef()
 	}
 
-	return entity, err
+	return &entity, err
 }
 
 func BulkCreateAudios(
 	ctx context.Context,
-	apiCfg *config.ApiConfig,
+	resourceConfig *config.ResourceConfig,
 	params []database.CreateAudioParams,
 ) ([]database.Audio, error) {
 	return shared.RunDBTransaction(
 		ctx,
-		apiCfg,
+		resourceConfig,
 		func(tx *database.Queries) ([]database.Audio, error) {
 			audios := make([]database.Audio, 0, len(params))
 
 			for _, param := range params {
-				audio, err := createAudio(ctx, tx, param)
+				audio, err := CreateAudio(ctx, tx, param)
 				if err != nil {
 					log.Println("Error creating audio:", err)
 					return nil, shared.InternalServerErrorDef()
@@ -72,7 +76,7 @@ func GetAudioSpotifyIdsBySpotifyIds(
 	db *database.Queries,
 	spotifyIds []string,
 ) ([]database.GetAudioSpotifyIDsBySpotifyIDsRow, error) {
-	ids, err := getAudioSpotifyIdsBySpotifyIds(ctx, db, spotifyIds)
+	ids, err := db.GetAudioSpotifyIDsBySpotifyIDs(ctx, spotifyIds)
 
 	if err != nil {
 		log.Println("Error getting audios spotify ids by spotify ids: ", err)
@@ -87,7 +91,7 @@ func GetAudioIdsBySpotifyIds(
 	db *database.Queries,
 	spotifyIds []string,
 ) (uuid.UUIDs, error) {
-	ids, err := getAudioIdsBySpotifyIds(ctx, db, spotifyIds)
+	ids, err := db.GetAudioIDsBySpotifyIDs(ctx, spotifyIds)
 
 	if err != nil {
 		log.Println("Error getting audio ids by spotify ids: ", err)

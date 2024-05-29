@@ -16,17 +16,17 @@ type DBOverrideOptions struct {
 
 func RunDBTransaction[T interface{}](
 	ctx context.Context,
-	apiCfg *config.ApiConfig,
+	resourceConfig *config.ResourceConfig,
 	f func(queries *database.Queries) (T, error),
 ) (T, error) {
-	tx, err := apiCfg.SqlDB.BeginTx(ctx, nil)
+	tx, err := resourceConfig.SqlDB.BeginTx(ctx, nil)
 	if err != nil {
 		return *new(T), err
 	}
 
 	defer tx.Rollback()
 
-	qtx := apiCfg.DB.WithTx(tx)
+	qtx := resourceConfig.DB.WithTx(tx)
 
 	result, err := f(qtx)
 	if err != nil {

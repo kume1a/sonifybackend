@@ -12,7 +12,7 @@ import (
 )
 
 type WriteUserImportedLocalMusicParams struct {
-	ApiConfig          *config.ApiConfig
+	ResourceConfig     *config.ResourceConfig
 	Context            context.Context
 	UserID             uuid.UUID
 	AudioLocalId       string
@@ -31,7 +31,7 @@ func WriteUserImportedLocalMusic(params WriteUserImportedLocalMusicParams) (*Use
 
 	res, err := shared.RunDBTransaction(
 		params.Context,
-		params.ApiConfig,
+		params.ResourceConfig,
 		func(tx *database.Queries) (*UserAudioWithAudio, error) {
 			audio, err := CreateAudio(
 				params.Context,

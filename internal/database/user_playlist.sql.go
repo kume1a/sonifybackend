@@ -15,15 +15,17 @@ import (
 
 const createUserPlaylist = `-- name: CreateUserPlaylist :one
 INSERT INTO user_playlists(
+  id,
   user_id,
   playlist_id,
   is_spotify_saved_playlist,
   created_at
-) VALUES ($1,$2,$3,$4) 
+) VALUES ($1,$2,$3,$4,$5) 
 RETURNING id, created_at, user_id, playlist_id, is_spotify_saved_playlist
 `
 
 type CreateUserPlaylistParams struct {
+	ID                     uuid.UUID
 	UserID                 uuid.UUID
 	PlaylistID             uuid.UUID
 	IsSpotifySavedPlaylist bool
@@ -32,6 +34,7 @@ type CreateUserPlaylistParams struct {
 
 func (q *Queries) CreateUserPlaylist(ctx context.Context, arg CreateUserPlaylistParams) (UserPlaylist, error) {
 	row := q.db.QueryRowContext(ctx, createUserPlaylist,
+		arg.ID,
 		arg.UserID,
 		arg.PlaylistID,
 		arg.IsSpotifySavedPlaylist,

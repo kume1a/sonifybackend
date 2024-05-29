@@ -34,21 +34,28 @@ func (q *Queries) CountUserAudioByLocalID(ctx context.Context, arg CountUserAudi
 
 const createUserAudio = `-- name: CreateUserAudio :one
 INSERT INTO user_audios(
+  id,
   created_at,
   user_id, 
   audio_id
-) VALUES ($1,$2,$3) 
+) VALUES ($1,$2,$3,$4) 
 RETURNING id, created_at, user_id, audio_id
 `
 
 type CreateUserAudioParams struct {
+	ID        uuid.UUID
 	CreatedAt time.Time
 	UserID    uuid.UUID
 	AudioID   uuid.UUID
 }
 
 func (q *Queries) CreateUserAudio(ctx context.Context, arg CreateUserAudioParams) (UserAudio, error) {
-	row := q.db.QueryRowContext(ctx, createUserAudio, arg.CreatedAt, arg.UserID, arg.AudioID)
+	row := q.db.QueryRowContext(ctx, createUserAudio,
+		arg.ID,
+		arg.CreatedAt,
+		arg.UserID,
+		arg.AudioID,
+	)
 	var i UserAudio
 	err := row.Scan(
 		&i.ID,

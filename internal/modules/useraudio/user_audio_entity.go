@@ -3,6 +3,7 @@ package useraudio
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/kume1a/sonifybackend/internal/database"
@@ -13,6 +14,13 @@ func CreateUserAudio(
 	db *database.Queries,
 	params database.CreateUserAudioParams,
 ) (*database.UserAudio, error) {
+	if params.ID == uuid.Nil {
+		params.ID = uuid.New()
+	}
+	if params.CreatedAt.IsZero() {
+		params.CreatedAt = time.Now().UTC()
+	}
+
 	entity, err := db.CreateUserAudio(ctx, params)
 
 	if err != nil {

@@ -77,10 +77,14 @@ func handleImportSpotifyUserPlaylists(apiCfg *config.ApiConfig) http.HandlerFunc
 			return
 		}
 
-		if _, httpErr := usersync.UpdateUserSyncDatumByUserId(r.Context(), apiCfg.DB, database.UpdateUserSyncDatumByUserIDParams{
-			UserID:              authPayload.UserID,
-			SpotifyLastSyncedAt: sql.NullTime{Time: time.Now().UTC(), Valid: true},
-		}); httpErr != nil {
+		if _, httpErr := usersync.UpdateUserSyncDatumByUserId(
+			r.Context(),
+			apiCfg.DB,
+			database.UpdateUserSyncDatumByUserIDParams{
+				UserID:              authPayload.UserID,
+				SpotifyLastSyncedAt: sql.NullTime{Time: time.Now().UTC(), Valid: true},
+			},
+		); httpErr != nil {
 			shared.ResHttpError(w, httpErr)
 			return
 		}

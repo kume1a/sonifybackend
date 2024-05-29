@@ -7,8 +7,12 @@ import (
 	"github.com/kume1a/sonifybackend/internal/database"
 )
 
+type ResourceConfig struct {
+	DB    *database.Queries
+	SqlDB *sql.DB
+}
+
 type ApiConfig struct {
-	DB           *database.Queries
-	SqlDB        *sql.DB
+	*ResourceConfig
 	WorkEnqueuer *work.Enqueuer
 }

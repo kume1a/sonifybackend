@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/gocraft/work"
 	"github.com/google/uuid"
 	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
@@ -13,6 +14,84 @@ import (
 	"github.com/kume1a/sonifybackend/internal/modules/userplaylist"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
+
+func DownloadSpotifyPlaylistAudios(
+	ctx context.Context,
+	resouceConfig *config.ResourceConfig,
+	playlistSpotifyID string,
+	spotifyAccessToken string,
+) error {
+	createPlaylistAudioParams := []database.CreatePlaylistAudioParams{}
+
+	playlistItems, err := GetSpotifyPlaylistItems(spotifyAccessToken, playlistSpotifyID)
+	if err != nil {
+		return err
+	}
+
+	if err := DownloadWriteSpotifyAudios(
+		ctx,
+		resouceConfig,
+		shared.Map(
+			playlistItems.Items,
+			func(playlistItem spotifyPlaylistItemDTO) DownloadSpotifyAudioInput {
+				artistName := ""
+				if len(playlistItem.Track.Artists) > 0 {
+					artistName = playlistItem.Track.Artists[0].Name
+				}
+
+				thumbnailURL := ""
+				if len(playlistItem.Track.Album.Images) > 0 {
+					thumbnailURL = playlistItem.Track.Album.Images[0].URL
+				}
+
+				return DownloadSpotifyAudioInput{
+					SpotifyID:    playlistItem.Track.ID,
+					TrackName:    playlistItem.Track.Name,
+					ArtistName:   artistName,
+					DurationMs:   int32(playlistItem.Track.DurationMS),
+					ThumbnailURL: thumbnailURL,
+				}
+			},
+		),
+	); err != nil {
+		return err
+	}
+
+	playlistItemSpotifyIDs := shared.Map(
+		playlistItems.Items,
+		func(playlistItem spotifyPlaylistItemDTO) string { return playlistItem.Track.ID },
+	)
+
+	playlistAudioIDs, err := audio.GetAudioIdsBySpotifyIds(ctx, resouceConfig.DB, playlistItemSpotifyIDs)
+	if err != nil {
+		return err
+	}
+
+	playlistID, err := playlist.GetPlaylistIDBySpotifyID(ctx, resouceConfig.DB, playlistSpotifyID)
+	if err != nil {
+		return err
+	}
+
+	for _, playlistAudioID := range playlistAudioIDs {
+		createPlaylistAudioParams = append(
+			createPlaylistAudioParams,
+			database.CreatePlaylistAudioParams{
+				PlaylistID: playlistID,
+				AudioID:    playlistAudioID,
+			},
+		)
+	}
+
+	if _, err := playlistaudio.BulkCreatePlaylistAudios(
+		ctx,
+		resouceConfig,
+		createPlaylistAudioParams,
+	); err != nil {
+		return err
+	}
+
+	return nil
+}
 
 func downloadSpotifyPlaylist(
 	ctx context.Context,
@@ -25,91 +104,29 @@ func downloadSpotifyPlaylist(
 		return err
 	}
 
-	playlist.DeleteSpotifyUserSavedPlaylists(ctx, apiCfg, authUserID)
+	playlist.DeleteSpotifyUserSavedPlaylists(ctx, apiCfg.ResourceConfig, authUserID)
 
 	createPlaylistParams := []database.CreatePlaylistParams{}
-	createPlaylistAudioParams := []database.CreatePlaylistAudioParams{}
 	createUserPlaylistParams := []database.CreateUserPlaylistParams{}
 
 	for _, playlist := range playlists.Items {
-		playlistItems, err := GetSpotifyPlaylistItems(spotifyAccessToken, playlist.ID)
-		if err != nil {
-			return err
-		}
-
-		if err := DownloadWriteSpotifyAudios(
-			ctx,
-			apiCfg,
-			shared.Map(
-				playlistItems.Items,
-				func(playlistItem spotifyPlaylistItemDTO) DownloadSpotifyAudioInput {
-					artistName := ""
-					if len(playlistItem.Track.Artists) > 0 {
-						artistName = playlistItem.Track.Artists[0].Name
-					}
-
-					thumbnailURL := ""
-					if len(playlistItem.Track.Album.Images) > 0 {
-						thumbnailURL = playlistItem.Track.Album.Images[0].URL
-					}
-
-					return DownloadSpotifyAudioInput{
-						SpotifyID:    playlistItem.Track.ID,
-						TrackName:    playlistItem.Track.Name,
-						ArtistName:   artistName,
-						DurationMs:   int32(playlistItem.Track.DurationMS),
-						ThumbnailURL: thumbnailURL,
-					}
-				},
-			),
-		); err != nil {
-			return err
-		}
-
-		playlistItemSpotifyIDs := shared.Map(
-			playlistItems.Items,
-			func(playlistItem spotifyPlaylistItemDTO) string { return playlistItem.Track.ID },
-		)
-
-		dbPlaylistAudioSpotifyIds, err := audio.GetAudioSpotifyIdsBySpotifyIds(ctx, apiCfg.DB, playlistItemSpotifyIDs)
-		if err != nil {
-			return err
-		}
-
 		playlistEntityCreateParams := spotifyPlaylistDTOToCreatePlaylistParams(&playlist)
 		userPlaylistEntityCreateParams := database.CreateUserPlaylistParams{
 			PlaylistID:             playlistEntityCreateParams.ID,
 			UserID:                 authUserID,
 			IsSpotifySavedPlaylist: true,
 		}
-		playlistAudioCreateParams := shared.Map(
-			dbPlaylistAudioSpotifyIds,
-			func(e database.GetAudioSpotifyIDsBySpotifyIDsRow) database.CreatePlaylistAudioParams {
-				return database.CreatePlaylistAudioParams{
-					PlaylistID: playlistEntityCreateParams.ID,
-					AudioID:    e.ID,
-				}
-			},
-		)
 
 		createPlaylistParams = append(createPlaylistParams, playlistEntityCreateParams)
 		createUserPlaylistParams = append(createUserPlaylistParams, userPlaylistEntityCreateParams)
-		createPlaylistAudioParams = append(createPlaylistAudioParams, playlistAudioCreateParams...)
 	}
 
-	_, err = shared.RunDBTransaction(
+	if _, err := shared.RunDBTransaction(
 		ctx,
-		apiCfg,
+		apiCfg.ResourceConfig,
 		func(queries *database.Queries) (any, error) {
 			for _, params := range createPlaylistParams {
 				_, err := playlist.CreatePlaylist(ctx, queries, params)
-				if err != nil {
-					return nil, err
-				}
-			}
-
-			for _, params := range createPlaylistAudioParams {
-				_, err := playlistaudio.CreatePlaylistAudio(ctx, queries, params)
 				if err != nil {
 					return nil, err
 				}
@@ -124,9 +141,20 @@ func downloadSpotifyPlaylist(
 
 			return nil, nil
 		},
-	)
+	); err != nil {
+		return err
+	}
 
-	return err
+	for _, playlist := range playlists.Items {
+		if _, err := apiCfg.WorkEnqueuer.Enqueue(
+			shared.BackgroundJobDownloadPlaylistAudios,
+			work.Q{"playlistId": playlist.ID},
+		); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func spotifyPlaylistDTOToCreatePlaylistParams(playlist *spotifyPlaylistDTO) database.CreatePlaylistParams {

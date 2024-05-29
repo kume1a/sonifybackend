@@ -1,9 +1,10 @@
 -- name: CreateUserAudio :one
 INSERT INTO user_audios(
+  id,
   created_at,
   user_id, 
   audio_id
-) VALUES ($1,$2,$3) 
+) VALUES ($1,$2,$3,$4) 
 RETURNING *;
 
 -- name: GetUserAudioByVideoID :one
