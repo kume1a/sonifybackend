@@ -79,42 +79,41 @@ func DownloadSpotifyAudios(
 			})
 	})
 
-	downloadedSpotifyAudios := []DownloadedSpotifyAudio{}
-	for _, input := range filteredInputs {
-		searchQuery := input.TrackName + " " + input.ArtistName + "\"topic\""
+	return shared.ExecuteParallel(
+		3,
+		filteredInputs,
+		func(input DownloadSpotifyAudioInput) (DownloadedSpotifyAudio, error) {
+			searchQuery := input.TrackName + " " + input.ArtistName + "\"topic\""
 
-		ytVideoID, err := youtube.GetYoutubeSearchBestMatchVideoID(searchQuery)
-		if err != nil {
-			return []DownloadedSpotifyAudio{}, err
-		}
+			ytVideoID, err := youtube.GetYoutubeSearchBestMatchVideoID(searchQuery)
+			if err != nil {
+				return DownloadedSpotifyAudio{}, err
+			}
 
-		audioOutputPath, _, err := youtube.DownloadYoutubeAudio(ytVideoID, youtube.DownloadYoutubeAudioOptions{
-			DownloadThumbnail: false,
-		})
-		if err != nil {
-			return []DownloadedSpotifyAudio{}, err
-		}
+			audioOutputPath, _, err := youtube.DownloadYoutubeAudio(ytVideoID, youtube.DownloadYoutubeAudioOptions{
+				DownloadThumbnail: false,
+			})
+			if err != nil {
+				return DownloadedSpotifyAudio{}, err
+			}
 
-		audioFileSize, err := shared.GetFileSize(audioOutputPath)
-		if err != nil {
-			return []DownloadedSpotifyAudio{}, err
-		}
+			audioFileSize, err := shared.GetFileSize(audioOutputPath)
+			if err != nil {
+				return DownloadedSpotifyAudio{}, err
+			}
 
-		downloadedSpotifyAudio := DownloadedSpotifyAudio{
-			AudioPath:      audioOutputPath,
-			AudioFileSize:  audioFileSize,
-			YoutubeVideoID: ytVideoID,
-			SpotifyID:      input.SpotifyID,
-			DurationMs:     input.DurationMs,
-			ThumbnailURL:   input.ThumbnailURL,
-			TrackName:      input.TrackName,
-			ArtistName:     input.ArtistName,
-		}
-
-		downloadedSpotifyAudios = append(downloadedSpotifyAudios, downloadedSpotifyAudio)
-	}
-
-	return downloadedSpotifyAudios, nil
+			return DownloadedSpotifyAudio{
+				AudioPath:      audioOutputPath,
+				AudioFileSize:  audioFileSize,
+				YoutubeVideoID: ytVideoID,
+				SpotifyID:      input.SpotifyID,
+				DurationMs:     input.DurationMs,
+				ThumbnailURL:   input.ThumbnailURL,
+				TrackName:      input.TrackName,
+				ArtistName:     input.ArtistName,
+			}, nil
+		},
+	)
 }
 
 func DownloadWriteSpotifyAudios(
