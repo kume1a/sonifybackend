@@ -104,7 +104,9 @@ func downloadSpotifyPlaylist(
 		return err
 	}
 
-	playlist.DeleteSpotifyUserSavedPlaylists(ctx, apiCfg.ResourceConfig, authUserID)
+	if err := playlist.DeleteSpotifyUserSavedPlaylists(ctx, apiCfg.ResourceConfig, authUserID); err != nil {
+		return err
+	}
 
 	createPlaylistParams := []database.CreatePlaylistParams{}
 	createUserPlaylistParams := []database.CreateUserPlaylistParams{}

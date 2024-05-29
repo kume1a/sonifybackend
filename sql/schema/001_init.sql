@@ -91,8 +91,8 @@ CREATE TABLE artist_audios
   id         UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
   created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
 
-  artist_id  UUID NOT NULL REFERENCES artists,
-  audio_id   UUID NOT NULL REFERENCES audios,
+  artist_id  UUID NOT NULL REFERENCES artists ON DELETE CASCADE,
+  audio_id   UUID NOT NULL REFERENCES audios ON DELETE CASCADE,
   UNIQUE (artist_id, audio_id)
 );
 
@@ -105,8 +105,8 @@ CREATE TABLE audio_likes
   id       UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
   created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
 
-  user_id  UUID NOT NULL REFERENCES users,
-  audio_id UUID NOT NULL REFERENCES audios,
+  user_id  UUID NOT NULL REFERENCES users ON DELETE CASCADE,
+  audio_id UUID NOT NULL REFERENCES audios ON DELETE CASCADE,
   UNIQUE (user_id, audio_id)
 );
 
@@ -119,8 +119,8 @@ CREATE TABLE playlist_audios
   id          UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
   created_at  TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
 
-  playlist_id UUID NOT NULL REFERENCES playlists,
-  audio_id    UUID NOT NULL REFERENCES audios,
+  playlist_id UUID NOT NULL REFERENCES playlists ON DELETE CASCADE,
+  audio_id    UUID NOT NULL REFERENCES audios ON DELETE CASCADE,
   UNIQUE (playlist_id, audio_id)
 );
 
@@ -133,8 +133,8 @@ CREATE TABLE user_audios
   id         UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
   created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
 
-  user_id    UUID NOT NULL REFERENCES users,
-  audio_id   UUID NOT NULL REFERENCES audios,
+  user_id    UUID NOT NULL REFERENCES users ON DELETE CASCADE,
+  audio_id   UUID NOT NULL REFERENCES audios ON DELETE CASCADE,
   UNIQUE (user_id, audio_id)
 );
 
@@ -147,8 +147,8 @@ CREATE TABLE user_playlists
   id                        UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
   created_at                TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
   
-  user_id                   UUID NOT NULL REFERENCES users,
-  playlist_id               UUID NOT NULL REFERENCES playlists,
+  user_id                   UUID NOT NULL REFERENCES users ON DELETE CASCADE,
+  playlist_id               UUID NOT NULL REFERENCES playlists ON DELETE CASCADE,
   is_spotify_saved_playlist BOOLEAN NOT NULL,
   UNIQUE (user_id, playlist_id)
 );
@@ -160,7 +160,7 @@ CREATE INDEX idx_user_playlists_created_at
 CREATE TABLE user_sync_data
 (
   id                        UUID NOT NULL PRIMARY KEY,
-  user_id                   UUID NOT NULL REFERENCES users,
+  user_id                   UUID NOT NULL REFERENCES users ON DELETE CASCADE,
   spotify_last_synced_at    TIMESTAMPTZ,
   user_audio_last_synced_at TIMESTAMPTZ,
   UNIQUE (user_id)
