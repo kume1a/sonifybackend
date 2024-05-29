@@ -5,6 +5,7 @@ import (
 	"database/sql"
 
 	"github.com/google/uuid"
+	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/modules/audio"
 	"github.com/kume1a/sonifybackend/internal/modules/playlist"
@@ -15,7 +16,7 @@ import (
 
 func downloadSpotifyPlaylist(
 	ctx context.Context,
-	apiCfg *shared.ApiConfig,
+	apiCfg *config.ApiConfig,
 	authUserID uuid.UUID,
 	spotifyAccessToken string,
 ) error {

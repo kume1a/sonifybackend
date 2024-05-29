@@ -3,10 +3,11 @@ package auth
 import (
 	"net/http"
 
+	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
-func handleGoogleAuth(apiCfg *shared.ApiConfig) http.HandlerFunc {
+func handleGoogleAuth(apiCfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		body, err := shared.ValidateRequestBody[*googleSignInDTO](r)
 
@@ -25,7 +26,7 @@ func handleGoogleAuth(apiCfg *shared.ApiConfig) http.HandlerFunc {
 	}
 }
 
-func handleEmailAuth(apiCfg *shared.ApiConfig) http.HandlerFunc {
+func handleEmailAuth(apiCfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		body, err := shared.ValidateRequestBody[*emailSignInDTO](r)
 

@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/modules/usersync"
 	"github.com/kume1a/sonifybackend/internal/shared"
@@ -57,7 +58,7 @@ func handleSpotifyRefreshToken(w http.ResponseWriter, r *http.Request) {
 	shared.ResOK(w, dto)
 }
 
-func handleImportSpotifyUserPlaylists(apiCfg *shared.ApiConfig) http.HandlerFunc {
+func handleImportSpotifyUserPlaylists(apiCfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authPayload, err := shared.GetAuthPayload(r)
 		if err != nil {

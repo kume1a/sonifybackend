@@ -2,10 +2,10 @@ package auth
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/kume1a/sonifybackend/internal/shared"
+	"github.com/kume1a/sonifybackend/internal/config"
 )
 
-func Router(apiCfg *shared.ApiConfig, router *mux.Router) *mux.Router {
+func Router(apiCfg *config.ApiConfig, router *mux.Router) *mux.Router {
 	r := router.PathPrefix("/auth").Subrouter()
 
 	r.HandleFunc("/googleSignIn", handleGoogleAuth(apiCfg)).Methods("POST")

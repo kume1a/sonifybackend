@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
 )
 
@@ -15,7 +16,7 @@ type DBOverrideOptions struct {
 
 func RunDBTransaction[T interface{}](
 	ctx context.Context,
-	apiCfg *ApiConfig,
+	apiCfg *config.ApiConfig,
 	f func(queries *database.Queries) (T, error),
 ) (T, error) {
 	tx, err := apiCfg.SqlDB.BeginTx(ctx, nil)

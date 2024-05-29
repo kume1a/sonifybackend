@@ -4,13 +4,14 @@ import (
 	"database/sql"
 	"net/http"
 
+	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/modules/audio"
 	"github.com/kume1a/sonifybackend/internal/modules/playlistaudio"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
-func handleCreatePlaylist(apiCfg *shared.ApiConfig) http.HandlerFunc {
+func handleCreatePlaylist(apiCfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		body, httpErr := ValidateCreatePlaylistDto(w, r)
 		if httpErr != nil {
@@ -33,7 +34,7 @@ func handleCreatePlaylist(apiCfg *shared.ApiConfig) http.HandlerFunc {
 	}
 }
 
-func handleGetPlaylists(apiCfg *shared.ApiConfig) http.HandlerFunc {
+func handleGetPlaylists(apiCfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		query, err := shared.ValidateRequestQuery[*shared.LastCreatedAtPageParamsDto](r)
 		if err != nil {
@@ -56,7 +57,7 @@ func handleGetPlaylists(apiCfg *shared.ApiConfig) http.HandlerFunc {
 	}
 }
 
-func handleCreatePlaylistAudio(apiCfg *shared.ApiConfig) http.HandlerFunc {
+func handleCreatePlaylistAudio(apiCfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		body, err := shared.ValidateRequestBody[*createPlaylistAudioDTO](r)
 		if err != nil {
@@ -79,7 +80,7 @@ func handleCreatePlaylistAudio(apiCfg *shared.ApiConfig) http.HandlerFunc {
 	}
 }
 
-func handleGetPlaylistWithAudios(apiCfg *shared.ApiConfig) http.HandlerFunc {
+func handleGetPlaylistWithAudios(apiCfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authPaylad, err := shared.GetAuthPayload(r)
 		if err != nil {

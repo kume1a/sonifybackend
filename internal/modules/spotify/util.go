@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 
 	"github.com/asaskevich/govalidator"
-	"github.com/kume1a/sonifybackend/internal/shared"
+	"github.com/kume1a/sonifybackend/internal/config"
 )
 
 func (dto *downloadSpotifyPlaylistDTO) Validate() error {
@@ -58,7 +58,7 @@ func spotifyPlaylistDtoToModel(dto *spotifyPlaylistDTO) *spotifyPlaylist {
 }
 
 func getSpotifyBasicAuthHeader() (string, error) {
-	env, err := shared.ParseEnv()
+	env, err := config.ParseEnv()
 	if err != nil {
 		return "", err
 	}

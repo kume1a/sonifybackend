@@ -7,21 +7,22 @@ import (
 
 	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/modules"
-	"github.com/kume1a/sonifybackend/internal/shared"
+
+	"github.com/kume1a/sonifybackend/internal/config"
 
 	_ "github.com/lib/pq"
 )
 
 func main() {
-	shared.LoadEnv()
+	config.LoadEnv()
 
-	envVars, err := shared.ParseEnv()
+	envVars, err := config.ParseEnv()
 	if err != nil {
 		log.Fatal("Coultn't parse env vars, returning")
 		return
 	}
 
-	shared.ConfigureGoValidator()
+	config.ConfigureGoValidator()
 
 	conn, err := sql.Open("postgres", envVars.DbUrl)
 	if err != nil {
@@ -29,7 +30,7 @@ func main() {
 		return
 	}
 
-	apiCfg := shared.ApiConfig{
+	apiCfg := config.ApiConfig{
 		DB:    database.New(conn),
 		SqlDB: conn,
 	}

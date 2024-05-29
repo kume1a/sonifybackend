@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
@@ -29,7 +30,7 @@ type DownloadYoutubeAudioOptions struct {
 }
 
 func DownloadYoutubeAudio(videoID string, options DownloadYoutubeAudioOptions) (outputPath string, thumbnailPath string, err error) {
-	tempOutputDir := shared.DirTempYoutubeAudios + "/" + videoID
+	tempOutputDir := config.DirTempYoutubeAudios + "/" + videoID
 
 	tempOutputPath, err := shared.NewFileLocation(shared.FileLocationArgs{
 		Dir:       tempOutputDir,
@@ -57,7 +58,7 @@ func DownloadYoutubeAudio(videoID string, options DownloadYoutubeAudioOptions) (
 		TempOutputDir:      tempOutputDir,
 		PossibleExtensions: shared.AudioExtensions,
 		DesiredExtension:   shared.AudioExtMp3,
-		OutputDir:          shared.DirYoutubeAudios,
+		OutputDir:          config.DirYoutubeAudios,
 	})
 	if err != nil {
 		return "", "", err
@@ -69,7 +70,7 @@ func DownloadYoutubeAudio(videoID string, options DownloadYoutubeAudioOptions) (
 			TempOutputDir:      tempOutputDir,
 			PossibleExtensions: shared.ImageExtensions,
 			DesiredExtension:   shared.ImageExtJpg,
-			OutputDir:          shared.DirYoutubeAudioThumbnails,
+			OutputDir:          config.DirYoutubeAudioThumbnails,
 		})
 		if err != nil {
 			return "", "", err

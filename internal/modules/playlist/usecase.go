@@ -4,13 +4,14 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
 func DeleteSpotifyUserSavedPlaylists(
 	ctx context.Context,
-	apiCfg *shared.ApiConfig,
+	apiCfg *config.ApiConfig,
 	userId uuid.UUID,
 ) error {
 	playlistIds, err := GetSpotifyUserSavedPlaylistIds(ctx, apiCfg.DB, userId)

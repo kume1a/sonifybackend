@@ -6,6 +6,7 @@ import (
 	"github.com/asaskevich/govalidator"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
@@ -20,7 +21,7 @@ func ValidateCreatePlaylistDto(w http.ResponseWriter, r *http.Request) (*createP
 		ResponseWriter:   w,
 		Request:          r,
 		FieldName:        "thumbnail",
-		Dir:              shared.DirPlaylistThumbnails,
+		Dir:              config.DirPlaylistThumbnails,
 		AllowedMimeTypes: shared.ImageMimeTypes,
 		IsOptional:       false,
 	})

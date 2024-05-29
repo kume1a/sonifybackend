@@ -5,11 +5,12 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
-func handleGetUserSyncDatumByUserId(apiCfg *shared.ApiConfig) http.HandlerFunc {
+func handleGetUserSyncDatumByUserId(apiCfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tokenPayload, err := shared.GetAuthPayload(r)
 		if err != nil {
@@ -29,7 +30,7 @@ func handleGetUserSyncDatumByUserId(apiCfg *shared.ApiConfig) http.HandlerFunc {
 	}
 }
 
-func handleMarkUserAudioLastUpdatedAtAsNow(apiCfg *shared.ApiConfig) http.HandlerFunc {
+func handleMarkUserAudioLastUpdatedAtAsNow(apiCfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tokenPayload, err := shared.GetAuthPayload(r)
 		if err != nil {

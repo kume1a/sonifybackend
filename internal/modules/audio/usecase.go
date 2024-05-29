@@ -5,13 +5,14 @@ import (
 	"database/sql"
 
 	"github.com/google/uuid"
+	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/modules/useraudio"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
 type WriteUserImportedLocalMusicParams struct {
-	ApiConfig          *shared.ApiConfig
+	ApiConfig          *config.ApiConfig
 	Context            context.Context
 	UserID             uuid.UUID
 	AudioLocalId       string

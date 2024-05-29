@@ -1,4 +1,4 @@
-package shared
+package config
 
 import (
 	"errors"
@@ -41,6 +41,7 @@ type EnvVariables struct {
 	SpotifyClientID      string
 	SpotifyClientSecret  string
 	SpotifyRedirectURI   string
+	RedisPassword        string
 }
 
 func ParseEnv() (*EnvVariables, error) {
@@ -99,6 +100,11 @@ func ParseEnv() (*EnvVariables, error) {
 		return nil, err
 	}
 
+	redisPassword, err := getEnv("REDIS_PASSWORD")
+	if err != nil {
+		return nil, err
+	}
+
 	return &EnvVariables{
 		IsDevelopment:        environment == "development",
 		IsProduction:         environment == "production",
@@ -112,6 +118,7 @@ func ParseEnv() (*EnvVariables, error) {
 		SpotifyClientID:      spotifyClientID,
 		SpotifyClientSecret:  spotifyClientSecret,
 		SpotifyRedirectURI:   spotifyRedirectURI,
+		RedisPassword:        redisPassword,
 	}, nil
 }
 

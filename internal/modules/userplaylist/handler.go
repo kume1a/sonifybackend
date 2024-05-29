@@ -3,12 +3,13 @@ package userplaylist
 import (
 	"net/http"
 
+	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/modules/playlist"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
-func handleGetAuthUserPlaylists(apiCfg *shared.ApiConfig) http.HandlerFunc {
+func handleGetAuthUserPlaylists(apiCfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authPayload, err := shared.GetAuthPayload(r)
 		if err != nil {
@@ -37,7 +38,7 @@ func handleGetAuthUserPlaylists(apiCfg *shared.ApiConfig) http.HandlerFunc {
 	}
 }
 
-func handleGetAuthUserPlaylistIDs(apiCfg *shared.ApiConfig) http.HandlerFunc {
+func handleGetAuthUserPlaylistIDs(apiCfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authPayload, err := shared.GetAuthPayload(r)
 		if err != nil {

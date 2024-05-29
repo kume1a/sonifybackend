@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/google/uuid"
+	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/modules/useraudio"
 	"github.com/kume1a/sonifybackend/internal/shared"
@@ -28,7 +29,7 @@ func CreateAudio(
 
 func BulkCreateAudios(
 	ctx context.Context,
-	apiCfg *shared.ApiConfig,
+	apiCfg *config.ApiConfig,
 	params []database.CreateAudioParams,
 ) ([]database.Audio, error) {
 	return shared.RunDBTransaction(

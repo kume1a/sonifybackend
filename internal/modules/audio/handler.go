@@ -3,12 +3,13 @@ package audio
 import (
 	"net/http"
 
+	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/modules/useraudio"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
-func handleUploadUserLocalMusic(apiCfg *shared.ApiConfig) http.HandlerFunc {
+func handleUploadUserLocalMusic(apiCfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authPayload, err := shared.GetAuthPayload(r)
 		if err != nil {
@@ -61,7 +62,7 @@ func handleUploadUserLocalMusic(apiCfg *shared.ApiConfig) http.HandlerFunc {
 	}
 }
 
-func handleGetAuthUserAudioIds(apiCfg *shared.ApiConfig) http.HandlerFunc {
+func handleGetAuthUserAudioIds(apiCfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authPayload, err := shared.GetAuthPayload(r)
 		if err != nil {
@@ -79,7 +80,7 @@ func handleGetAuthUserAudioIds(apiCfg *shared.ApiConfig) http.HandlerFunc {
 	}
 }
 
-func handleGetAuthUserUserAudiosByIDs(apiCfg *shared.ApiConfig) http.HandlerFunc {
+func handleGetAuthUserUserAudiosByIDs(apiCfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authPayload, err := shared.GetAuthPayload(r)
 		if err != nil {

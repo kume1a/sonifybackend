@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/modules/audio"
 	"github.com/kume1a/sonifybackend/internal/modules/useraudio"
@@ -13,7 +14,7 @@ import (
 )
 
 type DownloadYoutubeAudioParams struct {
-	ApiConfig *shared.ApiConfig
+	ApiConfig *config.ApiConfig
 	Context   context.Context
 	UserID    uuid.UUID
 	VideoID   string

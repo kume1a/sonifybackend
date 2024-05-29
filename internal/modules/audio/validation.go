@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/asaskevich/govalidator"
+	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
@@ -18,7 +19,7 @@ func ValidateUploadUserLocalMusicDTO(w http.ResponseWriter, r *http.Request) (*u
 		ResponseWriter:   w,
 		Request:          r,
 		FieldName:        "thumbnail",
-		Dir:              shared.DirUserLocalAudioThumbnails,
+		Dir:              config.DirUserLocalAudioThumbnails,
 		AllowedMimeTypes: shared.ImageMimeTypes,
 		IsOptional:       true,
 	})
@@ -30,7 +31,7 @@ func ValidateUploadUserLocalMusicDTO(w http.ResponseWriter, r *http.Request) (*u
 		ResponseWriter:   w,
 		Request:          r,
 		FieldName:        "audio",
-		Dir:              shared.DirUserLocalAudios,
+		Dir:              config.DirUserLocalAudios,
 		AllowedMimeTypes: shared.AudioMimeTypes,
 		IsOptional:       false,
 	})

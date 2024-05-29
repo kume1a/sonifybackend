@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/modules/audio"
 	"github.com/kume1a/sonifybackend/internal/modules/youtube"
@@ -32,7 +33,7 @@ type DownloadedSpotifyAudio struct {
 
 func BulkWriteDownloadedSpotifyAudios(
 	ctx context.Context,
-	apiCfg *shared.ApiConfig,
+	apiCfg *config.ApiConfig,
 	downloadedSpotifyAudios []DownloadedSpotifyAudio,
 ) error {
 	params := shared.Map(
@@ -58,7 +59,7 @@ func BulkWriteDownloadedSpotifyAudios(
 
 func DownloadSpotifyAudios(
 	ctx context.Context,
-	apiCfg *shared.ApiConfig,
+	apiCfg *config.ApiConfig,
 	inputs []DownloadSpotifyAudioInput,
 ) ([]DownloadedSpotifyAudio, error) {
 	spotifyIDs := shared.Map(inputs, func(input DownloadSpotifyAudioInput) string {
@@ -117,7 +118,7 @@ func DownloadSpotifyAudios(
 
 func DownloadWriteSpotifyAudios(
 	ctx context.Context,
-	apiCfg *shared.ApiConfig,
+	apiCfg *config.ApiConfig,
 	inputs []DownloadSpotifyAudioInput,
 ) error {
 	downloadedSpotifyAudios, err := DownloadSpotifyAudios(

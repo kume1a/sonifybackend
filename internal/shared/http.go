@@ -11,6 +11,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/kume1a/sonifybackend/internal/config"
 )
 
 type Validatable interface {
@@ -64,7 +66,7 @@ func XWWWFormUrlencoded(params XWWWFormUrlencodedParams) (
 }
 
 func HandleUploadFile(args HandleUploadFileArgs) (string, *HttpError) {
-	env, err := ParseEnv()
+	env, err := config.ParseEnv()
 	if err != nil {
 		return "", InternalServerErrorDef()
 	}

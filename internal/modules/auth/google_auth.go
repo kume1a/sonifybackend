@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/modules/user"
 	"github.com/kume1a/sonifybackend/internal/shared"
@@ -25,7 +26,7 @@ type GoogleClaims struct {
 	jwt.StandardClaims
 }
 
-func AuthWithGoogle(apiCfg shared.ApiConfig, ctx context.Context, token string) (*tokenPayloadDTO, *shared.HttpError) {
+func AuthWithGoogle(apiCfg config.ApiConfig, ctx context.Context, token string) (*tokenPayloadDTO, *shared.HttpError) {
 	claims, err := validateGoogleJWT(token)
 	if err != nil {
 		return nil, shared.Unauthorized(shared.ErrInvalidGoogleToken)
@@ -82,7 +83,7 @@ func getGooglePublicKey(keyID string) (string, error) {
 }
 
 func validateGoogleJWT(tokenString string) (*GoogleClaims, error) {
-	env, err := shared.ParseEnv()
+	env, err := config.ParseEnv()
 	if err != nil {
 		return nil, err
 	}

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
@@ -41,7 +42,7 @@ func GetSpotifyPlaylistItems(accessToken, playlistID string) (*spotifyPlaylistIt
 }
 
 func GetGeneralSpotifyAccessToken() (*spotifyClientCredsTokenDTO, error) {
-	env, err := shared.ParseEnv()
+	env, err := config.ParseEnv()
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +75,7 @@ func GetGeneralSpotifyAccessToken() (*spotifyClientCredsTokenDTO, error) {
 }
 
 func GetAuthorizationCodeSpotifyTokenPayload(code string) (*spotifyAuthCodeTokenDTO, error) {
-	env, err := shared.ParseEnv()
+	env, err := config.ParseEnv()
 	if err != nil {
 		return nil, err
 	}

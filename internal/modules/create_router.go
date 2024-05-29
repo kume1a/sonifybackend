@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-chi/cors"
 	"github.com/gorilla/mux"
+	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/modules/audio"
 	"github.com/kume1a/sonifybackend/internal/modules/audiolike"
 	"github.com/kume1a/sonifybackend/internal/modules/auth"
@@ -15,10 +16,9 @@ import (
 	"github.com/kume1a/sonifybackend/internal/modules/userplaylist"
 	"github.com/kume1a/sonifybackend/internal/modules/usersync"
 	"github.com/kume1a/sonifybackend/internal/modules/youtube"
-	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
-func CreateRouter(apiCfg *shared.ApiConfig) *mux.Router {
+func CreateRouter(apiCfg *config.ApiConfig) *mux.Router {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Recovered in f", r)

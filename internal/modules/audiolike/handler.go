@@ -3,12 +3,13 @@ package audiolike
 import (
 	"net/http"
 
+	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/modules/sharedmodule"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
-func handleLikeAudio(apiCfg *shared.ApiConfig) http.HandlerFunc {
+func handleLikeAudio(apiCfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authPayload, err := shared.GetAuthPayload(r)
 		if err != nil {
@@ -37,7 +38,7 @@ func handleLikeAudio(apiCfg *shared.ApiConfig) http.HandlerFunc {
 	}
 }
 
-func handleUnlikeAudio(apiCfg *shared.ApiConfig) http.HandlerFunc {
+func handleUnlikeAudio(apiCfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authPayload, err := shared.GetAuthPayload(r)
 		if err != nil {
@@ -64,7 +65,7 @@ func handleUnlikeAudio(apiCfg *shared.ApiConfig) http.HandlerFunc {
 	}
 }
 
-func handleGetAuthUserAudioLikes(apiCfg *shared.ApiConfig) http.HandlerFunc {
+func handleGetAuthUserAudioLikes(apiCfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authPayload, err := shared.GetAuthPayload(r)
 		if err != nil {
