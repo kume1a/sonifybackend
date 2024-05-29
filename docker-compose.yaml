@@ -2,18 +2,19 @@ version: "3"
 
 volumes:
   sonify_postgres_data:
+  local_redis_data:
 
 services:
-  sonify:
-    build: ./
-    # network_mode: host
-    ports:
-      - "8000:8000"
-    depends_on:
-      sonifydb:
-        condition: service_healthy
-    volumes:
-      - /root/sonifybackendpublic:/app/public
+  # sonify:
+  #   build: ./
+  #   # network_mode: host
+  #   ports:
+  #     - "8000:8000"
+  #   depends_on:
+  #     sonifydb:
+  #       condition: service_healthy
+  #   volumes:
+  #     - /root/sonifybackendpublic:/app/public
 
   sonifydb:
     image: postgres:14.5-alpine
@@ -30,4 +31,13 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  sonifyredis:
+      image: redis:7-alpine    
+      container_name: sonify_redis
+      ports:
+        - "6379:6379"
+      volumes:
+        - local_redis_data:/data
+      command: /bin/sh -c "redis-server --requirepass N4Aop37Glf0"
 

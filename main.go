@@ -30,9 +30,12 @@ func main() {
 		return
 	}
 
+	workEnqueuer := config.ConfigureBackgroundWork()
+
 	apiCfg := config.ApiConfig{
-		DB:    database.New(conn),
-		SqlDB: conn,
+		DB:           database.New(conn),
+		SqlDB:        conn,
+		WorkEnqueuer: workEnqueuer,
 	}
 
 	router := modules.CreateRouter(&apiCfg)
