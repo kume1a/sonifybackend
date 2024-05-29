@@ -77,7 +77,7 @@ func DownloadYoutubeAudio(videoID string, options DownloadYoutubeAudioOptions) (
 		}
 	}
 
-	if err := os.Remove(tempOutputDir); err != nil {
+	if err := os.RemoveAll(tempOutputDir); err != nil {
 		log.Println("Error removing temp output directory: ", err)
 		return "", "", err
 	}
