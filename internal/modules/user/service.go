@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/kume1a/sonifybackend/internal/database"
+	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
 func CreateUser(
@@ -15,14 +16,13 @@ func CreateUser(
 	db *database.Queries,
 	params database.CreateUserParams,
 ) (*database.User, error) {
-	createdAt := time.Now().UTC()
-
 	if params.ID == uuid.Nil {
 		params.ID = uuid.New()
 	}
 	if params.CreatedAt.IsZero() {
-		params.CreatedAt = createdAt
+		params.CreatedAt = time.Now().UTC()
 	}
+
 	user, err := db.CreateUser(ctx, params)
 
 	if err != nil {
@@ -39,9 +39,16 @@ func GetUserByID(
 ) (*database.User, error) {
 	user, err := db.GetUserByID(ctx, userId)
 
-	log.Println("Error getting user by ID: ", err)
+	if shared.IsDBErrorNotFound(err) {
+		return nil, shared.NotFound(shared.ErrUserNotFound)
+	}
 
-	return &user, err
+	if err != nil {
+		log.Println("Error getting user by ID: ", err)
+		return nil, shared.InternalServerErrorDef()
+	}
+
+	return &user, nil
 }
 
 func GetUserByEmail(ctx context.Context, db *database.Queries, email string) (*database.User, error) {
