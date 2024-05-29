@@ -16,7 +16,7 @@ func (dto *createPlaylistAudioDTO) Validate() error {
 	return err
 }
 
-func ValidateCreatePlaylistDto(w http.ResponseWriter, r *http.Request) (*createPlaylistDTO, *shared.HttpError) {
+func ValidateCreatePlaylistDto(w http.ResponseWriter, r *http.Request) (*createPlaylistDTO, error) {
 	thumbnailPath, err := shared.HandleUploadFile(shared.HandleUploadFileArgs{
 		ResponseWriter:   w,
 		Request:          r,
@@ -41,7 +41,7 @@ func ValidateCreatePlaylistDto(w http.ResponseWriter, r *http.Request) (*createP
 	}, nil
 }
 
-func ValidateGetPlaylistByIDVars(r *http.Request) (*playlistIDDTO, *shared.HttpError) {
+func ValidateGetPlaylistByIDVars(r *http.Request) (*playlistIDDTO, error) {
 	vars := mux.Vars(r)
 
 	playlistID, ok := vars["playlistID"]

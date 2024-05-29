@@ -13,9 +13,9 @@ import (
 
 func handleCreatePlaylist(apiCfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		body, httpErr := ValidateCreatePlaylistDto(w, r)
-		if httpErr != nil {
-			shared.ResHttpError(w, httpErr)
+		body, err := ValidateCreatePlaylistDto(w, r)
+		if err != nil {
+			shared.ResTryHttpError(w, err)
 			return
 		}
 
@@ -88,15 +88,15 @@ func handleGetPlaylistWithAudios(apiCfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		playlistIDDTO, httpErr := ValidateGetPlaylistByIDVars(r)
-		if httpErr != nil {
-			shared.ResHttpError(w, httpErr)
+		playlistIDDTO, err := ValidateGetPlaylistByIDVars(r)
+		if err != nil {
+			shared.ResTryHttpError(w, err)
 			return
 		}
 
-		playlist, audios, httpErr := GetPlaylistWithAudios(r.Context(), apiCfg.DB, playlistIDDTO.PlaylistID, authPaylad.UserID)
-		if httpErr != nil {
-			shared.ResHttpError(w, httpErr)
+		playlist, audios, err := GetPlaylistWithAudios(r.Context(), apiCfg.DB, playlistIDDTO.PlaylistID, authPaylad.UserID)
+		if err != nil {
+			shared.ResTryHttpError(w, err)
 			return
 		}
 

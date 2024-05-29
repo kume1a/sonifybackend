@@ -2,6 +2,8 @@ package playlist
 
 import (
 	"context"
+	"log"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/kume1a/sonifybackend/internal/database"
@@ -10,22 +12,100 @@ import (
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
+func CreatePlaylist(
+	ctx context.Context,
+	db *database.Queries,
+	params database.CreatePlaylistParams,
+) (*database.Playlist, error) {
+	if params.ID == uuid.Nil {
+		params.ID = uuid.New()
+	}
+	if params.CreatedAt.IsZero() {
+		params.CreatedAt = time.Now().UTC()
+	}
+
+	entity, err := db.CreatePlaylist(ctx, params)
+
+	if err != nil {
+		log.Println("Error creating playlist:", err)
+	}
+
+	return &entity, err
+}
+
+func GetPlaylists(
+	ctx context.Context,
+	db *database.Queries,
+	params database.GetPlaylistsParams,
+) ([]database.Playlist, error) {
+	playlists, err := db.GetPlaylists(ctx, params)
+
+	if err != nil {
+		log.Println("Error getting playlists:", err)
+	}
+
+	return playlists, err
+}
+
+func GetSpotifyUserSavedPlaylistIds(
+	ctx context.Context,
+	db *database.Queries,
+	userId uuid.UUID,
+) (uuid.UUIDs, error) {
+	playlistIds, err := db.GetSpotifyUserSavedPlaylistIDs(ctx, userId)
+
+	if err != nil {
+		log.Println("Error getting spotify user saved playlist ids:", err)
+	}
+
+	return playlistIds, err
+}
+
+func DeleteSpotifyUserSavedPlaylistJoins(
+	ctx context.Context,
+	db *database.Queries,
+	userId uuid.UUID,
+) error {
+	err := db.DeleteSpotifyUserSavedPlaylistJoins(ctx, userId)
+
+	if err != nil {
+		log.Println("Error deleting spotify user saved playlist ids:", err)
+	}
+
+	return err
+}
+
+func DeletePlaylistsByIds(
+	ctx context.Context,
+	db *database.Queries,
+	playlistIds uuid.UUIDs,
+) error {
+	err := db.DeletePlaylistsByIDs(ctx, playlistIds)
+
+	if err != nil {
+		log.Println("Error deleting playlists by ids:", err)
+	}
+
+	return err
+}
+
 func GetPlaylistById(
 	ctx context.Context,
 	db *database.Queries,
 	playlistID uuid.UUID,
-) (*database.Playlist, *shared.HttpError) {
-	playlist, err := getPlaylistById(ctx, db, playlistID)
+) (*database.Playlist, error) {
+	playlist, err := db.GetPlaylistByID(ctx, playlistID)
 
 	if err != nil && shared.IsDBErrorNotFound(err) {
 		return nil, shared.NotFound(shared.ErrPlaylistNotFound)
 	}
 
 	if err != nil {
+		log.Println("Error getting playlist by id:", err)
 		return nil, shared.InternalServerErrorDef()
 	}
 
-	return playlist, nil
+	return &playlist, nil
 }
 
 func GetPlaylistIDBySpotifyID(
@@ -51,15 +131,11 @@ func GetPlaylistWithAudios(
 	db *database.Queries,
 	playlistID uuid.UUID,
 	authUserID uuid.UUID,
-) (*database.Playlist, []audio.AudioWithAudioLike, *shared.HttpError) {
-	playlist, err := getPlaylistById(ctx, db, playlistID)
+) (*database.Playlist, []audio.AudioWithAudioLike, error) {
+	playlist, err := GetPlaylistById(ctx, db, playlistID)
 
 	if err != nil {
-		if shared.IsDBErrorNotFound(err) {
-			return nil, nil, shared.NotFound(shared.ErrPlaylistNotFound)
-		}
-
-		return nil, nil, shared.InternalServerErrorDef()
+		return nil, nil, err
 	}
 
 	playlistAudios, err := playlistaudio.GetPlaylistAudios(ctx, db, database.GetPlaylistAudiosParams{
