@@ -57,6 +57,50 @@ func (ns NullAuthProvider) Value() (driver.Value, error) {
 	return string(ns.AuthProvider), nil
 }
 
+type ProcessStatus string
+
+const (
+	ProcessStatusPENDING    ProcessStatus = "PENDING"
+	ProcessStatusPROCESSING ProcessStatus = "PROCESSING"
+	ProcessStatusCOMPLETED  ProcessStatus = "COMPLETED"
+	ProcessStatusFAILED     ProcessStatus = "FAILED"
+)
+
+func (e *ProcessStatus) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = ProcessStatus(s)
+	case string:
+		*e = ProcessStatus(s)
+	default:
+		return fmt.Errorf("unsupported scan type for ProcessStatus: %T", src)
+	}
+	return nil
+}
+
+type NullProcessStatus struct {
+	ProcessStatus ProcessStatus
+	Valid         bool // Valid is true if ProcessStatus is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullProcessStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.ProcessStatus, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.ProcessStatus.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullProcessStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.ProcessStatus), nil
+}
+
 type Artist struct {
 	ID        uuid.UUID
 	CreatedAt time.Time
@@ -96,12 +140,15 @@ type AudioLike struct {
 }
 
 type Playlist struct {
-	ID            uuid.UUID
-	CreatedAt     time.Time
-	Name          string
-	ThumbnailPath sql.NullString
-	SpotifyID     sql.NullString
-	ThumbnailUrl  sql.NullString
+	ID                uuid.UUID
+	CreatedAt         time.Time
+	Name              string
+	ThumbnailPath     sql.NullString
+	SpotifyID         sql.NullString
+	ThumbnailUrl      sql.NullString
+	AudioImportStatus ProcessStatus
+	AudioCount        int32
+	TotalAudioCount   int32
 }
 
 type PlaylistAudio struct {

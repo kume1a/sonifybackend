@@ -20,8 +20,11 @@ func handleCreatePlaylist(apiCfg *config.ApiConfig) http.HandlerFunc {
 		}
 
 		playlist, err := CreatePlaylist(r.Context(), apiCfg.DB, database.CreatePlaylistParams{
-			Name:          body.Name,
-			ThumbnailPath: sql.NullString{String: body.ThumbnailPath, Valid: true},
+			Name:              body.Name,
+			ThumbnailPath:     sql.NullString{String: body.ThumbnailPath, Valid: true},
+			AudioImportStatus: database.ProcessStatusCOMPLETED,
+			AudioCount:        0,
+			TotalAudioCount:   0,
 		})
 		if err != nil {
 			shared.ResInternalServerErrorDef(w)

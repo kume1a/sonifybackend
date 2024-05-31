@@ -23,4 +23,7 @@ require (
 	golang.org/x/exp v0.0.0-20240325151524-a685a6edb6d8
 )
 
-require github.com/robfig/cron v1.2.0 // indirect
+require (
+	github.com/luraim/fun v0.0.0-20240427173526-62ed2a5a9acf // indirect
+	github.com/robfig/cron v1.2.0 // indirect
+)

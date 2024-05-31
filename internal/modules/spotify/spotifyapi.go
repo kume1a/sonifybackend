@@ -3,7 +3,6 @@ package spotify
 import (
 	"encoding/json"
 	"errors"
-	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -12,31 +11,55 @@ import (
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
+const spotifyBaseApiUrl = "https://api.spotify.com"
+
 func GetSpotifyPlaylist(accessToken, playlistID string) (*spotifyPlaylistDTO, error) {
-	return getSpotifyEndpoint[spotifyPlaylistDTO](
-		"/v1/playlists/"+playlistID,
-		accessToken,
-		nil,
+	return shared.HttpGetWithResponse[spotifyPlaylistDTO](
+		shared.HttpGetParams{
+			URL: spotifyBaseApiUrl + "/v1/playlists/" + playlistID,
+			Headers: map[string]string{
+				"Authorization": "Bearer " + accessToken,
+			},
+		},
 	)
 }
 
 func GetSavedSpotifyPlaylists(accessToken string) (*getSpotifyPlaylistsDTO, error) {
-	return getSpotifyEndpoint[getSpotifyPlaylistsDTO](
-		"/v1/me/playlists",
-		accessToken,
-		url.Values{
-			"limit": {"50"},
+	return shared.HttpGetWithResponse[getSpotifyPlaylistsDTO](
+		shared.HttpGetParams{
+			URL: spotifyBaseApiUrl + "/v1/me/playlists",
+			Headers: map[string]string{
+				"Authorization": "Bearer " + accessToken,
+			},
+			Query: url.Values{
+				"limit": {"50"},
+			},
 		},
 	)
 }
 
 func GetSpotifyPlaylistItems(accessToken, playlistID string) (*spotifyPlaylistItemsDTO, error) {
-	return getSpotifyEndpoint[spotifyPlaylistItemsDTO](
-		"/v1/playlists/"+playlistID+"/tracks",
-		accessToken,
-		url.Values{
-			"limit":  {"50"},
-			"fields": {"next,previous,limit,total,items(added_at,added_by(id,type),track(id,preview_url,name,duration_ms,artists(id,name),album(name,images,id)))"},
+	return shared.HttpGetWithResponse[spotifyPlaylistItemsDTO](
+		shared.HttpGetParams{
+			URL: spotifyBaseApiUrl + "/v1/playlists/" + playlistID + "/tracks",
+			Headers: map[string]string{
+				"Authorization": "Bearer " + accessToken,
+			},
+			Query: url.Values{
+				"limit":  {"50"},
+				"fields": {"next,previous,limit,total,items(added_at,added_by(id,type),track(id,preview_url,name,duration_ms,artists(id,name),album(name,images,id)))"},
+			},
+		},
+	)
+}
+
+func GetSpotifyPlaylistItemsNext(accessToken, nextUrl string) (*spotifyPlaylistItemsDTO, error) {
+	return shared.HttpGetWithResponse[spotifyPlaylistItemsDTO](
+		shared.HttpGetParams{
+			URL: nextUrl,
+			Headers: map[string]string{
+				"Authorization": "Bearer " + accessToken,
+			},
 		},
 	)
 }
@@ -144,37 +167,4 @@ func RefreshSpotifyToken(refreshToken string) (*spotifyRefreshTokenDTO, error) {
 	}
 
 	return &dto, err
-}
-
-func getSpotifyEndpoint[DTO interface{}](endpoint, accessToken string, queryParams url.Values) (*DTO, error) {
-	url := "https://api.spotify.com" + endpoint
-
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Set("Authorization", "Bearer "+accessToken)
-
-	req.URL.RawQuery = queryParams.Encode()
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	var dto DTO
-	err = json.Unmarshal(body, &dto)
-	if err != nil {
-		return nil, err
-	}
-
-	return &dto, nil
 }

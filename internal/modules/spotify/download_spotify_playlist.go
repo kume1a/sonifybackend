@@ -23,7 +23,12 @@ func DownloadSpotifyPlaylistAudios(
 ) error {
 	createPlaylistAudioParams := []database.CreatePlaylistAudioParams{}
 
-	playlistItems, err := GetSpotifyPlaylistItems(spotifyAccessToken, playlistSpotifyID)
+	playlistItems, err := getAllSpotifyPlaylistItems(spotifyAccessToken, playlistSpotifyID)
+	if err != nil {
+		return err
+	}
+
+	playlistID, err := playlist.GetPlaylistIDBySpotifyID(ctx, resouceConfig.DB, playlistSpotifyID)
 	if err != nil {
 		return err
 	}
@@ -32,7 +37,7 @@ func DownloadSpotifyPlaylistAudios(
 		ctx,
 		resouceConfig,
 		shared.Map(
-			playlistItems.Items,
+			playlistItems,
 			func(playlistItem spotifyPlaylistItemDTO) DownloadSpotifyAudioInput {
 				artistName := ""
 				if len(playlistItem.Track.Artists) > 0 {
@@ -53,21 +58,26 @@ func DownloadSpotifyPlaylistAudios(
 				}
 			},
 		),
+		func(progress, total int) {
+			playlist.UpdatePlaylistByID(
+				ctx, resouceConfig.DB,
+				database.UpdatePlaylistByIDParams{
+					PlaylistID:      playlistID,
+					AudioCount:      sql.NullInt32{Int32: int32(progress), Valid: true},
+					TotalAudioCount: sql.NullInt32{Int32: int32(total), Valid: true},
+				},
+			)
+		},
 	); err != nil {
 		return err
 	}
 
 	playlistItemSpotifyIDs := shared.Map(
-		playlistItems.Items,
+		playlistItems,
 		func(playlistItem spotifyPlaylistItemDTO) string { return playlistItem.Track.ID },
 	)
 
 	playlistAudioIDs, err := audio.GetAudioIdsBySpotifyIds(ctx, resouceConfig.DB, playlistItemSpotifyIDs)
-	if err != nil {
-		return err
-	}
-
-	playlistID, err := playlist.GetPlaylistIDBySpotifyID(ctx, resouceConfig.DB, playlistSpotifyID)
 	if err != nil {
 		return err
 	}
@@ -89,8 +99,33 @@ func DownloadSpotifyPlaylistAudios(
 	); err != nil {
 		return err
 	}
-
 	return nil
+}
+
+func getAllSpotifyPlaylistItems(
+	spotifyAccessToken string,
+	playlistSpotifyID string,
+) ([]spotifyPlaylistItemDTO, error) {
+	allPlaylistItems := []spotifyPlaylistItemDTO{}
+
+	playlistItems, err := GetSpotifyPlaylistItems(spotifyAccessToken, playlistSpotifyID)
+	if err != nil {
+		return []spotifyPlaylistItemDTO{}, err
+	}
+
+	nextURL := playlistItems.Next
+
+	for nextURL != "" {
+		playlistItems, err = GetSpotifyPlaylistItemsNext(spotifyAccessToken, nextURL)
+		if err != nil {
+			return nil, err
+		}
+
+		allPlaylistItems = append(allPlaylistItems, playlistItems.Items...)
+		nextURL = playlistItems.Next
+	}
+
+	return allPlaylistItems, nil
 }
 
 func downloadSpotifyPlaylist(
@@ -169,9 +204,12 @@ func spotifyPlaylistDTOToCreatePlaylistParams(playlist *spotifyPlaylistDTO) data
 	}
 
 	return database.CreatePlaylistParams{
-		ID:           uuid.New(),
-		SpotifyID:    sql.NullString{String: playlist.ID, Valid: true},
-		Name:         playlist.Name,
-		ThumbnailUrl: sql.NullString{String: thumbnailUrl, Valid: true},
+		ID:                uuid.New(),
+		SpotifyID:         sql.NullString{String: playlist.ID, Valid: true},
+		Name:              playlist.Name,
+		ThumbnailUrl:      sql.NullString{String: thumbnailUrl, Valid: true},
+		AudioImportStatus: database.ProcessStatusPENDING,
+		TotalAudioCount:   int32(playlist.Tracks.Total),
+		AudioCount:        0,
 	}
 }

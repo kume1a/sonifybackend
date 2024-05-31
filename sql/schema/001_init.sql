@@ -68,15 +68,25 @@ CREATE INDEX idx_audios_created_at
     ON audios (created_at);
 
 ----------------- PLAYLISTS -----------------
+CREATE TYPE process_status AS ENUM (
+  'PENDING',
+  'PROCESSING',
+  'COMPLETED',
+  'FAILED'
+);
+
 CREATE TABLE playlists
 (
-  id             UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
-  created_at     TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  id                  UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
+  created_at          TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
 
-  name           VARCHAR(255) NOT NULL,
-  thumbnail_path VARCHAR(255),
-  spotify_id     VARCHAR(255),
-  thumbnail_url  VARCHAR(255)
+  name                VARCHAR(255) NOT NULL,
+  thumbnail_path      VARCHAR(255),
+  spotify_id          VARCHAR(255),
+  thumbnail_url       VARCHAR(255),
+  audio_import_status process_status NOT NULL,
+  audio_count         INTEGER NOT NULL,
+  total_audio_count   INTEGER NOT NULL
 );
 
 CREATE INDEX idx_playlists_created_at

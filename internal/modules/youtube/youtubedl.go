@@ -3,6 +3,7 @@ package youtube
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -49,9 +50,11 @@ func DownloadYoutubeAudio(videoID string, options DownloadYoutubeAudioOptions) (
 		cmd = exec.Command("yt-dlp", "-f", "bestaudio", "-o", tempOutputPath+".%(ext)s", ytURL)
 	}
 
-	if err := cmd.Run(); err != nil {
-		log.Println("Error downloading youtube audio: ", err)
-		return "", "", err
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		errorMessage := fmt.Sprintf("Error downloading youtube audio: %v, output: %s", err, output)
+		log.Println(errorMessage)
+		return "", "", fmt.Errorf(errorMessage)
 	}
 
 	audioOutputLocation, err := shared.ProcessUnknownExtMediaFile(shared.ProcessUnknownExtMediaFileParams{

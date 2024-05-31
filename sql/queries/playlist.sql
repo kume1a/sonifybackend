@@ -5,8 +5,11 @@ INSERT INTO playlists(
   name,
   thumbnail_path,
   spotify_id,
-  thumbnail_url
-) VALUES ($1,$2,$3,$4,$5,$6) 
+  thumbnail_url,
+  audio_import_status,
+  audio_count,
+  total_audio_count
+) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) 
 RETURNING *;
 
 -- name: GetPlaylists :many
@@ -17,9 +20,13 @@ SELECT * FROM playlists
 
 -- name: UpdatePlaylistByID :one
 UPDATE playlists
-SET name = COALESCE($1, name),
-    thumbnail_path = COALESCE($2, thumbnail_path)
-WHERE id = $3
+SET name = COALESCE(sqlc.narg(name), name),
+    thumbnail_path = COALESCE(sqlc.narg(thumbnail_path), thumbnail_path),
+    thumbnail_url = COALESCE(sqlc.narg(thumbnail_url), thumbnail_url),
+    audio_import_status = COALESCE(sqlc.narg(audio_import_status), audio_import_status),
+    audio_count = COALESCE(sqlc.narg(audio_count), audio_count),
+    total_audio_count = COALESCE(sqlc.narg(total_audio_count), total_audio_count)
+WHERE id = sqlc.arg(playlist_id)
 RETURNING *;
 
 -- name: DeletePlaylistByID :exec

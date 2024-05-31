@@ -126,6 +126,26 @@ func GetPlaylistIDBySpotifyID(
 	return playlistID, nil
 }
 
+func UpdatePlaylistByID(
+	ctx context.Context,
+	db *database.Queries,
+	params database.UpdatePlaylistByIDParams,
+) (*database.Playlist, error) {
+	playlist, err := db.UpdatePlaylistByID(ctx, params)
+
+	if err != nil && shared.IsDBErrorNotFound(err) {
+		return nil, shared.NotFound(shared.ErrPlaylistNotFound)
+	}
+
+	if err != nil {
+		log.Println("Error updating playlist by id:", err)
+		return nil, shared.InternalServerErrorDef()
+	}
+
+	return &playlist, err
+
+}
+
 func GetPlaylistWithAudios(
 	ctx context.Context,
 	db *database.Queries,
@@ -138,10 +158,13 @@ func GetPlaylistWithAudios(
 		return nil, nil, err
 	}
 
-	playlistAudios, err := playlistaudio.GetPlaylistAudios(ctx, db, database.GetPlaylistAudiosParams{
-		PlaylistID: playlistID,
-		UserID:     authUserID,
-	})
+	playlistAudios, err := playlistaudio.GetPlaylistAudios(
+		ctx, db,
+		database.GetPlaylistAudiosParams{
+			PlaylistID: playlistID,
+			UserID:     authUserID,
+		},
+	)
 	if err != nil {
 		return nil, nil, shared.InternalServerErrorDef()
 	}

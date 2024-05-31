@@ -21,18 +21,24 @@ INSERT INTO playlists(
   name,
   thumbnail_path,
   spotify_id,
-  thumbnail_url
-) VALUES ($1,$2,$3,$4,$5,$6) 
-RETURNING id, created_at, name, thumbnail_path, spotify_id, thumbnail_url
+  thumbnail_url,
+  audio_import_status,
+  audio_count,
+  total_audio_count
+) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) 
+RETURNING id, created_at, name, thumbnail_path, spotify_id, thumbnail_url, audio_import_status, audio_count, total_audio_count
 `
 
 type CreatePlaylistParams struct {
-	ID            uuid.UUID
-	CreatedAt     time.Time
-	Name          string
-	ThumbnailPath sql.NullString
-	SpotifyID     sql.NullString
-	ThumbnailUrl  sql.NullString
+	ID                uuid.UUID
+	CreatedAt         time.Time
+	Name              string
+	ThumbnailPath     sql.NullString
+	SpotifyID         sql.NullString
+	ThumbnailUrl      sql.NullString
+	AudioImportStatus ProcessStatus
+	AudioCount        int32
+	TotalAudioCount   int32
 }
 
 func (q *Queries) CreatePlaylist(ctx context.Context, arg CreatePlaylistParams) (Playlist, error) {
@@ -43,6 +49,9 @@ func (q *Queries) CreatePlaylist(ctx context.Context, arg CreatePlaylistParams) 
 		arg.ThumbnailPath,
 		arg.SpotifyID,
 		arg.ThumbnailUrl,
+		arg.AudioImportStatus,
+		arg.AudioCount,
+		arg.TotalAudioCount,
 	)
 	var i Playlist
 	err := row.Scan(
@@ -52,6 +61,9 @@ func (q *Queries) CreatePlaylist(ctx context.Context, arg CreatePlaylistParams) 
 		&i.ThumbnailPath,
 		&i.SpotifyID,
 		&i.ThumbnailUrl,
+		&i.AudioImportStatus,
+		&i.AudioCount,
+		&i.TotalAudioCount,
 	)
 	return i, err
 }
@@ -75,7 +87,7 @@ func (q *Queries) DeletePlaylistsByIDs(ctx context.Context, ids []uuid.UUID) err
 }
 
 const getPlaylistByID = `-- name: GetPlaylistByID :one
-SELECT id, created_at, name, thumbnail_path, spotify_id, thumbnail_url FROM playlists WHERE id = $1
+SELECT id, created_at, name, thumbnail_path, spotify_id, thumbnail_url, audio_import_status, audio_count, total_audio_count FROM playlists WHERE id = $1
 `
 
 func (q *Queries) GetPlaylistByID(ctx context.Context, id uuid.UUID) (Playlist, error) {
@@ -88,6 +100,9 @@ func (q *Queries) GetPlaylistByID(ctx context.Context, id uuid.UUID) (Playlist, 
 		&i.ThumbnailPath,
 		&i.SpotifyID,
 		&i.ThumbnailUrl,
+		&i.AudioImportStatus,
+		&i.AudioCount,
+		&i.TotalAudioCount,
 	)
 	return i, err
 }
@@ -104,7 +119,7 @@ func (q *Queries) GetPlaylistIDBySpotifyID(ctx context.Context, spotifyID string
 }
 
 const getPlaylists = `-- name: GetPlaylists :many
-SELECT id, created_at, name, thumbnail_path, spotify_id, thumbnail_url FROM playlists 
+SELECT id, created_at, name, thumbnail_path, spotify_id, thumbnail_url, audio_import_status, audio_count, total_audio_count FROM playlists 
   WHERE created_at > $1
   ORDER BY created_at DESC
   LIMIT $2
@@ -131,6 +146,9 @@ func (q *Queries) GetPlaylists(ctx context.Context, arg GetPlaylistsParams) ([]P
 			&i.ThumbnailPath,
 			&i.SpotifyID,
 			&i.ThumbnailUrl,
+			&i.AudioImportStatus,
+			&i.AudioCount,
+			&i.TotalAudioCount,
 		); err != nil {
 			return nil, err
 		}
@@ -178,19 +196,35 @@ func (q *Queries) GetSpotifyUserSavedPlaylistIDs(ctx context.Context, userID uui
 const updatePlaylistByID = `-- name: UpdatePlaylistByID :one
 UPDATE playlists
 SET name = COALESCE($1, name),
-    thumbnail_path = COALESCE($2, thumbnail_path)
-WHERE id = $3
-RETURNING id, created_at, name, thumbnail_path, spotify_id, thumbnail_url
+    thumbnail_path = COALESCE($2, thumbnail_path),
+    thumbnail_url = COALESCE($3, thumbnail_url),
+    audio_import_status = COALESCE($4, audio_import_status),
+    audio_count = COALESCE($5, audio_count),
+    total_audio_count = COALESCE($6, total_audio_count)
+WHERE id = $7
+RETURNING id, created_at, name, thumbnail_path, spotify_id, thumbnail_url, audio_import_status, audio_count, total_audio_count
 `
 
 type UpdatePlaylistByIDParams struct {
-	Name          string
-	ThumbnailPath sql.NullString
-	ID            uuid.UUID
+	Name              sql.NullString
+	ThumbnailPath     sql.NullString
+	ThumbnailUrl      sql.NullString
+	AudioImportStatus NullProcessStatus
+	AudioCount        sql.NullInt32
+	TotalAudioCount   sql.NullInt32
+	PlaylistID        uuid.UUID
 }
 
 func (q *Queries) UpdatePlaylistByID(ctx context.Context, arg UpdatePlaylistByIDParams) (Playlist, error) {
-	row := q.db.QueryRowContext(ctx, updatePlaylistByID, arg.Name, arg.ThumbnailPath, arg.ID)
+	row := q.db.QueryRowContext(ctx, updatePlaylistByID,
+		arg.Name,
+		arg.ThumbnailPath,
+		arg.ThumbnailUrl,
+		arg.AudioImportStatus,
+		arg.AudioCount,
+		arg.TotalAudioCount,
+		arg.PlaylistID,
+	)
 	var i Playlist
 	err := row.Scan(
 		&i.ID,
@@ -199,6 +233,9 @@ func (q *Queries) UpdatePlaylistByID(ctx context.Context, arg UpdatePlaylistByID
 		&i.ThumbnailPath,
 		&i.SpotifyID,
 		&i.ThumbnailUrl,
+		&i.AudioImportStatus,
+		&i.AudioCount,
+		&i.TotalAudioCount,
 	)
 	return i, err
 }

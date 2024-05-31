@@ -91,7 +91,7 @@ func (q *Queries) GetUserPlaylistIDs(ctx context.Context, userID uuid.UUID) ([]u
 
 const getUserPlaylists = `-- name: GetUserPlaylists :many
 SELECT 
-  playlists.id, playlists.created_at, playlists.name, playlists.thumbnail_path, playlists.spotify_id, playlists.thumbnail_url 
+  playlists.id, playlists.created_at, playlists.name, playlists.thumbnail_path, playlists.spotify_id, playlists.thumbnail_url, playlists.audio_import_status, playlists.audio_count, playlists.total_audio_count 
 FROM user_playlists
 INNER JOIN playlists ON user_playlists.playlist_id = playlists.id
 WHERE user_playlists.user_id = $1 
@@ -119,6 +119,9 @@ func (q *Queries) GetUserPlaylists(ctx context.Context, arg GetUserPlaylistsPara
 			&i.ThumbnailPath,
 			&i.SpotifyID,
 			&i.ThumbnailUrl,
+			&i.AudioImportStatus,
+			&i.AudioCount,
+			&i.TotalAudioCount,
 		); err != nil {
 			return nil, err
 		}

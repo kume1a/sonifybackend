@@ -34,6 +34,47 @@ type HandleUploadFileArgs struct {
 	IsOptional       bool
 }
 
+type HttpGetParams struct {
+	URL     string
+	Headers map[string]string
+	Query   url.Values
+}
+
+func HttpGetWithResponse[DTO interface{}](params HttpGetParams) (*DTO, error) {
+	req, err := http.NewRequest("GET", params.URL, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	for key, value := range params.Headers {
+		req.Header.Add(key, value)
+	}
+
+	if len(params.Query) != 0 {
+		req.URL.RawQuery = params.Query.Encode()
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var dto DTO
+	err = json.Unmarshal(body, &dto)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto, nil
+}
+
 func XWWWFormUrlencoded(params XWWWFormUrlencodedParams) (
 	httpResp *http.Response,
 	respBody string,
