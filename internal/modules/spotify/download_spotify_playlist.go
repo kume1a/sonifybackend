@@ -22,8 +22,6 @@ func DownloadSpotifyPlaylistAudios(
 	playlistSpotifyID string,
 	spotifyAccessToken string,
 ) error {
-	createPlaylistAudioParams := []database.CreatePlaylistAudioParams{}
-
 	playlistID, err := playlist.GetPlaylistIDBySpotifyID(ctx, resouceConfig.DB, playlistSpotifyID)
 	if err != nil {
 		return err
@@ -61,7 +59,7 @@ func DownloadSpotifyPlaylistAudios(
 			},
 		),
 		func(progress, total int) {
-			audioImportStatus := database.ProcessStatusPENDING
+			audioImportStatus := database.ProcessStatusPROCESSING
 			if progress == total {
 				audioImportStatus = database.ProcessStatusCOMPLETED
 			}
@@ -93,6 +91,7 @@ func DownloadSpotifyPlaylistAudios(
 		return err
 	}
 
+	createPlaylistAudioParams := []database.CreatePlaylistAudioParams{}
 	for _, playlistAudioID := range playlistAudioIDs {
 		createPlaylistAudioParams = append(
 			createPlaylistAudioParams,
