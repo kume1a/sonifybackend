@@ -1,7 +1,21 @@
 package userplaylist
 
-import "github.com/google/uuid"
+import (
+	"time"
 
-type getMyPlaylistsDTO struct {
-	IDs uuid.UUIDs `json:"ids" valid:"-"`
+	"github.com/google/uuid"
+	"github.com/kume1a/sonifybackend/internal/modules/playlist"
+)
+
+type userPlaylistDTO struct {
+	ID                     uuid.UUID             `json:"id"`
+	UserID                 uuid.UUID             `json:"userId"`
+	PlaylistID             uuid.UUID             `json:"playlistId"`
+	CreatedAt              time.Time             `json:"createdAt"`
+	IsSpotifySavedPlaylist bool                  `json:"isSpotifySavedPlaylist"`
+	Playlist               *playlist.PlaylistDTO `json:"playlist"`
+}
+
+type PlaylistIDsDTO struct {
+	PlaylistIDs []uuid.UUID `json:"playlistIds" valid:"-"`
 }

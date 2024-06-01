@@ -7,7 +7,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/kume1a/sonifybackend/internal/config"
-	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
@@ -55,26 +54,4 @@ func ValidateGetPlaylistByIDVars(r *http.Request) (*playlistIDDTO, error) {
 	}
 
 	return &playlistIDDTO{PlaylistID: playlistIDUUID}, nil
-}
-
-func PlaylistEntityToDto(e database.Playlist) playlistDTO {
-	return playlistDTO{
-		ID:                e.ID,
-		CreatedAt:         e.CreatedAt,
-		Name:              e.Name,
-		ThumbnailPath:     e.ThumbnailPath.String,
-		ThumbnailUrl:      e.ThumbnailUrl.String,
-		SpotifyId:         e.SpotifyID.String,
-		AudioImportStatus: e.AudioImportStatus,
-		AudioCount:        e.AudioCount,
-		TotalAudioCount:   e.TotalAudioCount,
-	}
-}
-
-func playlistAudioEntityToDto(e *database.PlaylistAudio) playlistAudioDTO {
-	return playlistAudioDTO{
-		CreatedAt:  e.CreatedAt,
-		PlaylistID: e.PlaylistID,
-		AudioID:    e.AudioID,
-	}
 }

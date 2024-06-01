@@ -35,6 +35,10 @@ type LastCreatedAtPageParamsDto struct {
 	Limit         int32     `json:"limit" valid:"required,max(200)"`
 }
 
+type OptionalIDsDTO struct {
+	IDs uuid.UUIDs `json:"ids" valid:"-"`
+}
+
 func (dto *KeywordDto) Validate() error {
 	if len(dto.Keyword) != 1 {
 		return fmt.Errorf("keyword must have exactly one element")
@@ -45,6 +49,11 @@ func (dto *KeywordDto) Validate() error {
 }
 
 func (dto *LastCreatedAtPageParamsDto) Validate() error {
+	_, err := govalidator.ValidateStruct(dto)
+	return err
+}
+
+func (dto *OptionalIDsDTO) Validate() error {
 	_, err := govalidator.ValidateStruct(dto)
 	return err
 }

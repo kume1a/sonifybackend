@@ -12,13 +12,13 @@ type createPlaylistDTO struct {
 	ThumbnailPath string
 }
 
-type playlistDTO struct {
+type PlaylistDTO struct {
 	ID                uuid.UUID              `json:"id"`
 	CreatedAt         time.Time              `json:"createdAt"`
 	Name              string                 `json:"name"`
 	ThumbnailPath     string                 `json:"thumbnailPath"`
 	ThumbnailUrl      string                 `json:"thumbnailUrl"`
-	SpotifyId         string                 `json:"spotifyId"`
+	SpotifyID         string                 `json:"spotifyId"`
 	AudioImportStatus database.ProcessStatus `json:"audioImportStatus"`
 	AudioCount        int32                  `json:"audioCount"`
 	TotalAudioCount   int32                  `json:"totalAudioCount"`

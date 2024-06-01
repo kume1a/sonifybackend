@@ -74,7 +74,7 @@ func handleGetAuthUserAudioLikes(apiCfg *config.ApiConfig) http.HandlerFunc {
 		}
 
 		// user body for big payload
-		body, err := shared.ValidateRequestBody[*getAudioLikesDTO](r)
+		body, err := shared.ValidateRequestBody[*shared.OptionalIDsDTO](r)
 		if err != nil {
 			shared.ResBadRequest(w, err.Error())
 			return
