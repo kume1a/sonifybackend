@@ -32,6 +32,9 @@ RETURNING *;
 -- name: DeletePlaylistByID :exec
 DELETE FROM playlists WHERE id = $1;
 
+-- name: GetPlaylistBySpotifyID :one
+SELECT * FROM playlists WHERE spotify_id = sqlc.arg(spotify_id)::text;
+
 -- name: GetPlaylistByID :one
 SELECT * FROM playlists WHERE id = $1;
 

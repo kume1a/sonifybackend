@@ -107,6 +107,27 @@ func (q *Queries) GetPlaylistByID(ctx context.Context, id uuid.UUID) (Playlist, 
 	return i, err
 }
 
+const getPlaylistBySpotifyID = `-- name: GetPlaylistBySpotifyID :one
+SELECT id, created_at, name, thumbnail_path, spotify_id, thumbnail_url, audio_import_status, audio_count, total_audio_count FROM playlists WHERE spotify_id = $1::text
+`
+
+func (q *Queries) GetPlaylistBySpotifyID(ctx context.Context, spotifyID string) (Playlist, error) {
+	row := q.db.QueryRowContext(ctx, getPlaylistBySpotifyID, spotifyID)
+	var i Playlist
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.Name,
+		&i.ThumbnailPath,
+		&i.SpotifyID,
+		&i.ThumbnailUrl,
+		&i.AudioImportStatus,
+		&i.AudioCount,
+		&i.TotalAudioCount,
+	)
+	return i, err
+}
+
 const getPlaylistIDBySpotifyID = `-- name: GetPlaylistIDBySpotifyID :one
 SELECT id FROM playlists WHERE spotify_id = $1::text
 `

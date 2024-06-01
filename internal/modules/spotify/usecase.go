@@ -3,6 +3,7 @@ package spotify
 import (
 	"context"
 	"database/sql"
+	"log"
 
 	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
@@ -60,6 +61,8 @@ func DownloadWriteSpotifyAudios(
 	total := len(inputs)
 
 	for inputIndex, input := range filteredInputs {
+		log.Println("Downloading audio for track: ", input.TrackName, " by ", input.ArtistName, " with Spotify ID: ", input.SpotifyID)
+
 		searchQuery := input.TrackName + " " + input.ArtistName + "\"topic\""
 
 		ytVideoID, err := youtube.GetYoutubeSearchBestMatchVideoID(searchQuery)

@@ -59,12 +59,15 @@ func ValidateGetPlaylistByIDVars(r *http.Request) (*playlistIDDTO, error) {
 
 func PlaylistEntityToDto(e database.Playlist) playlistDTO {
 	return playlistDTO{
-		ID:            e.ID,
-		CreatedAt:     e.CreatedAt,
-		Name:          e.Name,
-		ThumbnailPath: e.ThumbnailPath.String,
-		ThumbnailUrl:  e.ThumbnailUrl.String,
-		SpotifyId:     e.SpotifyID.String,
+		ID:                e.ID,
+		CreatedAt:         e.CreatedAt,
+		Name:              e.Name,
+		ThumbnailPath:     e.ThumbnailPath.String,
+		ThumbnailUrl:      e.ThumbnailUrl.String,
+		SpotifyId:         e.SpotifyID.String,
+		AudioImportStatus: e.AudioImportStatus,
+		AudioCount:        e.AudioCount,
+		TotalAudioCount:   e.TotalAudioCount,
 	}
 }
 

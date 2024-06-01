@@ -3,6 +3,7 @@ package spotify
 import (
 	"context"
 	"database/sql"
+	"log"
 
 	"github.com/gocraft/work"
 	"github.com/google/uuid"
@@ -23,13 +24,14 @@ func DownloadSpotifyPlaylistAudios(
 ) error {
 	createPlaylistAudioParams := []database.CreatePlaylistAudioParams{}
 
-	playlistItems, err := getAllSpotifyPlaylistItems(spotifyAccessToken, playlistSpotifyID)
+	playlistID, err := playlist.GetPlaylistIDBySpotifyID(ctx, resouceConfig.DB, playlistSpotifyID)
 	if err != nil {
 		return err
 	}
 
-	playlistID, err := playlist.GetPlaylistIDBySpotifyID(ctx, resouceConfig.DB, playlistSpotifyID)
+	playlistItems, err := getAllSpotifyPlaylistItems(spotifyAccessToken, playlistSpotifyID)
 	if err != nil {
+		setPlaylistImportStatusToFailed(ctx, resouceConfig.DB, playlistID)
 		return err
 	}
 
@@ -59,16 +61,24 @@ func DownloadSpotifyPlaylistAudios(
 			},
 		),
 		func(progress, total int) {
+			audioImportStatus := database.ProcessStatusPENDING
+			if progress == total {
+				audioImportStatus = database.ProcessStatusCOMPLETED
+			}
+
 			playlist.UpdatePlaylistByID(
 				ctx, resouceConfig.DB,
 				database.UpdatePlaylistByIDParams{
-					PlaylistID:      playlistID,
-					AudioCount:      sql.NullInt32{Int32: int32(progress), Valid: true},
-					TotalAudioCount: sql.NullInt32{Int32: int32(total), Valid: true},
+					PlaylistID:        playlistID,
+					AudioCount:        sql.NullInt32{Int32: int32(progress), Valid: true},
+					TotalAudioCount:   sql.NullInt32{Int32: int32(total), Valid: true},
+					AudioImportStatus: database.NullProcessStatus{ProcessStatus: audioImportStatus, Valid: true},
 				},
 			)
 		},
 	); err != nil {
+		log.Println("Error downloading Spotify playlist audios: ", err)
+		setPlaylistImportStatusToFailed(ctx, resouceConfig.DB, playlistID)
 		return err
 	}
 
@@ -79,6 +89,7 @@ func DownloadSpotifyPlaylistAudios(
 
 	playlistAudioIDs, err := audio.GetAudioIdsBySpotifyIds(ctx, resouceConfig.DB, playlistItemSpotifyIDs)
 	if err != nil {
+		setPlaylistImportStatusToFailed(ctx, resouceConfig.DB, playlistID)
 		return err
 	}
 
@@ -97,8 +108,18 @@ func DownloadSpotifyPlaylistAudios(
 		resouceConfig,
 		createPlaylistAudioParams,
 	); err != nil {
+		setPlaylistImportStatusToFailed(ctx, resouceConfig.DB, playlistID)
 		return err
 	}
+
+	playlist.UpdatePlaylistByID(
+		ctx, resouceConfig.DB,
+		database.UpdatePlaylistByIDParams{
+			PlaylistID:        playlistID,
+			AudioImportStatus: database.NullProcessStatus{ProcessStatus: database.ProcessStatusCOMPLETED, Valid: true},
+		},
+	)
+
 	return nil
 }
 
@@ -112,6 +133,8 @@ func getAllSpotifyPlaylistItems(
 	if err != nil {
 		return []spotifyPlaylistItemDTO{}, err
 	}
+
+	allPlaylistItems = append(allPlaylistItems, playlistItems.Items...)
 
 	nextURL := playlistItems.Next
 
@@ -183,7 +206,7 @@ func downloadSpotifyPlaylist(
 	}
 
 	for _, spotifyPlaylist := range spotifyPlaylists.Items {
-		if _, err := apiCfg.WorkEnqueuer.Enqueue(
+		if _, err := apiCfg.WorkEnqueuer.EnqueueUnique(
 			shared.BackgroundJobDownloadPlaylistAudios,
 			work.Q{
 				"playlistSpotifyID":  spotifyPlaylist.ID,
@@ -212,4 +235,20 @@ func spotifyPlaylistDTOToCreatePlaylistParams(playlist *spotifyPlaylistDTO) data
 		TotalAudioCount:   int32(playlist.Tracks.Total),
 		AudioCount:        0,
 	}
+}
+
+func setPlaylistImportStatusToFailed(
+	ctx context.Context,
+	db *database.Queries,
+	playlistID uuid.UUID,
+) error {
+	_, err := playlist.UpdatePlaylistByID(
+		ctx, db,
+		database.UpdatePlaylistByIDParams{
+			PlaylistID:        playlistID,
+			AudioImportStatus: database.NullProcessStatus{ProcessStatus: database.ProcessStatusFAILED, Valid: true},
+		},
+	)
+
+	return err
 }

@@ -89,7 +89,7 @@ func DeletePlaylistsByIds(
 	return err
 }
 
-func GetPlaylistById(
+func GetPlaylistByID(
 	ctx context.Context,
 	db *database.Queries,
 	playlistID uuid.UUID,
@@ -102,6 +102,25 @@ func GetPlaylistById(
 
 	if err != nil {
 		log.Println("Error getting playlist by id:", err)
+		return nil, shared.InternalServerErrorDef()
+	}
+
+	return &playlist, nil
+}
+
+func GetPlaylistBySpotifyID(
+	ctx context.Context,
+	db *database.Queries,
+	spotifyID string,
+) (*database.Playlist, error) {
+	playlist, err := db.GetPlaylistBySpotifyID(ctx, spotifyID)
+
+	if err != nil && shared.IsDBErrorNotFound(err) {
+		return nil, shared.NotFound(shared.ErrPlaylistNotFound)
+	}
+
+	if err != nil {
+		log.Println("Error getting playlist by spotify id:", err)
 		return nil, shared.InternalServerErrorDef()
 	}
 
@@ -152,7 +171,7 @@ func GetPlaylistWithAudios(
 	playlistID uuid.UUID,
 	authUserID uuid.UUID,
 ) (*database.Playlist, []audio.AudioWithAudioLike, error) {
-	playlist, err := GetPlaylistById(ctx, db, playlistID)
+	playlist, err := GetPlaylistByID(ctx, db, playlistID)
 
 	if err != nil {
 		return nil, nil, err
