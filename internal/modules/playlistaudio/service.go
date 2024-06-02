@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
+	"github.com/kume1a/sonifybackend/internal/modules/userplaylist"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
@@ -58,20 +59,6 @@ func BulkCreatePlaylistAudios(
 	)
 }
 
-func GetPlaylistAudioJoins(
-	ctx context.Context,
-	db *database.Queries,
-	params database.GetPlaylistAudioJoinsParams,
-) ([]database.GetPlaylistAudioJoinsRow, error) {
-	audios, err := db.GetPlaylistAudioJoins(ctx, params)
-
-	if err != nil {
-		log.Println("Error getting playlist audios:", err)
-	}
-
-	return audios, err
-}
-
 func DeletePlaylistAudiosByIds(
 	ctx context.Context,
 	db *database.Queries,
@@ -100,16 +87,58 @@ func GetPlaylistAudioJoinsBySpotifyIds(
 	return entities, err
 }
 
-func GetPlaylistAudios(
+func GetPlaylistAudiosWithAudioAndAudioLikes(
 	ctx context.Context,
 	db *database.Queries,
-	params database.GetPlaylistAudiosParams,
-) ([]database.GetPlaylistAudiosRow, error) {
-	audios, err := db.GetPlaylistAudios(ctx, params)
+	params database.GetPlaylistAudiosWithAudioAndAudioLikesParams,
+) ([]database.GetPlaylistAudiosWithAudioAndAudioLikesRow, error) {
+	audios, err := db.GetPlaylistAudiosWithAudioAndAudioLikes(ctx, params)
 
 	if err != nil {
 		log.Println("Error getting playlist audios:", err)
 	}
 
 	return audios, err
+}
+
+func GetPlaylistAudiosByUserID(
+	ctx context.Context,
+	db *database.Queries,
+	userID uuid.UUID,
+	filterIDs uuid.UUIDs,
+) ([]database.PlaylistAudio, error) {
+	userPlaylistIDs, err := userplaylist.GetUserPlaylistIDsByUserID(ctx, db, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	playlistAudios, err := db.GetPlaylistAudios(ctx, database.GetPlaylistAudiosParams{
+		PlaylistIds: userPlaylistIDs,
+		Ids:         filterIDs,
+	})
+	if err != nil {
+		log.Println("Error getting playlist audios by user ID:", err)
+		return nil, err
+	}
+
+	return playlistAudios, nil
+}
+
+func GetPlaylistAudioIDsByUserID(
+	ctx context.Context,
+	db *database.Queries,
+	userID uuid.UUID,
+) (uuid.UUIDs, error) {
+	userPlaylistIDs, err := userplaylist.GetUserPlaylistIDsByUserID(ctx, db, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	playlistAudioIds, err := db.GetPlaylistAudioIDsByPlaylistIDs(ctx, userPlaylistIDs)
+	if err != nil {
+		log.Println("Error getting playlist audio IDs by playlist ID:", err)
+		return nil, err
+	}
+
+	return playlistAudioIds, nil
 }

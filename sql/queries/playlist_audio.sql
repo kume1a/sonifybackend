@@ -7,7 +7,7 @@ INSERT INTO playlist_audios(
 ) VALUES ($1,$2,$3,$4) 
 RETURNING *;
 
--- name: GetPlaylistAudios :many
+-- name: GetPlaylistAudiosWithAudioAndAudioLikes :many
 SELECT 
   audios.*,
   audio_likes.audio_id AS audio_likes_audio_id,
@@ -19,13 +19,16 @@ LEFT JOIN audio_likes ON
   AND audio_likes.user_id = $1 
 WHERE playlist_audios.playlist_id = $2;
 
--- name: GetPlaylistAudioJoins :many
-SELECT * FROM playlist_audios
-  INNER JOIN audios ON playlist_audios.audio_id = audios.id
-WHERE (playlist_id = $1 or $1 IS NULL) 
-  AND playlist_audios.created_at > $2
-ORDER BY playlist_audios.created_at DESC
-  LIMIT $3;
+-- name: GetPlaylistAudios :many
+SELECT * 
+FROM playlist_audios
+WHERE (sqlc.arg(playlist_ids)::uuid[] IS NULL OR playlist_id = ANY(sqlc.arg(playlist_ids)::uuid[])) 
+  AND (sqlc.arg(ids)::uuid[] IS NULL OR id = ANY(sqlc.arg(ids)::uuid[]));
+
+-- name: GetPlaylistAudioIDsByPlaylistIDs :many
+SELECT audio_id
+FROM playlist_audios
+WHERE playlist_id = ANY(sqlc.arg(playlist_ids)::uuid[]);
 
 -- name: DeletePlaylistAudiosByIDs :exec
 DELETE FROM playlist_audios 

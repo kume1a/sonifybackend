@@ -10,7 +10,6 @@ func Router(apiCfg *config.ApiConfig, router *mux.Router) *mux.Router {
 	r := router.PathPrefix("/playlists").Subrouter()
 
 	r.HandleFunc("", shared.AuthMW(handleCreatePlaylist(apiCfg))).Methods("POST")
-	r.HandleFunc("/audio", shared.AuthMW(handleCreatePlaylistAudio(apiCfg))).Methods("POST")
 
 	r.HandleFunc("", shared.AuthMW(handleGetPlaylists(apiCfg))).Methods("GET")
 	r.HandleFunc("/{playlistID}", shared.AuthMW(handleGetPlaylistWithAudios(apiCfg))).Methods("GET")

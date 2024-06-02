@@ -177,9 +177,9 @@ func GetPlaylistWithAudios(
 		return nil, nil, err
 	}
 
-	playlistAudios, err := playlistaudio.GetPlaylistAudios(
+	playlistAudios, err := playlistaudio.GetPlaylistAudiosWithAudioAndAudioLikes(
 		ctx, db,
-		database.GetPlaylistAudiosParams{
+		database.GetPlaylistAudiosWithAudioAndAudioLikesParams{
 			PlaylistID: playlistID,
 			UserID:     authUserID,
 		},

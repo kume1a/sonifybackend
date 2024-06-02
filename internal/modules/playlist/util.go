@@ -10,11 +10,6 @@ import (
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
-func (dto *createPlaylistAudioDTO) Validate() error {
-	_, err := govalidator.ValidateStruct(dto)
-	return err
-}
-
 func ValidateCreatePlaylistDto(w http.ResponseWriter, r *http.Request) (*createPlaylistDTO, error) {
 	thumbnailPath, err := shared.HandleUploadFile(shared.HandleUploadFileArgs{
 		ResponseWriter:   w,

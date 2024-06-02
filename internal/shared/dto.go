@@ -39,6 +39,10 @@ type OptionalIDsDTO struct {
 	IDs uuid.UUIDs `json:"ids" valid:"-"`
 }
 
+type RequiredIDsDTO struct {
+	IDs uuid.UUIDs `json:"ids" valid:"required"`
+}
+
 func (dto *KeywordDto) Validate() error {
 	if len(dto.Keyword) != 1 {
 		return fmt.Errorf("keyword must have exactly one element")
@@ -54,6 +58,11 @@ func (dto *LastCreatedAtPageParamsDto) Validate() error {
 }
 
 func (dto *OptionalIDsDTO) Validate() error {
+	_, err := govalidator.ValidateStruct(dto)
+	return err
+}
+
+func (dto *RequiredIDsDTO) Validate() error {
 	_, err := govalidator.ValidateStruct(dto)
 	return err
 }

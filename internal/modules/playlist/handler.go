@@ -7,7 +7,7 @@ import (
 	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/modules/audio"
-	"github.com/kume1a/sonifybackend/internal/modules/playlistaudio"
+	"github.com/kume1a/sonifybackend/internal/modules/sharedmodule"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
@@ -31,9 +31,10 @@ func handleCreatePlaylist(apiCfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		dto := PlaylistEntityToDto(*playlist)
-
-		shared.ResCreated(w, dto)
+		shared.ResCreated(
+			w,
+			sharedmodule.PlaylistEntityToDto(*playlist),
+		)
 	}
 }
 
@@ -54,32 +55,9 @@ func handleGetPlaylists(apiCfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		dtos := shared.Map(playlists, PlaylistEntityToDto)
+		dtos := shared.Map(playlists, sharedmodule.PlaylistEntityToDto)
 
 		shared.ResOK(w, dtos)
-	}
-}
-
-func handleCreatePlaylistAudio(apiCfg *config.ApiConfig) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		body, err := shared.ValidateRequestBody[*createPlaylistAudioDTO](r)
-		if err != nil {
-			shared.ResBadRequest(w, err.Error())
-			return
-		}
-
-		playlistAudio, err := playlistaudio.CreatePlaylistAudio(r.Context(), apiCfg.DB, database.CreatePlaylistAudioParams{
-			PlaylistID: body.PlaylistID,
-			AudioID:    body.AudioID,
-		})
-		if err != nil {
-			shared.ResInternalServerErrorDef(w)
-			return
-		}
-
-		dto := playlistAudioEntityToDto(playlistAudio)
-
-		shared.ResCreated(w, dto)
 	}
 }
 
@@ -104,10 +82,10 @@ func handleGetPlaylistWithAudios(apiCfg *config.ApiConfig) http.HandlerFunc {
 		}
 
 		dto := struct {
-			PlaylistDTO
+			sharedmodule.PlaylistDTO
 			Audios []*audio.AudioDTO `json:"audios"`
 		}{
-			PlaylistDTO: PlaylistEntityToDto(*playlist),
+			PlaylistDTO: sharedmodule.PlaylistEntityToDto(*playlist),
 			Audios:      shared.Map(audios, audio.AudioWithAudioLikeToAudioDTO),
 		}
 

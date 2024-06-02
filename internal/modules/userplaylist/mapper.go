@@ -2,26 +2,26 @@ package userplaylist
 
 import (
 	"github.com/kume1a/sonifybackend/internal/database"
-	"github.com/kume1a/sonifybackend/internal/modules/playlist"
+	"github.com/kume1a/sonifybackend/internal/modules/sharedmodule"
 )
 
-func MapUserPlaylistFullEntityToDTO(row database.GetFullUserPlaylistsRow) userPlaylistDTO {
+func MapUserPlaylistFullEntityToDTO(e database.GetFullUserPlaylistsRow) userPlaylistDTO {
 	return userPlaylistDTO{
-		ID:                     row.UserPlaylistID,
-		PlaylistID:             row.UserPlaylistPlaylistID,
-		UserID:                 row.UserPlaylistUserID,
-		CreatedAt:              row.UserPlaylistCreatedAt,
-		IsSpotifySavedPlaylist: row.UserPlaylistIsSpotifySavedPlaylist,
-		Playlist: &playlist.PlaylistDTO{
-			ID:                row.PlaylistID,
-			CreatedAt:         row.PlaylistCreatedAt,
-			Name:              row.PlaylistName,
-			ThumbnailPath:     row.PlaylistThumbnailPath.String,
-			ThumbnailUrl:      row.PlaylistThumbnailUrl.String,
-			SpotifyID:         row.PlaylistSpotifyID.String,
-			AudioImportStatus: row.PlaylistAudioImportStatus,
-			AudioCount:        row.PlaylistAudioCount,
-			TotalAudioCount:   row.PlaylistTotalAudioCount,
+		ID:                     e.UserPlaylistID,
+		PlaylistID:             e.UserPlaylistPlaylistID,
+		UserID:                 e.UserPlaylistUserID,
+		CreatedAt:              e.UserPlaylistCreatedAt,
+		IsSpotifySavedPlaylist: e.UserPlaylistIsSpotifySavedPlaylist,
+		Playlist: &sharedmodule.PlaylistDTO{
+			ID:                e.PlaylistID,
+			CreatedAt:         e.PlaylistCreatedAt,
+			Name:              e.PlaylistName,
+			ThumbnailPath:     e.PlaylistThumbnailPath.String,
+			ThumbnailUrl:      e.PlaylistThumbnailUrl.String,
+			SpotifyID:         e.PlaylistSpotifyID.String,
+			AudioImportStatus: e.PlaylistAudioImportStatus,
+			AudioCount:        e.PlaylistAudioCount,
+			TotalAudioCount:   e.PlaylistTotalAudioCount,
 		},
 	}
 }
