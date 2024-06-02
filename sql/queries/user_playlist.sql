@@ -27,7 +27,8 @@ SELECT
 FROM user_playlists
 INNER JOIN playlists ON user_playlists.playlist_id = playlists.id
 WHERE user_playlists.user_id = sqlc.arg(user_id) 
-  AND (sqlc.arg(playlist_ids)::uuid[] IS NULL OR playlists.id = ANY(sqlc.arg(playlist_ids)::uuid[]));
+  AND (sqlc.arg(playlist_ids)::uuid[] IS NULL OR playlists.id = ANY(sqlc.arg(playlist_ids)::uuid[]))
+ORDER BY user_playlists.created_at DESC;
 
 -- name: GetUserPlaylists :many
 SELECT * FROM user_playlists
