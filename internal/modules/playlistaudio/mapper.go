@@ -4,6 +4,7 @@ import "github.com/kume1a/sonifybackend/internal/database"
 
 func playlistAudioEntityToDTO(e *database.PlaylistAudio) playlistAudioDTO {
 	return playlistAudioDTO{
+		ID:         e.ID,
 		CreatedAt:  e.CreatedAt,
 		PlaylistID: e.PlaylistID,
 		AudioID:    e.AudioID,
