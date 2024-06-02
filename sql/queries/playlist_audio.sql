@@ -26,7 +26,7 @@ WHERE (sqlc.arg(playlist_ids)::uuid[] IS NULL OR playlist_id = ANY(sqlc.arg(play
   AND (sqlc.arg(ids)::uuid[] IS NULL OR id = ANY(sqlc.arg(ids)::uuid[]));
 
 -- name: GetPlaylistAudioIDsByPlaylistIDs :many
-SELECT audio_id
+SELECT id
 FROM playlist_audios
 WHERE playlist_id = ANY(sqlc.arg(playlist_ids)::uuid[]);
 

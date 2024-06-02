@@ -39,8 +39,9 @@ type OptionalIDsDTO struct {
 	IDs uuid.UUIDs `json:"ids" valid:"-"`
 }
 
+// TODO fix validation
 type RequiredIDsDTO struct {
-	IDs uuid.UUIDs `json:"ids" valid:"required"`
+	IDs uuid.UUIDs `json:"ids" valid:"-"`
 }
 
 func (dto *KeywordDto) Validate() error {

@@ -107,14 +107,14 @@ func GetPlaylistAudiosByUserID(
 	userID uuid.UUID,
 	filterIDs uuid.UUIDs,
 ) ([]database.PlaylistAudio, error) {
-	userPlaylistIDs, err := userplaylist.GetUserPlaylistIDsByUserID(ctx, db, userID)
+	userPlaylistIDs, err := userplaylist.GetPlaylistIDsByUserID(ctx, db, userID)
 	if err != nil {
 		return nil, err
 	}
 
 	playlistAudios, err := db.GetPlaylistAudios(ctx, database.GetPlaylistAudiosParams{
 		PlaylistIds: userPlaylistIDs,
-		Ids:         filterIDs,
+		Ids:         nil,
 	})
 	if err != nil {
 		log.Println("Error getting playlist audios by user ID:", err)
@@ -129,7 +129,7 @@ func GetPlaylistAudioIDsByUserID(
 	db *database.Queries,
 	userID uuid.UUID,
 ) (uuid.UUIDs, error) {
-	userPlaylistIDs, err := userplaylist.GetUserPlaylistIDsByUserID(ctx, db, userID)
+	userPlaylistIDs, err := userplaylist.GetPlaylistIDsByUserID(ctx, db, userID)
 	if err != nil {
 		return nil, err
 	}

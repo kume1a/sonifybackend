@@ -25,7 +25,7 @@ func handleCreatePlaylistAudio(apiCfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		dto := playlistAudioEntityToDto(playlistAudio)
+		dto := playlistAudioEntityToDTO(playlistAudio)
 
 		shared.ResCreated(w, dto)
 	}
@@ -39,7 +39,8 @@ func handleGetPlaylistAudiosByAuthUser(apiCfg *config.ApiConfig) http.HandlerFun
 			return
 		}
 
-		query, err := shared.ValidateRequestQuery[*shared.RequiredIDsDTO](r)
+		// using body for big payload
+		body, err := shared.ValidateRequestBody[*shared.RequiredIDsDTO](r)
 		if err != nil {
 			shared.ResBadRequest(w, err.Error())
 			return
@@ -48,14 +49,16 @@ func handleGetPlaylistAudiosByAuthUser(apiCfg *config.ApiConfig) http.HandlerFun
 		playlistAudios, err := GetPlaylistAudiosByUserID(
 			r.Context(), apiCfg.DB,
 			authPayload.UserID,
-			query.IDs,
+			body.IDs,
 		)
 		if err != nil {
 			shared.ResInternalServerErrorDef(w)
 			return
 		}
 
-		shared.ResOK(w, playlistAudios)
+		dtos := playlistAudioEntityListToDTO(playlistAudios)
+
+		shared.ResOK(w, dtos)
 	}
 }
 

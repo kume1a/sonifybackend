@@ -3,6 +3,7 @@ package modules
 import (
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/go-chi/cors"
 	"github.com/gorilla/mux"
@@ -11,6 +12,7 @@ import (
 	"github.com/kume1a/sonifybackend/internal/modules/audiolike"
 	"github.com/kume1a/sonifybackend/internal/modules/auth"
 	"github.com/kume1a/sonifybackend/internal/modules/playlist"
+	"github.com/kume1a/sonifybackend/internal/modules/playlistaudio"
 	"github.com/kume1a/sonifybackend/internal/modules/spotify"
 	"github.com/kume1a/sonifybackend/internal/modules/user"
 	"github.com/kume1a/sonifybackend/internal/modules/userplaylist"
@@ -33,8 +35,7 @@ func CreateRouter(apiCfg *config.ApiConfig) *mux.Router {
 				err = errors.New("unknown panic")
 			}
 			if err != nil {
-				// sendMeMail(err)
-				fmt.Println("sendMeMail")
+				log.Println("Recovering server, unknown error caused exit: ", err)
 			}
 		}
 	}()
@@ -60,6 +61,7 @@ func CreateRouter(apiCfg *config.ApiConfig) *mux.Router {
 	v1Router.Handle("", usersync.Router(apiCfg, v1Router))
 	v1Router.Handle("", audiolike.Router(apiCfg, v1Router))
 	v1Router.Handle("", userplaylist.Router(apiCfg, v1Router))
+	v1Router.Handle("", playlistaudio.Router(apiCfg, v1Router))
 
 	router.Handle("", v1Router)
 

@@ -65,7 +65,7 @@ func (q *Queries) DeletePlaylistAudiosByIDs(ctx context.Context, arg DeletePlayl
 }
 
 const getPlaylistAudioIDsByPlaylistIDs = `-- name: GetPlaylistAudioIDsByPlaylistIDs :many
-SELECT audio_id
+SELECT id
 FROM playlist_audios
 WHERE playlist_id = ANY($1::uuid[])
 `
@@ -78,11 +78,11 @@ func (q *Queries) GetPlaylistAudioIDsByPlaylistIDs(ctx context.Context, playlist
 	defer rows.Close()
 	var items []uuid.UUID
 	for rows.Next() {
-		var audio_id uuid.UUID
-		if err := rows.Scan(&audio_id); err != nil {
+		var id uuid.UUID
+		if err := rows.Scan(&id); err != nil {
 			return nil, err
 		}
-		items = append(items, audio_id)
+		items = append(items, id)
 	}
 	if err := rows.Close(); err != nil {
 		return nil, err

@@ -48,7 +48,8 @@ func handleGetUserPlaylistsByAuthUserID(apiCfg *config.ApiConfig) http.HandlerFu
 			return
 		}
 
-		query, err := shared.ValidateRequestQuery[*shared.OptionalIDsDTO](r)
+		// using body for big payload
+		body, err := shared.ValidateRequestBody[*shared.OptionalIDsDTO](r)
 		if err != nil {
 			shared.ResBadRequest(w, err.Error())
 			return
@@ -58,7 +59,7 @@ func handleGetUserPlaylistsByAuthUserID(apiCfg *config.ApiConfig) http.HandlerFu
 			r.Context(), apiCfg.DB,
 			database.GetUserPlaylistsParams{
 				UserID: authPayload.UserID,
-				Ids:    query.IDs,
+				Ids:    body.IDs,
 			},
 		)
 		if err != nil {

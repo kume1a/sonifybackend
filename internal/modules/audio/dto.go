@@ -17,7 +17,7 @@ type uploadUserLocalMusicDTO struct {
 }
 
 type audioIDsDTO struct {
-	AudioIDs []uuid.UUID `json:"audioIds" valid:"sliceNotEmpty,optional"`
+	AudioIDs []uuid.UUID `json:"audioIds" valid:"uuidSliceNotEmpty,optional"`
 }
 
 type AudioDTO struct {
