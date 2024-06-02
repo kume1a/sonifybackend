@@ -13,6 +13,7 @@ services:
     depends_on:
       sonifydb:
         condition: service_healthy
+      sonifyredis:
     volumes:
       - /root/sonifybackendpublic:/app/public
 
@@ -33,11 +34,11 @@ services:
       retries: 5
 
   sonifyredis:
-      image: redis:7-alpine    
-      container_name: sonify_redis
-      ports:
-        - "6379:6379"
-      volumes:
-        - local_redis_data:/data
-      command: /bin/sh -c "redis-server --requirepass N4Aop37Glf0"
-
+    image: redis:7-alpine    
+    container_name: sonify_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - local_redis_data:/data
+    command: /bin/sh -c "redis-server --requirepass N4Aop37Glf0"
+    
