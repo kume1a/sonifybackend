@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/kume1a/sonifybackend/internal/modules/audio"
 )
 
 type createPlaylistAudioDTO struct {
@@ -12,8 +13,9 @@ type createPlaylistAudioDTO struct {
 }
 
 type playlistAudioDTO struct {
-	ID         uuid.UUID `json:"id"`
-	CreatedAt  time.Time `json:"createdAt"`
-	PlaylistID uuid.UUID `json:"playlistId"`
-	AudioID    uuid.UUID `json:"audioId"`
+	ID         uuid.UUID       `json:"id"`
+	CreatedAt  time.Time       `json:"createdAt"`
+	PlaylistID uuid.UUID       `json:"playlistId"`
+	AudioID    uuid.UUID       `json:"audioId"`
+	Audio      *audio.AudioDTO `json:"audio"`
 }

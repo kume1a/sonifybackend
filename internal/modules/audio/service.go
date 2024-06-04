@@ -58,10 +58,13 @@ func BulkCreateAudios(
 }
 
 func DoesAudioExistByLocalId(ctx context.Context, db *database.Queries, userID uuid.UUID, localID string) (bool, error) {
-	count, err := useraudio.CountUserAudioByLocalId(ctx, db, database.CountUserAudioByLocalIDParams{
-		LocalID: sql.NullString{String: localID, Valid: true},
-		UserID:  userID,
-	})
+	count, err := useraudio.CountUserAudioByLocalId(
+		ctx, db,
+		database.CountUserAudioByLocalIDParams{
+			LocalID: sql.NullString{String: localID, Valid: true},
+			UserID:  userID,
+		},
+	)
 
 	if err != nil {
 		log.Println("Error counting user audio by local id: ", err)

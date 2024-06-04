@@ -106,7 +106,7 @@ func GetPlaylistAudiosByUserID(
 	db *database.Queries,
 	userID uuid.UUID,
 	filterIDs uuid.UUIDs,
-) ([]database.PlaylistAudio, error) {
+) ([]database.GetPlaylistAudiosRow, error) {
 	userPlaylistIDs, err := userplaylist.GetPlaylistIDsByUserID(ctx, db, userID)
 	if err != nil {
 		return nil, err

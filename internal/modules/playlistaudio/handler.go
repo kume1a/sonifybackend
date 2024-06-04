@@ -56,7 +56,7 @@ func handleGetPlaylistAudiosByAuthUser(apiCfg *config.ApiConfig) http.HandlerFun
 			return
 		}
 
-		dtos := playlistAudioEntityListToDTO(playlistAudios)
+		dtos := getPlaylistAudioRowListToDTO(playlistAudios)
 
 		shared.ResOK(w, dtos)
 	}

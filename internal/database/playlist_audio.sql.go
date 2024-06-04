@@ -145,10 +145,28 @@ func (q *Queries) GetPlaylistAudioJoinsBySpotifyIDs(ctx context.Context, arg Get
 }
 
 const getPlaylistAudios = `-- name: GetPlaylistAudios :many
-SELECT id, created_at, playlist_id, audio_id 
+SELECT
+  playlist_audios.id AS playlist_audio_id,
+  playlist_audios.created_at AS playlist_audio_created_at,
+  playlist_audios.playlist_id AS playlist_audio_playlist_id,
+  playlist_audios.audio_id AS playlist_audio_audio_id,
+
+  audios.id AS audio_id,
+  audios.created_at AS audio_created_at,
+  audios.title AS audio_title,
+  audios.author AS audio_author,
+  audios.duration_ms AS audio_duration_ms,
+  audios.path AS audio_path,
+  audios.size_bytes AS audio_size_bytes,
+  audios.youtube_video_id AS audio_youtube_video_id,
+  audios.thumbnail_path AS audio_thumbnail_path,
+  audios.spotify_id AS audio_spotify_id,
+  audios.thumbnail_url AS audio_thumbnail_url,
+  audios.local_id AS audio_local_id
 FROM playlist_audios
-WHERE ($1::uuid[] IS NULL OR playlist_id = ANY($1::uuid[])) 
-  AND ($2::uuid[] IS NULL OR id = ANY($2::uuid[]))
+LEFT JOIN audios ON playlist_audios.audio_id = audios.id
+WHERE ($1::uuid[] IS NULL OR playlist_audios.playlist_id = ANY($1::uuid[])) 
+  AND ($2::uuid[] IS NULL OR playlist_audios.id = ANY($2::uuid[]))
 `
 
 type GetPlaylistAudiosParams struct {
@@ -156,20 +174,51 @@ type GetPlaylistAudiosParams struct {
 	Ids         []uuid.UUID
 }
 
-func (q *Queries) GetPlaylistAudios(ctx context.Context, arg GetPlaylistAudiosParams) ([]PlaylistAudio, error) {
+type GetPlaylistAudiosRow struct {
+	PlaylistAudioID         uuid.UUID
+	PlaylistAudioCreatedAt  time.Time
+	PlaylistAudioPlaylistID uuid.UUID
+	PlaylistAudioAudioID    uuid.UUID
+	AudioID                 uuid.NullUUID
+	AudioCreatedAt          sql.NullTime
+	AudioTitle              sql.NullString
+	AudioAuthor             sql.NullString
+	AudioDurationMs         sql.NullInt32
+	AudioPath               sql.NullString
+	AudioSizeBytes          sql.NullInt64
+	AudioYoutubeVideoID     sql.NullString
+	AudioThumbnailPath      sql.NullString
+	AudioSpotifyID          sql.NullString
+	AudioThumbnailUrl       sql.NullString
+	AudioLocalID            sql.NullString
+}
+
+func (q *Queries) GetPlaylistAudios(ctx context.Context, arg GetPlaylistAudiosParams) ([]GetPlaylistAudiosRow, error) {
 	rows, err := q.db.QueryContext(ctx, getPlaylistAudios, pq.Array(arg.PlaylistIds), pq.Array(arg.Ids))
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []PlaylistAudio
+	var items []GetPlaylistAudiosRow
 	for rows.Next() {
-		var i PlaylistAudio
+		var i GetPlaylistAudiosRow
 		if err := rows.Scan(
-			&i.ID,
-			&i.CreatedAt,
-			&i.PlaylistID,
+			&i.PlaylistAudioID,
+			&i.PlaylistAudioCreatedAt,
+			&i.PlaylistAudioPlaylistID,
+			&i.PlaylistAudioAudioID,
 			&i.AudioID,
+			&i.AudioCreatedAt,
+			&i.AudioTitle,
+			&i.AudioAuthor,
+			&i.AudioDurationMs,
+			&i.AudioPath,
+			&i.AudioSizeBytes,
+			&i.AudioYoutubeVideoID,
+			&i.AudioThumbnailPath,
+			&i.AudioSpotifyID,
+			&i.AudioThumbnailUrl,
+			&i.AudioLocalID,
 		); err != nil {
 			return nil, err
 		}

@@ -20,10 +20,28 @@ LEFT JOIN audio_likes ON
 WHERE playlist_audios.playlist_id = $2;
 
 -- name: GetPlaylistAudios :many
-SELECT * 
+SELECT
+  playlist_audios.id AS playlist_audio_id,
+  playlist_audios.created_at AS playlist_audio_created_at,
+  playlist_audios.playlist_id AS playlist_audio_playlist_id,
+  playlist_audios.audio_id AS playlist_audio_audio_id,
+
+  audios.id AS audio_id,
+  audios.created_at AS audio_created_at,
+  audios.title AS audio_title,
+  audios.author AS audio_author,
+  audios.duration_ms AS audio_duration_ms,
+  audios.path AS audio_path,
+  audios.size_bytes AS audio_size_bytes,
+  audios.youtube_video_id AS audio_youtube_video_id,
+  audios.thumbnail_path AS audio_thumbnail_path,
+  audios.spotify_id AS audio_spotify_id,
+  audios.thumbnail_url AS audio_thumbnail_url,
+  audios.local_id AS audio_local_id
 FROM playlist_audios
-WHERE (sqlc.arg(playlist_ids)::uuid[] IS NULL OR playlist_id = ANY(sqlc.arg(playlist_ids)::uuid[])) 
-  AND (sqlc.arg(ids)::uuid[] IS NULL OR id = ANY(sqlc.arg(ids)::uuid[]));
+LEFT JOIN audios ON playlist_audios.audio_id = audios.id
+WHERE (sqlc.arg(playlist_ids)::uuid[] IS NULL OR playlist_audios.playlist_id = ANY(sqlc.arg(playlist_ids)::uuid[])) 
+  AND (sqlc.arg(ids)::uuid[] IS NULL OR playlist_audios.id = ANY(sqlc.arg(ids)::uuid[]));
 
 -- name: GetPlaylistAudioIDsByPlaylistIDs :many
 SELECT id
