@@ -16,6 +16,6 @@ type playlistIDDTO struct {
 }
 
 type PlaylistFullDTO struct {
-	Playlist       sharedmodule.PlaylistDTO
-	PlaylistAudios []playlistaudio.PlaylistAudioDTO
+	sharedmodule.PlaylistDTO
+	PlaylistAudios []playlistaudio.PlaylistAudioDTO `json:"playlistAudios"`
 }

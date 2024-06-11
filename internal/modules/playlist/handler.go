@@ -98,7 +98,7 @@ func handleGetPlaylistFull(apiCfg *config.ApiConfig) http.HandlerFunc {
 		}
 
 		dto := PlaylistFullDTO{
-			Playlist:       sharedmodule.PlaylistEntityToDto(*playlist),
+			PlaylistDTO:    sharedmodule.PlaylistEntityToDto(*playlist),
 			PlaylistAudios: shared.Map(playlistAudios, playlistaudio.GetPlaylistAudioRowToDTO),
 		}
 
