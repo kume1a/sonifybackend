@@ -162,14 +162,21 @@ SELECT
   audios.thumbnail_path AS audio_thumbnail_path,
   audios.spotify_id AS audio_spotify_id,
   audios.thumbnail_url AS audio_thumbnail_url,
-  audios.local_id AS audio_local_id
+  audios.local_id AS audio_local_id,
+
+  audio_likes.id AS audio_likes_id,
+  audio_likes.created_at AS audio_likes_created_at,
+  audio_likes.audio_id AS audio_likes_audio_id,
+  audio_likes.user_id AS audio_likes_user_id
 FROM playlist_audios
 LEFT JOIN audios ON playlist_audios.audio_id = audios.id
-WHERE ($1::uuid[] IS NULL OR playlist_audios.playlist_id = ANY($1::uuid[])) 
-  AND ($2::uuid[] IS NULL OR playlist_audios.id = ANY($2::uuid[]))
+LEFT JOIN audio_likes ON playlist_audios.audio_id = audio_likes.audio_id AND audio_likes.user_id = $1 
+WHERE ($2::uuid[] IS NULL OR playlist_audios.playlist_id = ANY($2::uuid[])) 
+  AND ($3::uuid[] IS NULL OR playlist_audios.id = ANY($3::uuid[]))
 `
 
 type GetPlaylistAudiosParams struct {
+	UserID      uuid.UUID
 	PlaylistIds []uuid.UUID
 	Ids         []uuid.UUID
 }
@@ -191,10 +198,14 @@ type GetPlaylistAudiosRow struct {
 	AudioSpotifyID          sql.NullString
 	AudioThumbnailUrl       sql.NullString
 	AudioLocalID            sql.NullString
+	AudioLikesID            uuid.NullUUID
+	AudioLikesCreatedAt     sql.NullTime
+	AudioLikesAudioID       uuid.NullUUID
+	AudioLikesUserID        uuid.NullUUID
 }
 
 func (q *Queries) GetPlaylistAudios(ctx context.Context, arg GetPlaylistAudiosParams) ([]GetPlaylistAudiosRow, error) {
-	rows, err := q.db.QueryContext(ctx, getPlaylistAudios, pq.Array(arg.PlaylistIds), pq.Array(arg.Ids))
+	rows, err := q.db.QueryContext(ctx, getPlaylistAudios, arg.UserID, pq.Array(arg.PlaylistIds), pq.Array(arg.Ids))
 	if err != nil {
 		return nil, err
 	}
@@ -219,77 +230,8 @@ func (q *Queries) GetPlaylistAudios(ctx context.Context, arg GetPlaylistAudiosPa
 			&i.AudioSpotifyID,
 			&i.AudioThumbnailUrl,
 			&i.AudioLocalID,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getPlaylistAudiosWithAudioAndAudioLikes = `-- name: GetPlaylistAudiosWithAudioAndAudioLikes :many
-SELECT 
-  audios.id, audios.created_at, audios.title, audios.author, audios.duration_ms, audios.path, audios.size_bytes, audios.youtube_video_id, audios.thumbnail_path, audios.spotify_id, audios.thumbnail_url, audios.local_id,
-  audio_likes.audio_id AS audio_likes_audio_id,
-  audio_likes.user_id AS audio_likes_user_id
-FROM playlist_audios 
-INNER JOIN audios ON playlist_audios.audio_id = audios.id
-LEFT JOIN audio_likes ON 
-  playlist_audios.audio_id = audio_likes.audio_id 
-  AND audio_likes.user_id = $1 
-WHERE playlist_audios.playlist_id = $2
-`
-
-type GetPlaylistAudiosWithAudioAndAudioLikesParams struct {
-	UserID     uuid.UUID
-	PlaylistID uuid.UUID
-}
-
-type GetPlaylistAudiosWithAudioAndAudioLikesRow struct {
-	ID                uuid.UUID
-	CreatedAt         time.Time
-	Title             sql.NullString
-	Author            sql.NullString
-	DurationMs        sql.NullInt32
-	Path              sql.NullString
-	SizeBytes         sql.NullInt64
-	YoutubeVideoID    sql.NullString
-	ThumbnailPath     sql.NullString
-	SpotifyID         sql.NullString
-	ThumbnailUrl      sql.NullString
-	LocalID           sql.NullString
-	AudioLikesAudioID uuid.NullUUID
-	AudioLikesUserID  uuid.NullUUID
-}
-
-func (q *Queries) GetPlaylistAudiosWithAudioAndAudioLikes(ctx context.Context, arg GetPlaylistAudiosWithAudioAndAudioLikesParams) ([]GetPlaylistAudiosWithAudioAndAudioLikesRow, error) {
-	rows, err := q.db.QueryContext(ctx, getPlaylistAudiosWithAudioAndAudioLikes, arg.UserID, arg.PlaylistID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []GetPlaylistAudiosWithAudioAndAudioLikesRow
-	for rows.Next() {
-		var i GetPlaylistAudiosWithAudioAndAudioLikesRow
-		if err := rows.Scan(
-			&i.ID,
-			&i.CreatedAt,
-			&i.Title,
-			&i.Author,
-			&i.DurationMs,
-			&i.Path,
-			&i.SizeBytes,
-			&i.YoutubeVideoID,
-			&i.ThumbnailPath,
-			&i.SpotifyID,
-			&i.ThumbnailUrl,
-			&i.LocalID,
+			&i.AudioLikesID,
+			&i.AudioLikesCreatedAt,
 			&i.AudioLikesAudioID,
 			&i.AudioLikesUserID,
 		); err != nil {

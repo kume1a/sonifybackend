@@ -4,9 +4,10 @@ import (
 	"database/sql"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
-	"github.com/kume1a/sonifybackend/internal/modules/audio"
+	"github.com/kume1a/sonifybackend/internal/modules/playlistaudio"
 	"github.com/kume1a/sonifybackend/internal/modules/sharedmodule"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
@@ -61,7 +62,7 @@ func handleGetPlaylists(apiCfg *config.ApiConfig) http.HandlerFunc {
 	}
 }
 
-func handleGetPlaylistWithAudios(apiCfg *config.ApiConfig) http.HandlerFunc {
+func handleGetPlaylistFull(apiCfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authPaylad, err := shared.GetAuthPayload(r)
 		if err != nil {
@@ -75,18 +76,30 @@ func handleGetPlaylistWithAudios(apiCfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		playlist, audios, err := GetPlaylistWithAudios(r.Context(), apiCfg.DB, playlistIDDTO.PlaylistID, authPaylad.UserID)
+		ctx := r.Context()
+
+		playlist, err := GetPlaylistByID(ctx, apiCfg.DB, playlistIDDTO.PlaylistID)
 		if err != nil {
 			shared.ResTryHttpError(w, err)
 			return
 		}
 
-		dto := struct {
-			sharedmodule.PlaylistDTO
-			Audios []*audio.AudioDTO `json:"audios"`
-		}{
-			PlaylistDTO: sharedmodule.PlaylistEntityToDto(*playlist),
-			Audios:      shared.Map(audios, audio.AudioWithAudioLikeToAudioDTO),
+		playlistAudios, err := playlistaudio.GetPlaylistAudios(
+			ctx, apiCfg.DB,
+			database.GetPlaylistAudiosParams{
+				PlaylistIds: []uuid.UUID{playlistIDDTO.PlaylistID},
+				UserID:      authPaylad.UserID,
+				Ids:         nil,
+			},
+		)
+		if err != nil {
+			shared.ResTryHttpError(w, err)
+			return
+		}
+
+		dto := PlaylistFullDTO{
+			Playlist:       sharedmodule.PlaylistEntityToDto(*playlist),
+			PlaylistAudios: shared.Map(playlistAudios, playlistaudio.GetPlaylistAudioRowToDTO),
 		}
 
 		shared.ResOK(w, dto)

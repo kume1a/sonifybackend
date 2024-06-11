@@ -5,6 +5,7 @@ import (
 
 	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
+	"github.com/kume1a/sonifybackend/internal/modules/userplaylist"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
@@ -46,10 +47,19 @@ func handleGetPlaylistAudiosByAuthUser(apiCfg *config.ApiConfig) http.HandlerFun
 			return
 		}
 
-		playlistAudios, err := GetPlaylistAudiosByUserID(
+		userPlaylistIDs, err := userplaylist.GetPlaylistIDsByUserID(r.Context(), apiCfg.DB, authPayload.UserID)
+		if err != nil {
+			shared.ResInternalServerErrorDef(w)
+			return
+		}
+
+		playlistAudios, err := GetPlaylistAudios(
 			r.Context(), apiCfg.DB,
-			authPayload.UserID,
-			body.IDs,
+			database.GetPlaylistAudiosParams{
+				UserID:      authPayload.UserID,
+				PlaylistIds: userPlaylistIDs,
+				Ids:         body.IDs,
+			},
 		)
 		if err != nil {
 			shared.ResInternalServerErrorDef(w)

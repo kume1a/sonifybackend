@@ -1,13 +1,17 @@
 package sharedmodule
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/kume1a/sonifybackend/internal/database"
 )
 
 type AudioLikeDTO struct {
-	UserID  uuid.UUID `json:"userId"`
-	AudioID uuid.UUID `json:"audioId"`
+	ID        uuid.UUID `json:"id"`
+	CreatedAt time.Time `json:"createdAt"`
+	UserID    uuid.UUID `json:"userId"`
+	AudioID   uuid.UUID `json:"audioId"`
 }
 
 func AudioLikeEntityToDTO(e *database.AudioLike) *AudioLikeDTO {
@@ -16,8 +20,10 @@ func AudioLikeEntityToDTO(e *database.AudioLike) *AudioLikeDTO {
 	}
 
 	return &AudioLikeDTO{
-		UserID:  e.UserID,
-		AudioID: e.AudioID,
+		ID:        e.ID,
+		CreatedAt: e.CreatedAt,
+		UserID:    e.UserID,
+		AudioID:   e.AudioID,
 	}
 }
 

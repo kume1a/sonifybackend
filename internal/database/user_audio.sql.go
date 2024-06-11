@@ -149,20 +149,23 @@ func (q *Queries) GetUserAudioIDs(ctx context.Context, userID uuid.UUID) ([]uuid
 
 const getUserAudiosByAudioIds = `-- name: GetUserAudiosByAudioIds :many
 SELECT user_audios.id, user_audios.created_at, user_audios.user_id, user_audios.audio_id,
-  audio_likes.user_id as audio_likes_user_id,
-  audio_likes.audio_id as audio_likes_audio_id,
-  audios.id as audio_id,
-  audios.created_at as audio_created_at,
-  audios.title as audio_title,
-  audios.author as audio_author,
-  audios.duration_ms as audio_duration_ms,
-  audios.path as audio_path,
-  audios.size_bytes as audio_size_bytes,
-  audios.youtube_video_id as audio_youtube_video_id,
-  audios.thumbnail_path as audio_thumbnail_path,
-  audios.spotify_id as audio_spotify_id,
-  audios.thumbnail_url as audio_thumbnail_url,
-  audios.local_id as audio_local_id
+  audio_likes.id AS audio_likes_id,
+  audio_likes.created_at AS audio_likes_created_at,
+  audio_likes.user_id AS audio_likes_user_id,
+  audio_likes.audio_id AS audio_likes_audio_id,
+
+  audios.id AS audio_id,
+  audios.created_at AS audio_created_at,
+  audios.title AS audio_title,
+  audios.author AS audio_author,
+  audios.duration_ms AS audio_duration_ms,
+  audios.path AS audio_path,
+  audios.size_bytes AS audio_size_bytes,
+  audios.youtube_video_id AS audio_youtube_video_id,
+  audios.thumbnail_path AS audio_thumbnail_path,
+  audios.spotify_id AS audio_spotify_id,
+  audios.thumbnail_url AS audio_thumbnail_url,
+  audios.local_id AS audio_local_id
 FROM user_audios
 INNER JOIN audios ON user_audios.audio_id = audios.id
 LEFT JOIN audio_likes ON audio_likes.audio_id = audios.id
@@ -179,6 +182,8 @@ type GetUserAudiosByAudioIdsRow struct {
 	CreatedAt           time.Time
 	UserID              uuid.UUID
 	AudioID             uuid.UUID
+	AudioLikesID        uuid.NullUUID
+	AudioLikesCreatedAt sql.NullTime
 	AudioLikesUserID    uuid.NullUUID
 	AudioLikesAudioID   uuid.NullUUID
 	AudioID_2           uuid.UUID
@@ -209,6 +214,8 @@ func (q *Queries) GetUserAudiosByAudioIds(ctx context.Context, arg GetUserAudios
 			&i.CreatedAt,
 			&i.UserID,
 			&i.AudioID,
+			&i.AudioLikesID,
+			&i.AudioLikesCreatedAt,
 			&i.AudioLikesUserID,
 			&i.AudioLikesAudioID,
 			&i.AudioID_2,

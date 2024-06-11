@@ -87,38 +87,16 @@ func GetPlaylistAudioJoinsBySpotifyIds(
 	return entities, err
 }
 
-func GetPlaylistAudiosWithAudioAndAudioLikes(
+func GetPlaylistAudios(
 	ctx context.Context,
 	db *database.Queries,
-	params database.GetPlaylistAudiosWithAudioAndAudioLikesParams,
-) ([]database.GetPlaylistAudiosWithAudioAndAudioLikesRow, error) {
-	audios, err := db.GetPlaylistAudiosWithAudioAndAudioLikes(ctx, params)
-
-	if err != nil {
-		log.Println("Error getting playlist audios:", err)
-	}
-
-	return audios, err
-}
-
-func GetPlaylistAudiosByUserID(
-	ctx context.Context,
-	db *database.Queries,
-	userID uuid.UUID,
-	filterIDs uuid.UUIDs,
+	params database.GetPlaylistAudiosParams,
 ) ([]database.GetPlaylistAudiosRow, error) {
-	userPlaylistIDs, err := userplaylist.GetPlaylistIDsByUserID(ctx, db, userID)
-	if err != nil {
-		return nil, err
-	}
+	playlistAudios, err := db.GetPlaylistAudios(ctx, params)
 
-	playlistAudios, err := db.GetPlaylistAudios(ctx, database.GetPlaylistAudiosParams{
-		PlaylistIds: userPlaylistIDs,
-		Ids:         nil,
-	})
 	if err != nil {
 		log.Println("Error getting playlist audios by user ID:", err)
-		return nil, err
+		return nil, shared.InternalServerErrorDef()
 	}
 
 	return playlistAudios, nil

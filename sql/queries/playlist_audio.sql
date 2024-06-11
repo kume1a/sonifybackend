@@ -7,18 +7,6 @@ INSERT INTO playlist_audios(
 ) VALUES ($1,$2,$3,$4) 
 RETURNING *;
 
--- name: GetPlaylistAudiosWithAudioAndAudioLikes :many
-SELECT 
-  audios.*,
-  audio_likes.audio_id AS audio_likes_audio_id,
-  audio_likes.user_id AS audio_likes_user_id
-FROM playlist_audios 
-INNER JOIN audios ON playlist_audios.audio_id = audios.id
-LEFT JOIN audio_likes ON 
-  playlist_audios.audio_id = audio_likes.audio_id 
-  AND audio_likes.user_id = $1 
-WHERE playlist_audios.playlist_id = $2;
-
 -- name: GetPlaylistAudios :many
 SELECT
   playlist_audios.id AS playlist_audio_id,
@@ -37,9 +25,15 @@ SELECT
   audios.thumbnail_path AS audio_thumbnail_path,
   audios.spotify_id AS audio_spotify_id,
   audios.thumbnail_url AS audio_thumbnail_url,
-  audios.local_id AS audio_local_id
+  audios.local_id AS audio_local_id,
+
+  audio_likes.id AS audio_likes_id,
+  audio_likes.created_at AS audio_likes_created_at,
+  audio_likes.audio_id AS audio_likes_audio_id,
+  audio_likes.user_id AS audio_likes_user_id
 FROM playlist_audios
 LEFT JOIN audios ON playlist_audios.audio_id = audios.id
+LEFT JOIN audio_likes ON playlist_audios.audio_id = audio_likes.audio_id AND audio_likes.user_id = sqlc.arg(user_id) 
 WHERE (sqlc.arg(playlist_ids)::uuid[] IS NULL OR playlist_audios.playlist_id = ANY(sqlc.arg(playlist_ids)::uuid[])) 
   AND (sqlc.arg(ids)::uuid[] IS NULL OR playlist_audios.id = ANY(sqlc.arg(ids)::uuid[]));
 
