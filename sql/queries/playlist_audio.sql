@@ -35,7 +35,8 @@ FROM playlist_audios
 LEFT JOIN audios ON playlist_audios.audio_id = audios.id
 LEFT JOIN audio_likes ON playlist_audios.audio_id = audio_likes.audio_id AND audio_likes.user_id = sqlc.arg(user_id) 
 WHERE (sqlc.arg(playlist_ids)::uuid[] IS NULL OR playlist_audios.playlist_id = ANY(sqlc.arg(playlist_ids)::uuid[])) 
-  AND (sqlc.arg(ids)::uuid[] IS NULL OR playlist_audios.id = ANY(sqlc.arg(ids)::uuid[]));
+  AND (sqlc.arg(ids)::uuid[] IS NULL OR playlist_audios.id = ANY(sqlc.arg(ids)::uuid[]))
+ORDER BY audios.title ASC;
 
 -- name: GetPlaylistAudioIDsByPlaylistIDs :many
 SELECT id

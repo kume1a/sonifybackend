@@ -173,6 +173,7 @@ LEFT JOIN audios ON playlist_audios.audio_id = audios.id
 LEFT JOIN audio_likes ON playlist_audios.audio_id = audio_likes.audio_id AND audio_likes.user_id = $1 
 WHERE ($2::uuid[] IS NULL OR playlist_audios.playlist_id = ANY($2::uuid[])) 
   AND ($3::uuid[] IS NULL OR playlist_audios.id = ANY($3::uuid[]))
+ORDER BY audios.title ASC
 `
 
 type GetPlaylistAudiosParams struct {
