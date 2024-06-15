@@ -9,7 +9,7 @@ import (
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
-func handleCreateUserAudiosByAuthUser(apiCfg *config.ApiConfig) http.HandlerFunc {
+func handleCreateUserAudiosForAuthUser(apiCfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authUser, err := shared.GetAuthPayload(r)
 		if err != nil {

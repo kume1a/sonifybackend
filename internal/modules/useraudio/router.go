@@ -9,7 +9,7 @@ import (
 func Router(apiCfg *config.ApiConfig, router *mux.Router) *mux.Router {
 	r := router.PathPrefix("/useraudio").Subrouter()
 
-	r.HandleFunc("/createByAuthUser", shared.AuthMW(handleCreateUserAudiosByAuthUser(apiCfg))).Methods("POST")
+	r.HandleFunc("/createForAuthUser", shared.AuthMW(handleCreateUserAudiosForAuthUser(apiCfg))).Methods("POST")
 
 	return r
 }
