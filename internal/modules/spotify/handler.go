@@ -2,6 +2,7 @@ package spotify
 
 import (
 	"database/sql"
+	"log"
 	"net/http"
 	"time"
 
@@ -11,6 +12,52 @@ import (
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
+func handleSpotifySearch() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		query, err := shared.ValidateRequestQuery[*searchSpotifyQueryDTO](r)
+		if err != nil {
+			shared.ResBadRequest(w, err.Error())
+			return
+		}
+
+		if len(query.Keyword) != 1 {
+			shared.ResBadRequest(w, shared.ErrKeywordMustHaveExactlyOneElement)
+			return
+		}
+
+		spotifyRes, err := SpotifySearch(query.SpotifyAccessToken, query.Keyword[0])
+		if err != nil {
+			shared.ResInternalServerErrorDef(w)
+			return
+		}
+
+		dto := MapSpotifySearchToSearchSpotifyResult(spotifyRes)
+
+		shared.ResOK(w, dto)
+	}
+}
+
+func handleDownloadPlaylist(apiCfg *config.ApiConfig) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		authPayload, err := shared.GetAuthPayload(r)
+		if err != nil {
+			shared.ResUnauthorized(w, shared.ErrUnauthorized)
+			return
+		}
+
+		body, err := shared.ValidateRequestBody[*downloadSpotifyPlaylistDTO](r)
+		if err != nil {
+			shared.ResBadRequest(w, err.Error())
+			return
+		}
+
+		// TODO implement
+		log.Println("AuthPayload: ", authPayload, "Body: ", body)
+
+		shared.ResInternalServerError(w, shared.ErrNotImplemented)
+	}
+}
+
 func handleAuthorizeSpotify(w http.ResponseWriter, r *http.Request) {
 	body, err := shared.ValidateRequestBody[*authorizeSpotifyDTO](r)
 	if err != nil {
@@ -18,7 +65,7 @@ func handleAuthorizeSpotify(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tokenPayload, err := GetAuthorizationCodeSpotifyTokenPayload(body.Code)
+	tokenPayload, err := SpotifyGetAuthorizationCodeTokenPayload(body.Code)
 	if err != nil {
 		shared.ResInternalServerError(w, shared.ErrFailedToGetSpotifyAccessToken)
 		return
@@ -42,7 +89,7 @@ func handleSpotifyRefreshToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tokenPayload, err := RefreshSpotifyToken(body.SpotifyRefreshToken)
+	tokenPayload, err := SpotifyRefreshToken(body.SpotifyRefreshToken)
 	if err != nil {
 		shared.ResInternalServerError(w, shared.ErrFailedToGetSpotifyAccessToken)
 		return
@@ -72,7 +119,7 @@ func handleImportSpotifyUserPlaylists(apiCfg *config.ApiConfig) http.HandlerFunc
 			return
 		}
 
-		if err := downloadSpotifyPlaylist(r.Context(), apiCfg, authPayload.UserID, query.SpotifyAccessToken[0]); err != nil {
+		if err := downloadSpotifyUserSavedPlaylists(r.Context(), apiCfg, authPayload.UserID, query.SpotifyAccessToken[0]); err != nil {
 			shared.ResInternalServerErrorDef(w)
 			return
 		}

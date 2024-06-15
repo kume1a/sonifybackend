@@ -9,7 +9,9 @@ import (
 func Router(apiCfg *config.ApiConfig, router *mux.Router) *mux.Router {
 	r := router.PathPrefix("/spotify").Subrouter()
 
-	// r.HandleFunc("/downloadPlaylist", shared.AuthMW(handleDownloadPlaylist(apiCfg))).Methods("POST")
+	r.HandleFunc("/search", shared.AuthMW(handleSpotifySearch())).Methods("GET")
+
+	r.HandleFunc("/downloadPlaylist", shared.AuthMW(handleDownloadPlaylist(apiCfg))).Methods("POST")
 	r.HandleFunc("/authorize", shared.AuthMW(handleAuthorizeSpotify)).Methods("POST")
 	r.HandleFunc("/refreshToken", shared.AuthMW(handleSpotifyRefreshToken)).Methods("POST")
 

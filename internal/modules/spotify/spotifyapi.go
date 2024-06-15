@@ -13,7 +13,23 @@ import (
 
 const spotifyBaseApiUrl = "https://api.spotify.com"
 
-func GetSpotifyPlaylist(accessToken, playlistID string) (*spotifyPlaylistDTO, error) {
+func SpotifySearch(accessToken, query string) (*spotifySearchDTO, error) {
+	return shared.HttpGetWithResponse[spotifySearchDTO](
+		shared.HttpGetParams{
+			URL: spotifyBaseApiUrl + "/v1/search",
+			Headers: map[string]string{
+				"Authorization": "Bearer " + accessToken,
+			},
+			Query: url.Values{
+				"q":     {query},
+				"type":  {"playlist"},
+				"limit": {"15"},
+			},
+		},
+	)
+}
+
+func SpotifyGetPlaylist(accessToken, playlistID string) (*spotifyPlaylistDTO, error) {
 	return shared.HttpGetWithResponse[spotifyPlaylistDTO](
 		shared.HttpGetParams{
 			URL: spotifyBaseApiUrl + "/v1/playlists/" + playlistID,
@@ -24,8 +40,8 @@ func GetSpotifyPlaylist(accessToken, playlistID string) (*spotifyPlaylistDTO, er
 	)
 }
 
-func GetSavedSpotifyPlaylists(accessToken string) (*getSpotifyPlaylistsDTO, error) {
-	return shared.HttpGetWithResponse[getSpotifyPlaylistsDTO](
+func SpotifyGetUserSavedPlaylists(accessToken string) (*spotifyGetPlaylistsDTO, error) {
+	return shared.HttpGetWithResponse[spotifyGetPlaylistsDTO](
 		shared.HttpGetParams{
 			URL: spotifyBaseApiUrl + "/v1/me/playlists",
 			Headers: map[string]string{
@@ -38,7 +54,7 @@ func GetSavedSpotifyPlaylists(accessToken string) (*getSpotifyPlaylistsDTO, erro
 	)
 }
 
-func GetSpotifyPlaylistItems(accessToken, playlistID string) (*spotifyPlaylistItemsDTO, error) {
+func SpotifyGetPlaylistItems(accessToken, playlistID string) (*spotifyPlaylistItemsDTO, error) {
 	return shared.HttpGetWithResponse[spotifyPlaylistItemsDTO](
 		shared.HttpGetParams{
 			URL: spotifyBaseApiUrl + "/v1/playlists/" + playlistID + "/tracks",
@@ -53,7 +69,7 @@ func GetSpotifyPlaylistItems(accessToken, playlistID string) (*spotifyPlaylistIt
 	)
 }
 
-func GetSpotifyPlaylistItemsNext(accessToken, nextUrl string) (*spotifyPlaylistItemsDTO, error) {
+func SpotifyGetPlaylistItemsNext(accessToken, nextUrl string) (*spotifyPlaylistItemsDTO, error) {
 	return shared.HttpGetWithResponse[spotifyPlaylistItemsDTO](
 		shared.HttpGetParams{
 			URL: nextUrl,
@@ -64,7 +80,7 @@ func GetSpotifyPlaylistItemsNext(accessToken, nextUrl string) (*spotifyPlaylistI
 	)
 }
 
-func GetGeneralSpotifyAccessToken() (*spotifyClientCredsTokenDTO, error) {
+func SpotifyGetGeneralAccessToken() (*spotifyClientCredsTokenDTO, error) {
 	env, err := config.ParseEnv()
 	if err != nil {
 		return nil, err
@@ -97,7 +113,7 @@ func GetGeneralSpotifyAccessToken() (*spotifyClientCredsTokenDTO, error) {
 	return &dto, err
 }
 
-func GetAuthorizationCodeSpotifyTokenPayload(code string) (*spotifyAuthCodeTokenDTO, error) {
+func SpotifyGetAuthorizationCodeTokenPayload(code string) (*spotifyAuthCodeTokenDTO, error) {
 	env, err := config.ParseEnv()
 	if err != nil {
 		return nil, err
@@ -136,7 +152,7 @@ func GetAuthorizationCodeSpotifyTokenPayload(code string) (*spotifyAuthCodeToken
 	return &dto, err
 }
 
-func RefreshSpotifyToken(refreshToken string) (*spotifyRefreshTokenDTO, error) {
+func SpotifyRefreshToken(refreshToken string) (*spotifyRefreshTokenDTO, error) {
 	basicAuthHeader, err := getSpotifyBasicAuthHeader()
 	if err != nil {
 		return nil, err

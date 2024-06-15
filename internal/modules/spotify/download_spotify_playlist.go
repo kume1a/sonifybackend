@@ -128,7 +128,7 @@ func getAllSpotifyPlaylistItems(
 ) ([]spotifyPlaylistItemDTO, error) {
 	allPlaylistItems := []spotifyPlaylistItemDTO{}
 
-	playlistItems, err := GetSpotifyPlaylistItems(spotifyAccessToken, playlistSpotifyID)
+	playlistItems, err := SpotifyGetPlaylistItems(spotifyAccessToken, playlistSpotifyID)
 	if err != nil {
 		return []spotifyPlaylistItemDTO{}, err
 	}
@@ -138,7 +138,7 @@ func getAllSpotifyPlaylistItems(
 	nextURL := playlistItems.Next
 
 	for nextURL != "" {
-		playlistItems, err = GetSpotifyPlaylistItemsNext(spotifyAccessToken, nextURL)
+		playlistItems, err = SpotifyGetPlaylistItemsNext(spotifyAccessToken, nextURL)
 		if err != nil {
 			return nil, err
 		}
@@ -150,13 +150,13 @@ func getAllSpotifyPlaylistItems(
 	return allPlaylistItems, nil
 }
 
-func downloadSpotifyPlaylist(
+func downloadSpotifyUserSavedPlaylists(
 	ctx context.Context,
 	apiCfg *config.ApiConfig,
 	authUserID uuid.UUID,
 	spotifyAccessToken string,
 ) error {
-	spotifyPlaylists, err := GetSavedSpotifyPlaylists(spotifyAccessToken)
+	spotifyPlaylists, err := SpotifyGetUserSavedPlaylists(spotifyAccessToken)
 	if err != nil {
 		return err
 	}

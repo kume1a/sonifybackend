@@ -27,9 +27,13 @@ func handleGetYoutubeMusicUrl(w http.ResponseWriter, r *http.Request) {
 
 func handleGetYoutubeSearchSuggestions(w http.ResponseWriter, r *http.Request) {
 	query, err := shared.ValidateRequestQuery[*shared.KeywordDto](r)
-
 	if err != nil {
 		shared.ResBadRequest(w, err.Error())
+		return
+	}
+
+	if len(query.Keyword) != 1 {
+		shared.ResBadRequest(w, shared.ErrKeywordMustHaveExactlyOneElement)
 		return
 	}
 
