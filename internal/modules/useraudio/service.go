@@ -6,7 +6,9 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
+	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
 func CreateUserAudio(
@@ -28,6 +30,32 @@ func CreateUserAudio(
 	}
 
 	return &entity, err
+}
+
+func BulkCreateUserAudios(
+	ctx context.Context,
+	resourceConfig *config.ResourceConfig,
+	params []database.CreateUserAudioParams,
+) ([]database.UserAudio, error) {
+	return shared.RunDBTransaction(
+		ctx,
+		resourceConfig,
+		func(tx *database.Queries) ([]database.UserAudio, error) {
+			audios := make([]database.UserAudio, 0, len(params))
+
+			for _, param := range params {
+				audio, err := CreateUserAudio(ctx, tx, param)
+				if err != nil {
+					log.Println("Error creating user audio:", err)
+					return nil, shared.InternalServerErrorDef()
+				}
+
+				audios = append(audios, *audio)
+			}
+
+			return audios, nil
+		},
+	)
 }
 
 func GetUserAudioByYoutubeVideoId(

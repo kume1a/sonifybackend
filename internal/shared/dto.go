@@ -22,6 +22,14 @@ type KeywordDto struct {
 	Keyword []string `json:"keyword" valid:"required"`
 }
 
+type AudioIDDTO struct {
+	AudioID uuid.UUID `json:"audioId" valid:"required"`
+}
+
+type AudioIDsDTO struct {
+	AudioIDs []uuid.UUID `json:"audioIds" valid:"uuidSliceNotEmpty,optional"`
+}
+
 type UserDto struct {
 	ID           uuid.UUID             `json:"id"`
 	CreatedAt    time.Time             `json:"createdAt"`
@@ -64,6 +72,16 @@ func (dto *OptionalIDsDTO) Validate() error {
 }
 
 func (dto *RequiredIDsDTO) Validate() error {
+	_, err := govalidator.ValidateStruct(dto)
+	return err
+}
+
+func (dto *AudioIDDTO) Validate() error {
+	_, err := govalidator.ValidateStruct(dto)
+	return err
+}
+
+func (dto *AudioIDsDTO) Validate() error {
 	_, err := govalidator.ValidateStruct(dto)
 	return err
 }

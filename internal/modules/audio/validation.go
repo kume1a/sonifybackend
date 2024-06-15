@@ -9,11 +9,6 @@ import (
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
-func (dto *audioIDsDTO) Validate() error {
-	_, err := govalidator.ValidateStruct(dto)
-	return err
-}
-
 func ValidateUploadUserLocalMusicDTO(w http.ResponseWriter, r *http.Request) (*uploadUserLocalMusicDTO, *shared.HttpError) {
 	thumbnailPath, httpErr := shared.HandleUploadFile(shared.HandleUploadFileArgs{
 		ResponseWriter:   w,

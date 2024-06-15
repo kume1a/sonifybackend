@@ -5,6 +5,7 @@ import (
 
 	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
+	"github.com/kume1a/sonifybackend/internal/modules/sharedmodule"
 	"github.com/kume1a/sonifybackend/internal/modules/useraudio"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
@@ -53,9 +54,9 @@ func handleUploadUserLocalMusic(apiCfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		res := UserAudioWithRelDTO{
-			UserAudioDTO: UserAudioEntityToDto(userAudioWithAudio.UserAudio),
-			Audio:        AudioEntityToDto(*userAudioWithAudio.Audio),
+		res := sharedmodule.UserAudioWithRelDTO{
+			UserAudioDTO: sharedmodule.UserAudioEntityToDTO(userAudioWithAudio.UserAudio),
+			Audio:        sharedmodule.AudioEntityToDto(*userAudioWithAudio.Audio),
 		}
 
 		shared.ResCreated(w, res)
@@ -89,7 +90,7 @@ func handleGetAuthUserUserAudiosByIDs(apiCfg *config.ApiConfig) http.HandlerFunc
 		}
 
 		// user body for big payload
-		body, err := shared.GetRequestBody[audioIDsDTO](r)
+		body, err := shared.GetRequestBody[*shared.AudioIDsDTO](r)
 		if err != nil {
 			shared.ResBadRequest(w, err.Error())
 			return
@@ -104,7 +105,7 @@ func handleGetAuthUserUserAudiosByIDs(apiCfg *config.ApiConfig) http.HandlerFunc
 			return
 		}
 
-		res := make([]*UserAudioWithRelDTO, 0, len(audios))
+		res := make([]*sharedmodule.UserAudioWithRelDTO, 0, len(audios))
 		for _, audio := range audios {
 			res = append(res, GetUserAudiosByAudioIdsRowToUserAudioWithRelDTO(audio))
 		}

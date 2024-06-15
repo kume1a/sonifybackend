@@ -40,7 +40,7 @@ func verifyJWT(tokenString string, secretKey string) (*TokenClaims, error) {
 
 	if err != nil {
 		log.Println("Error parsing token: ", err)
-		return nil, err
+		return nil, errors.New(ErrInvalidToken)
 	}
 
 	if !token.Valid {

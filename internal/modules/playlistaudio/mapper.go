@@ -2,7 +2,6 @@ package playlistaudio
 
 import (
 	"github.com/kume1a/sonifybackend/internal/database"
-	"github.com/kume1a/sonifybackend/internal/modules/audio"
 	"github.com/kume1a/sonifybackend/internal/modules/sharedmodule"
 )
 
@@ -26,9 +25,9 @@ func GetPlaylistAudioRowToDTO(e database.GetPlaylistAudiosRow) PlaylistAudioDTO 
 		}
 	}
 
-	var audioDTO *audio.AudioDTO
+	var audioDTO *sharedmodule.AudioDTO
 	if e.AudioID.Valid {
-		audioDTO = &audio.AudioDTO{
+		audioDTO = &sharedmodule.AudioDTO{
 			ID:             e.AudioID.UUID,
 			Title:          e.AudioTitle.String,
 			Author:         e.AudioAuthor.String,

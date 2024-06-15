@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/kume1a/sonifybackend/internal/config"
-	"github.com/kume1a/sonifybackend/internal/modules/audio"
+	"github.com/kume1a/sonifybackend/internal/modules/sharedmodule"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
@@ -67,9 +67,9 @@ func handleDownloadYoutubeAudio(apiCfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		res := audio.UserAudioWithRelDTO{
-			UserAudioDTO: audio.UserAudioEntityToDto(userAudio),
-			Audio:        audio.AudioEntityToDto(*savedAudio),
+		res := sharedmodule.UserAudioWithRelDTO{
+			UserAudioDTO: sharedmodule.UserAudioEntityToDTO(userAudio),
+			Audio:        sharedmodule.AudioEntityToDto(*savedAudio),
 		}
 
 		shared.ResCreated(w, res)

@@ -17,7 +17,7 @@ func handleLikeAudio(apiCfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		body, err := shared.ValidateRequestBody[*likeUnlikeAudioDTO](r)
+		body, err := shared.ValidateRequestBody[*shared.AudioIDDTO](r)
 		if err != nil {
 			shared.ResBadRequest(w, err.Error())
 			return
@@ -46,7 +46,7 @@ func handleUnlikeAudio(apiCfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		body, err := shared.ValidateRequestBody[*likeUnlikeAudioDTO](r)
+		body, err := shared.ValidateRequestBody[*shared.AudioIDDTO](r)
 		if err != nil {
 			shared.ResBadRequest(w, err.Error())
 			return

@@ -5,35 +5,9 @@ import (
 	"github.com/kume1a/sonifybackend/internal/modules/sharedmodule"
 )
 
-func AudioEntityToDto(e database.Audio) *AudioDTO {
-	return &AudioDTO{
-		ID:             e.ID,
-		CreatedAt:      e.CreatedAt,
-		Title:          e.Title.String,
-		DurationMs:     e.DurationMs.Int32,
-		Path:           e.Path.String,
-		Author:         e.Author.String,
-		SizeBytes:      e.SizeBytes.Int64,
-		YoutubeVideoID: e.YoutubeVideoID.String,
-		ThumbnailPath:  e.ThumbnailPath.String,
-		ThumbnailUrl:   e.ThumbnailUrl.String,
-		SpotifyID:      e.SpotifyID.String,
-		LocalID:        e.LocalID.String,
-		AudioLike:      nil,
-	}
-}
-
-func UserAudioEntityToDto(e *database.UserAudio) *UserAudioDTO {
-	return &UserAudioDTO{
-		CreatedAt: e.CreatedAt,
-		UserId:    e.UserID,
-		AudioId:   e.AudioID,
-	}
-}
-
 func GetUserAudiosByAudioIdsRowToUserAudioWithRelDTO(
 	e database.GetUserAudiosByAudioIdsRow,
-) *UserAudioWithRelDTO {
+) *sharedmodule.UserAudioWithRelDTO {
 	var audioLike *sharedmodule.AudioLikeDTO
 	if e.AudioLikesUserID.Valid && e.AudioLikesAudioID.Valid {
 		audioLike = &sharedmodule.AudioLikeDTO{
@@ -44,13 +18,13 @@ func GetUserAudiosByAudioIdsRowToUserAudioWithRelDTO(
 		}
 	}
 
-	return &UserAudioWithRelDTO{
-		UserAudioDTO: &UserAudioDTO{
+	return &sharedmodule.UserAudioWithRelDTO{
+		UserAudioDTO: &sharedmodule.UserAudioDTO{
 			CreatedAt: e.CreatedAt,
 			UserId:    e.UserID,
 			AudioId:   e.AudioID,
 		},
-		Audio: &AudioDTO{
+		Audio: &sharedmodule.AudioDTO{
 			ID:             e.AudioID,
 			CreatedAt:      e.AudioCreatedAt,
 			Title:          e.AudioTitle.String,
