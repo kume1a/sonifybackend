@@ -20,12 +20,12 @@ func handleSpotifySearch() http.HandlerFunc {
 			return
 		}
 
-		if len(query.Keyword) != 1 {
-			shared.ResBadRequest(w, shared.ErrKeywordMustHaveExactlyOneElement)
+		if len(query.Keyword) != 1 || len(query.SpotifyAccessToken) != 1 {
+			shared.ResBadRequest(w, shared.ErrInvalidQueryParams)
 			return
 		}
 
-		spotifyRes, err := SpotifySearch(query.SpotifyAccessToken, query.Keyword[0])
+		spotifyRes, err := SpotifySearch(query.SpotifyAccessToken[0], query.Keyword[0])
 		if err != nil {
 			shared.ResInternalServerErrorDef(w)
 			return

@@ -33,7 +33,7 @@ func handleGetYoutubeSearchSuggestions(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(query.Keyword) != 1 {
-		shared.ResBadRequest(w, shared.ErrKeywordMustHaveExactlyOneElement)
+		shared.ResBadRequest(w, shared.ErrInvalidQueryParams)
 		return
 	}
 

@@ -34,7 +34,7 @@ type spotifyRefreshTokenPayloadDTO struct {
 
 type searchSpotifyQueryDTO struct {
 	Keyword            []string `json:"keyword" valid:"required"`
-	SpotifyAccessToken string   `json:"spotifyAccessToken" valid:"required"`
+	SpotifyAccessToken []string `json:"spotifyAccessToken" valid:"required"`
 }
 
 type searchSpotifyResDTO struct {
@@ -42,7 +42,7 @@ type searchSpotifyResDTO struct {
 }
 
 type searchSpotifyResPlaylistDTO struct {
-	Title     string `json:"title"`
+	Name      string `json:"name"`
 	ImageUrl  string `json:"imageUrl"`
 	SpotifyID string `json:"spotifyId"`
 }
