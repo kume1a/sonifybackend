@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"log"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/kume1a/sonifybackend/internal/config"
@@ -17,6 +18,11 @@ func CreateAudio(
 	db *database.Queries,
 	params database.CreateAudioParams,
 ) (*database.Audio, error) {
+	// Trim surrounding quotes from the title
+	if params.Title.Valid {
+		params.Title.String = strings.Trim(params.Title.String, `"'`)
+	}
+
 	if params.ID == uuid.Nil {
 		params.ID = uuid.New()
 	}
