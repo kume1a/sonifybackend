@@ -24,6 +24,7 @@ require (
 )
 
 require (
+	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/luraim/fun v0.0.0-20240427173526-62ed2a5a9acf // indirect
 	github.com/robfig/cron v1.2.0 // indirect
 )

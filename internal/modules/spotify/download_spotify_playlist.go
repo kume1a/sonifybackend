@@ -22,6 +22,7 @@ func DownloadSpotifyPlaylistAudios(
 	playlistSpotifyID string,
 	spotifyAccessToken string,
 ) error {
+
 	playlistID, err := playlist.GetPlaylistIDBySpotifyID(ctx, resouceConfig.DB, playlistSpotifyID)
 	if err != nil {
 		return err
