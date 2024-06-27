@@ -111,14 +111,6 @@ func DownloadSpotifyPlaylistAudios(
 		return err
 	}
 
-	playlist.UpdatePlaylistByID(
-		ctx, resouceConfig.DB,
-		database.UpdatePlaylistByIDParams{
-			PlaylistID:        playlistID,
-			AudioImportStatus: database.NullProcessStatus{ProcessStatus: database.ProcessStatusCOMPLETED, Valid: true},
-		},
-	)
-
 	return nil
 }
 

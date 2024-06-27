@@ -49,6 +49,14 @@ func DownloadWriteSpotifyAudios(
 		return err
 	}
 
+	startingProgress := len(dbSpotifyIDs)
+	total := len(inputs)
+
+	if startingProgress == total {
+		onProgress(startingProgress, total)
+		return nil
+	}
+
 	filteredInputs := shared.Where(inputs, func(input DownloadSpotifyAudioInput) bool {
 		return !shared.ContainsWhereP(
 			dbSpotifyIDs,
@@ -56,9 +64,6 @@ func DownloadWriteSpotifyAudios(
 				return dbSpotifyID.SpotifyID.String == input.SpotifyID
 			})
 	})
-
-	startingProgress := len(dbSpotifyIDs)
-	total := len(inputs)
 
 	for inputIndex, input := range filteredInputs {
 		log.Println("Downloading audio for track: ", input.TrackName, " by ", input.ArtistName, " with Spotify ID: ", input.SpotifyID)
