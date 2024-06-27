@@ -73,6 +73,20 @@ func DeletePlaylistAudiosByIds(
 	return err
 }
 
+func DeletePlaylistAudiosByPlaylistID(
+	ctx context.Context,
+	db *database.Queries,
+	playlistID uuid.UUID,
+) error {
+	err := db.DeletePlaylistAudiosByPlaylistID(ctx, playlistID)
+
+	if err != nil {
+		log.Println("Error deleting playlist audios by playlist ID:", err)
+	}
+
+	return err
+}
+
 func GetPlaylistAudioJoinsBySpotifyIds(
 	ctx context.Context,
 	db *database.Queries,

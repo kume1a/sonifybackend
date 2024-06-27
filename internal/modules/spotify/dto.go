@@ -1,7 +1,7 @@
 package spotify
 
 type spotifyAccessTokenDTO struct {
-	SpotifyAccessToken []string `json:"spotifyAccessToken" valid:"required"`
+	SpotifyAccessToken string `json:"spotifyAccessToken" valid:"required"`
 }
 
 type refreshSpotifyTokenDTO struct {

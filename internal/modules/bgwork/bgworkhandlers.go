@@ -11,7 +11,7 @@ import (
 
 func CreateHandleDownloadPlaylistAudios(bgWorkConfig *config.ResourceConfig) func(job *work.Job) error {
 	return func(job *work.Job) error {
-		playlistId := job.ArgString("playlistSpotifyID")
+		playlistId := job.ArgString("spotifyPlaylistID")
 		spotifyAccessToken := job.ArgString("spotifyAccessToken")
 
 		if err := job.ArgError(); err != nil {

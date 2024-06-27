@@ -73,7 +73,7 @@ func DeleteSpotifyUserSavedPlaylistJoins(
 	return err
 }
 
-func DeletePlaylistsByIds(
+func DeletePlaylistsByIDs(
 	ctx context.Context,
 	db *database.Queries,
 	playlistIds uuid.UUIDs,
@@ -82,6 +82,20 @@ func DeletePlaylistsByIds(
 
 	if err != nil {
 		log.Println("Error deleting playlists by ids:", err)
+	}
+
+	return err
+}
+
+func DeletePlaylistByID(
+	ctx context.Context,
+	db *database.Queries,
+	playlistID uuid.UUID,
+) error {
+	err := db.DeletePlaylistByID(ctx, playlistID)
+
+	if err != nil {
+		log.Println("Error deleting playlist by id:", err)
 	}
 
 	return err

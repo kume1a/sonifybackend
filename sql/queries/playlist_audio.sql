@@ -48,6 +48,9 @@ DELETE FROM playlist_audios
   WHERE playlist_id = sqlc.arg(playlist_id)
   AND audio_id = ANY(sqlc.arg(audio_ids)::uuid[]);
 
+-- name: DeletePlaylistAudiosByPlaylistID :exec
+DELETE FROM playlist_audios WHERE playlist_id = $1;
+
 -- name: GetPlaylistAudioJoinsBySpotifyIDs :many
 SELECT 
   playlist_audios.*,

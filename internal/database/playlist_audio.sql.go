@@ -64,6 +64,15 @@ func (q *Queries) DeletePlaylistAudiosByIDs(ctx context.Context, arg DeletePlayl
 	return err
 }
 
+const deletePlaylistAudiosByPlaylistID = `-- name: DeletePlaylistAudiosByPlaylistID :exec
+DELETE FROM playlist_audios WHERE playlist_id = $1
+`
+
+func (q *Queries) DeletePlaylistAudiosByPlaylistID(ctx context.Context, playlistID uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deletePlaylistAudiosByPlaylistID, playlistID)
+	return err
+}
+
 const getPlaylistAudioIDsByPlaylistIDs = `-- name: GetPlaylistAudioIDsByPlaylistIDs :many
 SELECT id
 FROM playlist_audios

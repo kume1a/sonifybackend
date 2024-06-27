@@ -14,6 +14,7 @@ require (
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gorilla/mux v1.8.1
+	github.com/gorilla/websocket v1.5.3
 )
 
 require (
@@ -24,7 +25,5 @@ require (
 )
 
 require (
-	github.com/gorilla/websocket v1.5.3 // indirect
-	github.com/luraim/fun v0.0.0-20240427173526-62ed2a5a9acf // indirect
 	github.com/robfig/cron v1.2.0 // indirect
 )

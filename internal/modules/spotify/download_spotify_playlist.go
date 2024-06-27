@@ -22,7 +22,6 @@ func DownloadSpotifyPlaylistAudios(
 	playlistSpotifyID string,
 	spotifyAccessToken string,
 ) error {
-
 	playlistID, err := playlist.GetPlaylistIDBySpotifyID(ctx, resouceConfig.DB, playlistSpotifyID)
 	if err != nil {
 		return err
@@ -151,6 +150,67 @@ func getAllSpotifyPlaylistItems(
 	return allPlaylistItems, nil
 }
 
+func downloadSpotifyPlaylist(
+	ctx context.Context,
+	apiCfg *config.ApiConfig,
+	authUserID uuid.UUID,
+	spotifyPlaylistID string,
+	spotifyAccessToken string,
+) error {
+	spotifyPlaylist, err := SpotifyGetPlaylist(spotifyAccessToken, spotifyPlaylistID)
+	if err != nil {
+		return err
+	}
+
+	if err := playlist.DeletePlaylistAndPlaylistAudiosBySpotifyID(
+		ctx, apiCfg.ResourceConfig,
+		spotifyPlaylistID,
+	); err != nil {
+		return err
+	}
+
+	if _, err := shared.RunDBTransaction(
+		ctx,
+		apiCfg.ResourceConfig,
+		func(queries *database.Queries) (any, error) {
+			playlistEntity, err := playlist.CreatePlaylist(
+				ctx, queries,
+				spotifyPlaylistDTOToCreatePlaylistParams(spotifyPlaylist),
+			)
+			if err != nil {
+				return nil, err
+			}
+
+			userPlaylistEntity := database.CreateUserPlaylistParams{
+				PlaylistID:             playlistEntity.ID,
+				UserID:                 authUserID,
+				IsSpotifySavedPlaylist: false,
+			}
+
+			_, err = userplaylist.CreateUserPlaylist(ctx, queries, userPlaylistEntity)
+			if err != nil {
+				return nil, err
+			}
+
+			return nil, nil
+		},
+	); err != nil {
+		return err
+	}
+
+	if _, err := apiCfg.WorkEnqueuer.EnqueueUnique(
+		shared.BackgroundJobDownloadPlaylistAudios,
+		work.Q{
+			"spotifyPlaylistID":  spotifyPlaylistID,
+			"spotifyAccessToken": spotifyAccessToken,
+		},
+	); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func downloadSpotifyUserSavedPlaylists(
 	ctx context.Context,
 	apiCfg *config.ApiConfig,
@@ -162,7 +222,10 @@ func downloadSpotifyUserSavedPlaylists(
 		return err
 	}
 
-	if err := playlist.DeleteSpotifyUserSavedPlaylists(ctx, apiCfg.ResourceConfig, authUserID); err != nil {
+	if err := playlist.DeleteSpotifyUserSavedPlaylists(
+		ctx, apiCfg.ResourceConfig,
+		authUserID,
+	); err != nil {
 		return err
 	}
 
@@ -209,7 +272,7 @@ func downloadSpotifyUserSavedPlaylists(
 		if _, err := apiCfg.WorkEnqueuer.EnqueueUnique(
 			shared.BackgroundJobDownloadPlaylistAudios,
 			work.Q{
-				"playlistSpotifyID":  spotifyPlaylist.ID,
+				"spotifyPlaylistID":  spotifyPlaylist.ID,
 				"spotifyAccessToken": spotifyAccessToken,
 			},
 		); err != nil {
@@ -220,7 +283,9 @@ func downloadSpotifyUserSavedPlaylists(
 	return nil
 }
 
-func spotifyPlaylistDTOToCreatePlaylistParams(playlist *spotifyPlaylistDTO) database.CreatePlaylistParams {
+func spotifyPlaylistDTOToCreatePlaylistParams(
+	playlist *spotifyPlaylistDTO,
+) database.CreatePlaylistParams {
 	thumbnailUrl := ""
 	if len(playlist.Images) > 0 {
 		thumbnailUrl = playlist.Images[0].URL

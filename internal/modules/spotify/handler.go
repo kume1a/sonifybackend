@@ -2,7 +2,6 @@ package spotify
 
 import (
 	"database/sql"
-	"log"
 	"net/http"
 	"time"
 
@@ -37,7 +36,7 @@ func handleSpotifySearch() http.HandlerFunc {
 	}
 }
 
-func handleDownloadPlaylist(apiCfg *config.ApiConfig) http.HandlerFunc {
+func handleImportSpotifyPlaylist(apiCfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authPayload, err := shared.GetAuthPayload(r)
 		if err != nil {
@@ -51,10 +50,17 @@ func handleDownloadPlaylist(apiCfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		// TODO implement
-		log.Println("AuthPayload: ", authPayload, "Body: ", body)
+		if err := downloadSpotifyPlaylist(
+			r.Context(), apiCfg,
+			authPayload.UserID,
+			body.SpotifyPlaylistID,
+			body.SpotifyAccessToken,
+		); err != nil {
+			shared.ResInternalServerErrorDef(w)
+			return
+		}
 
-		shared.ResInternalServerError(w, shared.ErrNotImplemented)
+		shared.ResNoContent(w)
 	}
 }
 
@@ -113,26 +119,30 @@ func handleImportSpotifyUserPlaylists(apiCfg *config.ApiConfig) http.HandlerFunc
 			return
 		}
 
-		query, err := shared.ValidateRequestQuery[*spotifyAccessTokenDTO](r)
+		body, err := shared.ValidateRequestBody[*spotifyAccessTokenDTO](r)
 		if err != nil {
 			shared.ResBadRequest(w, err.Error())
 			return
 		}
 
-		if err := downloadSpotifyUserSavedPlaylists(r.Context(), apiCfg, authPayload.UserID, query.SpotifyAccessToken[0]); err != nil {
+		if err := downloadSpotifyUserSavedPlaylists(
+			r.Context(), apiCfg,
+			authPayload.UserID,
+			body.SpotifyAccessToken,
+		); err != nil {
 			shared.ResInternalServerErrorDef(w)
 			return
 		}
 
-		if _, httpErr := usersync.UpdateUserSyncDatumByUserId(
+		if _, err := usersync.UpdateUserSyncDatumByUserId(
 			r.Context(),
 			apiCfg.DB,
 			database.UpdateUserSyncDatumByUserIDParams{
 				UserID:              authPayload.UserID,
 				SpotifyLastSyncedAt: sql.NullTime{Time: time.Now().UTC(), Valid: true},
 			},
-		); httpErr != nil {
-			shared.ResHttpError(w, httpErr)
+		); err != nil {
+			shared.ResTryHttpError(w, err)
 			return
 		}
 
