@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/go-chi/cors"
 	"github.com/gorilla/mux"
@@ -18,6 +19,7 @@ import (
 	"github.com/kume1a/sonifybackend/internal/modules/useraudio"
 	"github.com/kume1a/sonifybackend/internal/modules/userplaylist"
 	"github.com/kume1a/sonifybackend/internal/modules/usersync"
+	"github.com/kume1a/sonifybackend/internal/modules/ws"
 	"github.com/kume1a/sonifybackend/internal/modules/youtube"
 )
 
@@ -69,6 +71,11 @@ func CreateRouter(apiCfg *config.ApiConfig) *mux.Router {
 
 	router.HandleFunc("/", handleHealthcheck).Methods("GET")
 	router.HandleFunc("/serverTime", handleGetServerTime).Methods("GET")
+	router.HandleFunc("/ws", ws.HandleWsUpgrade).Methods("GET")
+
+	router.PathPrefix("/").Handler(
+		http.StripPrefix("/public", http.FileServer(http.Dir("public/"))),
+	)
 
 	return router
 }
