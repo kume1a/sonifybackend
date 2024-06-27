@@ -9,16 +9,16 @@ import (
 	"github.com/kume1a/sonifybackend/internal/database"
 )
 
-type HttpErrorDto struct {
+type HttpErrorDTO struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
 }
 
-type UrlDto struct {
+type UrlDTO struct {
 	Url string `json:"url"`
 }
 
-type KeywordDto struct {
+type KeywordDTO struct {
 	Keyword []string `json:"keyword" valid:"required"`
 }
 
@@ -28,6 +28,10 @@ type AudioIDDTO struct {
 
 type AudioIDsDTO struct {
 	AudioIDs []uuid.UUID `json:"audioIds" valid:"uuidSliceNotEmpty,optional"`
+}
+
+type OkDTO struct {
+	Ok bool `json:"ok"`
 }
 
 type UserDto struct {
@@ -52,7 +56,7 @@ type RequiredIDsDTO struct {
 	IDs uuid.UUIDs `json:"ids" valid:"-"`
 }
 
-func (dto *KeywordDto) Validate() error {
+func (dto *KeywordDTO) Validate() error {
 	if len(dto.Keyword) != 1 {
 		return fmt.Errorf("keyword must have exactly one element")
 	}

@@ -7,6 +7,12 @@ import (
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
+func handleGetAuthStatus() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		shared.ResOK(w, shared.OkDTO{Ok: true})
+	}
+}
+
 func handleGoogleAuth(apiCfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		body, err := shared.ValidateRequestBody[*googleSignInDTO](r)

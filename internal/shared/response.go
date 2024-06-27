@@ -47,7 +47,7 @@ func ResError(w http.ResponseWriter, code int, msg string) {
 		w,
 		&HttpRes{
 			Code: code,
-			Payload: HttpErrorDto{
+			Payload: HttpErrorDTO{
 				Message: msg,
 				Code:    code,
 			},

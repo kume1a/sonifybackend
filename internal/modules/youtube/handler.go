@@ -21,12 +21,12 @@ func handleGetYoutubeMusicUrl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dto := shared.UrlDto{Url: url}
+	dto := shared.UrlDTO{Url: url}
 	shared.ResOK(w, dto)
 }
 
 func handleGetYoutubeSearchSuggestions(w http.ResponseWriter, r *http.Request) {
-	query, err := shared.ValidateRequestQuery[*shared.KeywordDto](r)
+	query, err := shared.ValidateRequestQuery[*shared.KeywordDTO](r)
 	if err != nil {
 		shared.ResBadRequest(w, err.Error())
 		return

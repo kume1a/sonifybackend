@@ -21,6 +21,7 @@ import (
 	"github.com/kume1a/sonifybackend/internal/modules/usersync"
 	"github.com/kume1a/sonifybackend/internal/modules/ws"
 	"github.com/kume1a/sonifybackend/internal/modules/youtube"
+	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
 func CreateRouter(apiCfg *config.ApiConfig) *mux.Router {
@@ -71,7 +72,7 @@ func CreateRouter(apiCfg *config.ApiConfig) *mux.Router {
 
 	router.HandleFunc("/", handleHealthcheck).Methods("GET")
 	router.HandleFunc("/serverTime", handleGetServerTime).Methods("GET")
-	router.HandleFunc("/ws", ws.HandleWsUpgrade).Methods("GET")
+	router.HandleFunc("/ws", shared.AuthMW(ws.HandleWsUpgrade)).Methods("GET")
 
 	router.PathPrefix("/").Handler(
 		http.StripPrefix("/public", http.FileServer(http.Dir("public/"))),
