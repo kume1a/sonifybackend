@@ -151,6 +151,7 @@ func downloadSpotifyPlaylist(
 ) error {
 	spotifyPlaylist, err := SpotifyGetPlaylist(spotifyAccessToken, spotifyPlaylistID)
 	if err != nil {
+		log.Println("Error getting Spotify playlist: ", err)
 		return err
 	}
 
@@ -158,6 +159,7 @@ func downloadSpotifyPlaylist(
 		ctx, apiCfg.ResourceConfig,
 		spotifyPlaylistID,
 	); err != nil {
+		log.Println("Error deleting playlist and playlist audios by spotify id: ", err)
 		return err
 	}
 

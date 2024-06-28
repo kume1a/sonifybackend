@@ -1,5 +1,7 @@
 package spotify
 
+import "github.com/google/uuid"
+
 type spotifyAccessTokenDTO struct {
 	SpotifyAccessToken string `json:"spotifyAccessToken" valid:"required"`
 }
@@ -42,9 +44,10 @@ type searchSpotifyResDTO struct {
 }
 
 type searchSpotifyResPlaylistDTO struct {
-	Name      string `json:"name"`
-	ImageUrl  string `json:"imageUrl"`
-	SpotifyID string `json:"spotifyId"`
+	Name       string    `json:"name"`
+	ImageUrl   string    `json:"imageUrl"`
+	SpotifyID  string    `json:"spotifyId"`
+	PlaylistID uuid.UUID `json:"playlistId"`
 }
 
 // --------- Spotify API DTOs ---------
@@ -236,48 +239,50 @@ type spotifyPlaylistItemsDTO struct {
 }
 type spotifySearchDTO struct {
 	Playlists struct {
-		Href     string `json:"href"`
-		Limit    int    `json:"limit"`
-		Next     string `json:"next"`
-		Offset   int    `json:"offset"`
-		Previous string `json:"previous"`
-		Total    int    `json:"total"`
-		Items    []struct {
-			Collaborative bool   `json:"collaborative"`
-			Description   string `json:"description"`
-			ExternalURLs  struct {
-				Spotify string `json:"spotify"`
-			} `json:"external_urls"`
-			Href   string `json:"href"`
-			ID     string `json:"id"`
-			Images []struct {
-				URL    string `json:"url"`
-				Height int    `json:"height"`
-				Width  int    `json:"width"`
-			} `json:"images"`
-			Name  string `json:"name"`
-			Owner struct {
-				ExternalURLs struct {
-					Spotify string `json:"spotify"`
-				} `json:"external_urls"`
-				Followers struct {
-					Href  string `json:"href"`
-					Total int    `json:"total"`
-				} `json:"followers"`
-				Href        string `json:"href"`
-				ID          string `json:"id"`
-				Type        string `json:"type"`
-				URI         string `json:"uri"`
-				DisplayName string `json:"display_name"`
-			} `json:"owner"`
-			Public     bool   `json:"public"`
-			SnapshotID string `json:"snapshot_id"`
-			Tracks     struct {
-				Href  string `json:"href"`
-				Total int    `json:"total"`
-			} `json:"tracks"`
-			Type string `json:"type"`
-			URI  string `json:"uri"`
-		} `json:"items"`
+		Href     string                         `json:"href"`
+		Limit    int                            `json:"limit"`
+		Next     string                         `json:"next"`
+		Offset   int                            `json:"offset"`
+		Previous string                         `json:"previous"`
+		Total    int                            `json:"total"`
+		Items    []spotifySearchPlaylistItemDTO `json:"items"`
 	} `json:"playlists"`
+}
+
+type spotifySearchPlaylistItemDTO struct {
+	Collaborative bool   `json:"collaborative"`
+	Description   string `json:"description"`
+	ExternalURLs  struct {
+		Spotify string `json:"spotify"`
+	} `json:"external_urls"`
+	Href   string `json:"href"`
+	ID     string `json:"id"`
+	Images []struct {
+		URL    string `json:"url"`
+		Height int    `json:"height"`
+		Width  int    `json:"width"`
+	} `json:"images"`
+	Name  string `json:"name"`
+	Owner struct {
+		ExternalURLs struct {
+			Spotify string `json:"spotify"`
+		} `json:"external_urls"`
+		Followers struct {
+			Href  string `json:"href"`
+			Total int    `json:"total"`
+		} `json:"followers"`
+		Href        string `json:"href"`
+		ID          string `json:"id"`
+		Type        string `json:"type"`
+		URI         string `json:"uri"`
+		DisplayName string `json:"display_name"`
+	} `json:"owner"`
+	Public     bool   `json:"public"`
+	SnapshotID string `json:"snapshot_id"`
+	Tracks     struct {
+		Href  string `json:"href"`
+		Total int    `json:"total"`
+	} `json:"tracks"`
+	Type string `json:"type"`
+	URI  string `json:"uri"`
 }

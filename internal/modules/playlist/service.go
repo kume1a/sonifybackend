@@ -31,15 +31,15 @@ func CreatePlaylist(
 	return &entity, err
 }
 
-func GetPlaylists(
+func GetPlaylistsBySpotifyIDs(
 	ctx context.Context,
 	db *database.Queries,
-	params database.GetPlaylistsParams,
+	spotifyIDs []string,
 ) ([]database.Playlist, error) {
-	playlists, err := db.GetPlaylists(ctx, params)
+	playlists, err := db.GetPlaylistsBySpotifyIDs(ctx, spotifyIDs)
 
 	if err != nil {
-		log.Println("Error getting playlists:", err)
+		log.Println("Error getting playlists by spotify ids:", err)
 	}
 
 	return playlists, err
@@ -151,6 +151,7 @@ func GetPlaylistIDBySpotifyID(
 	}
 
 	if err != nil {
+		log.Println("Error getting playlist id by spotify id:", err)
 		return uuid.Nil, shared.InternalServerErrorDef()
 	}
 

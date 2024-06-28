@@ -2,6 +2,7 @@ package spotify
 
 import (
 	"database/sql"
+	"log"
 	"net/http"
 	"time"
 
@@ -11,7 +12,7 @@ import (
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
-func handleSpotifySearch() http.HandlerFunc {
+func handleSpotifySearch(apiCfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		query, err := shared.ValidateRequestQuery[*searchSpotifyQueryDTO](r)
 		if err != nil {
@@ -30,7 +31,14 @@ func handleSpotifySearch() http.HandlerFunc {
 			return
 		}
 
-		dto := MapSpotifySearchToSearchSpotifyResult(spotifyRes)
+		log.Println("here 1")
+		spotifyResMergedWithDb, err := mergeSpotifySearchWithDBPlaylists(r.Context(), apiCfg.ResourceConfig, spotifyRes)
+		if err != nil {
+			shared.ResInternalServerErrorDef(w)
+			return
+		}
+
+		dto := MapMergedSpotifySearchToSearchSpotifyResult(spotifyRes, spotifyResMergedWithDb)
 
 		shared.ResOK(w, dto)
 	}

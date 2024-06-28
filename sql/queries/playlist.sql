@@ -12,12 +12,6 @@ INSERT INTO playlists(
 ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) 
 RETURNING *;
 
--- name: GetPlaylists :many
-SELECT * FROM playlists 
-  WHERE created_at > $1
-  ORDER BY created_at DESC
-  LIMIT $2;
-
 -- name: UpdatePlaylistByID :one
 UPDATE playlists
 SET name = COALESCE(sqlc.narg(name), name),
@@ -29,8 +23,8 @@ SET name = COALESCE(sqlc.narg(name), name),
 WHERE id = sqlc.arg(playlist_id)
 RETURNING *;
 
--- name: DeletePlaylistByID :exec
-DELETE FROM playlists WHERE id = $1;
+-- name: GetPlaylistsBySpotifyIDs :many
+SELECT * FROM playlists WHERE spotify_id = ANY(sqlc.arg(spotify_ids)::text[]);
 
 -- name: GetPlaylistBySpotifyID :one
 SELECT * FROM playlists WHERE spotify_id = sqlc.arg(spotify_id)::text;
@@ -49,3 +43,6 @@ SELECT playlists.id FROM playlists
 
 -- name: DeletePlaylistsByIDs :exec
 DELETE FROM playlists WHERE id = ANY(sqlc.arg(ids)::uuid[]);
+
+-- name: DeletePlaylistByID :exec
+DELETE FROM playlists WHERE id = $1;

@@ -20,10 +20,9 @@ require (
 require (
 	github.com/gocraft/work v0.5.1
 	github.com/gomodule/redigo v1.9.2
+	github.com/thoas/go-funk v0.9.3
 	golang.org/x/crypto v0.21.0
 	golang.org/x/exp v0.0.0-20240325151524-a685a6edb6d8
 )
 
-require (
-	github.com/robfig/cron v1.2.0 // indirect
-)
+require github.com/robfig/cron v1.2.0 // indirect

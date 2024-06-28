@@ -139,20 +139,12 @@ func (q *Queries) GetPlaylistIDBySpotifyID(ctx context.Context, spotifyID string
 	return id, err
 }
 
-const getPlaylists = `-- name: GetPlaylists :many
-SELECT id, created_at, name, thumbnail_path, spotify_id, thumbnail_url, audio_import_status, audio_count, total_audio_count FROM playlists 
-  WHERE created_at > $1
-  ORDER BY created_at DESC
-  LIMIT $2
+const getPlaylistsBySpotifyIDs = `-- name: GetPlaylistsBySpotifyIDs :many
+SELECT id, created_at, name, thumbnail_path, spotify_id, thumbnail_url, audio_import_status, audio_count, total_audio_count FROM playlists WHERE spotify_id = ANY($1::text[])
 `
 
-type GetPlaylistsParams struct {
-	CreatedAt time.Time
-	Limit     int32
-}
-
-func (q *Queries) GetPlaylists(ctx context.Context, arg GetPlaylistsParams) ([]Playlist, error) {
-	rows, err := q.db.QueryContext(ctx, getPlaylists, arg.CreatedAt, arg.Limit)
+func (q *Queries) GetPlaylistsBySpotifyIDs(ctx context.Context, spotifyIds []string) ([]Playlist, error) {
+	rows, err := q.db.QueryContext(ctx, getPlaylistsBySpotifyIDs, pq.Array(spotifyIds))
 	if err != nil {
 		return nil, err
 	}

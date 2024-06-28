@@ -6,11 +6,6 @@ import (
 	"github.com/kume1a/sonifybackend/internal/modules/sharedmodule"
 )
 
-type createPlaylistDTO struct {
-	Name          string
-	ThumbnailPath string
-}
-
 type playlistIDDTO struct {
 	PlaylistID uuid.UUID
 }

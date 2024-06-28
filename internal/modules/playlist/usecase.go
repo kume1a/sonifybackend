@@ -45,6 +45,11 @@ func DeletePlaylistAndPlaylistAudiosBySpotifyID(
 	playlistSpotifyID string,
 ) error {
 	playlistId, err := GetPlaylistIDBySpotifyID(ctx, resourceConfig.DB, playlistSpotifyID)
+
+	if err != nil && err.Error() == shared.ErrPlaylistNotFound {
+		return nil
+	}
+
 	if err != nil {
 		return err
 	}

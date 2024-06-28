@@ -8,8 +8,11 @@ import (
 	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/modules/audio"
+	"github.com/kume1a/sonifybackend/internal/modules/playlist"
 	"github.com/kume1a/sonifybackend/internal/modules/youtube"
 	"github.com/kume1a/sonifybackend/internal/shared"
+
+	"github.com/thoas/go-funk"
 )
 
 type DownloadSpotifyAudioInput struct {
@@ -127,4 +130,48 @@ func writeDownloadedSpotifyAudio(
 	_, err := audio.CreateAudio(ctx, resourceConfig.DB, params)
 
 	return err
+}
+
+func mergeSpotifySearchWithDBPlaylists(
+	ctx context.Context,
+	resourceConfig *config.ResourceConfig,
+	spotifySearch *spotifySearchDTO,
+) ([]spotifySearchPlaylistAndDbPlaylist, error) {
+	spotifyPlaylistIDs := funk.Map(
+		spotifySearch.Playlists.Items,
+		func(playlist spotifySearchPlaylistItemDTO) string {
+			return playlist.ID
+		},
+	).([]string)
+
+	dbPlaylists, err := playlist.GetPlaylistsBySpotifyIDs(ctx, resourceConfig.DB, spotifyPlaylistIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Println("Mapping dbPlaylists: ", dbPlaylists)
+	return funk.Map(
+		spotifySearch.Playlists.Items,
+		func(playlist spotifySearchPlaylistItemDTO) spotifySearchPlaylistAndDbPlaylist {
+			dbPlaylist := funk.Find(dbPlaylists, func(dbPlaylist database.Playlist) bool {
+				return dbPlaylist.SpotifyID.String == playlist.ID
+			})
+
+			log.Println("dbPlaylist: ", dbPlaylist)
+
+			if dbPlaylist == nil {
+				return spotifySearchPlaylistAndDbPlaylist{
+					SpotifySearchPlaylist: playlist,
+					DbPlaylist:            nil,
+				}
+			}
+
+			dbPlaylistValue := dbPlaylist.(database.Playlist)
+
+			return spotifySearchPlaylistAndDbPlaylist{
+				SpotifySearchPlaylist: playlist,
+				DbPlaylist:            &dbPlaylistValue,
+			}
+		},
+	).([]spotifySearchPlaylistAndDbPlaylist), nil
 }
