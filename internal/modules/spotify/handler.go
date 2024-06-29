@@ -7,6 +7,7 @@ import (
 
 	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
+	"github.com/kume1a/sonifybackend/internal/modules/sharedmodule"
 	"github.com/kume1a/sonifybackend/internal/modules/usersync"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
@@ -56,17 +57,20 @@ func handleImportSpotifyPlaylist(apiCfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		if err := downloadSpotifyPlaylist(
+		playlistEntity, err := downloadSpotifyPlaylist(
 			r.Context(), apiCfg,
 			authPayload.UserID,
 			body.SpotifyPlaylistID,
 			body.SpotifyAccessToken,
-		); err != nil {
+		)
+		if err != nil {
 			shared.ResInternalServerErrorDef(w)
 			return
 		}
 
-		shared.ResNoContent(w)
+		playlistDTO := sharedmodule.PlaylistEntityToDto(*playlistEntity)
+
+		shared.ResCreated(w, playlistDTO)
 	}
 }
 
