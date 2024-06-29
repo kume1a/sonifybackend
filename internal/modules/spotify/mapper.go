@@ -1,5 +1,7 @@
 package spotify
 
+import "github.com/google/uuid"
+
 func MapMergedSpotifySearchToSearchSpotifyResult(
 	dto *spotifySearchDTO,
 	spotifyResMergedWithDb []spotifySearchPlaylistAndDbPlaylist,
@@ -12,11 +14,16 @@ func MapMergedSpotifySearchToSearchSpotifyResult(
 			imageUrl = playlist.SpotifySearchPlaylist.Images[0].URL
 		}
 
+		var playlistID *uuid.UUID
+		if playlist.DbPlaylist != nil {
+			playlistID = &playlist.DbPlaylist.ID
+		}
+
 		res[index] = searchSpotifyResPlaylistDTO{
 			Name:       playlist.SpotifySearchPlaylist.Name,
 			ImageUrl:   imageUrl,
 			SpotifyID:  playlist.SpotifySearchPlaylist.ID,
-			PlaylistID: playlist.DbPlaylist.ID,
+			PlaylistID: playlistID,
 		}
 	}
 

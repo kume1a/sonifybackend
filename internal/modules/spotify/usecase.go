@@ -149,15 +149,12 @@ func mergeSpotifySearchWithDBPlaylists(
 		return nil, err
 	}
 
-	log.Println("Mapping dbPlaylists: ", dbPlaylists)
 	return funk.Map(
 		spotifySearch.Playlists.Items,
 		func(playlist spotifySearchPlaylistItemDTO) spotifySearchPlaylistAndDbPlaylist {
 			dbPlaylist := funk.Find(dbPlaylists, func(dbPlaylist database.Playlist) bool {
 				return dbPlaylist.SpotifyID.String == playlist.ID
 			})
-
-			log.Println("dbPlaylist: ", dbPlaylist)
 
 			if dbPlaylist == nil {
 				return spotifySearchPlaylistAndDbPlaylist{

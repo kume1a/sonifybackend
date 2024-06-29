@@ -44,10 +44,10 @@ type searchSpotifyResDTO struct {
 }
 
 type searchSpotifyResPlaylistDTO struct {
-	Name       string    `json:"name"`
-	ImageUrl   string    `json:"imageUrl"`
-	SpotifyID  string    `json:"spotifyId"`
-	PlaylistID uuid.UUID `json:"playlistId"`
+	Name       string     `json:"name"`
+	ImageUrl   string     `json:"imageUrl"`
+	SpotifyID  string     `json:"spotifyId"`
+	PlaylistID *uuid.UUID `json:"playlistId"`
 }
 
 // --------- Spotify API DTOs ---------

@@ -2,7 +2,6 @@ package spotify
 
 import (
 	"database/sql"
-	"log"
 	"net/http"
 	"time"
 
@@ -31,7 +30,6 @@ func handleSpotifySearch(apiCfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		log.Println("here 1")
 		spotifyResMergedWithDb, err := mergeSpotifySearchWithDBPlaylists(r.Context(), apiCfg.ResourceConfig, spotifyRes)
 		if err != nil {
 			shared.ResInternalServerErrorDef(w)
