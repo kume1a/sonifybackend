@@ -85,3 +85,17 @@ func GetUserPlaylistIDsByUserID(
 
 	return playlistIds, err
 }
+
+func GetUserPlaylistUserIDsByPlaylistID(
+	ctx context.Context,
+	db *database.Queries,
+	playlistId uuid.UUID,
+) (uuid.UUIDs, error) {
+	userIds, err := db.GetUserPlaylistUserIDsByPlaylistID(ctx, playlistId)
+
+	if err != nil {
+		log.Println("Error getting user playlist user ids:", err)
+	}
+
+	return userIds, err
+}

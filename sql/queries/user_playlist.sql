@@ -45,3 +45,6 @@ SELECT playlist_id FROM user_playlists WHERE user_id = $1;
 
 -- name: GetUserPlaylistIDsByUserID :many
 SELECT id FROM user_playlists WHERE user_id = $1;
+
+-- name: GetUserPlaylistUserIDsByPlaylistID :many
+SELECT user_id FROM user_playlists WHERE playlist_id = $1;

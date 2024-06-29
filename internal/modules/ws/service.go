@@ -9,13 +9,29 @@ import (
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
-func SendWSPayload(toSocketId string, payload interface{}) error {
-	ws, exists := GetManager().GetConnection(toSocketId)
+type wsPayloadDTO struct {
+	MessageType string      `json:"messageType"`
+	Payload     interface{} `json:"payload"`
+}
+
+type SendWSPayloadInput struct {
+	ToSocketId  string
+	MessageType string
+	Payload     interface{}
+}
+
+func SendWSPayload(input SendWSPayloadInput) error {
+	ws, exists := GetManager().GetConnection(input.ToSocketId)
 	if !exists {
 		return errors.New(shared.ErrSocketNotFound)
 	}
 
-	payloadJSON, err := json.Marshal(payload)
+	fullPayload := wsPayloadDTO{
+		MessageType: input.MessageType,
+		Payload:     input.Payload,
+	}
+
+	payloadJSON, err := json.Marshal(fullPayload)
 	if err != nil {
 		return errors.New(shared.ErrInvalidJSON)
 	}

@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"log"
 
+	"github.com/gocraft/work"
 	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/modules/audio"
@@ -171,4 +172,22 @@ func mergeSpotifySearchWithDBPlaylists(
 			}
 		},
 	).([]spotifySearchPlaylistAndDbPlaylist), nil
+}
+
+func enqueueDownloadPlaylistAudios(
+	apiCfg *config.ApiConfig,
+	spotifyPlaylistID string,
+	spotifyAccessToken string,
+) error {
+	if _, err := apiCfg.WorkEnqueuer.EnqueueUnique(
+		shared.BackgroundJobDownloadPlaylistAudios,
+		work.Q{
+			"spotifyPlaylistID":  spotifyPlaylistID,
+			"spotifyAccessToken": spotifyAccessToken,
+		},
+	); err != nil {
+		return err
+	}
+
+	return nil
 }

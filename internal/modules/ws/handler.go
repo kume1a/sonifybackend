@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/websocket"
+	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
 var upgrader = websocket.Upgrader{
@@ -14,12 +15,18 @@ var upgrader = websocket.Upgrader{
 }
 
 func HandleWsUpgrade(w http.ResponseWriter, r *http.Request) {
-	log.Println("Upgrading to websocket")
+	authPayload, err := shared.GetAuthPayload(r)
+	if err != nil {
+		log.Println("Error getting auth payload: ", err)
+		shared.ResUnauthorized(w, shared.ErrUnauthorized)
+		return
+	}
 
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println("Error upgrading to websocket:", err)
 		return
 	}
-	GetManager().addConnection("uniqueKey", conn)
+
+	GetManager().addConnection(authPayload.UserID.String(), conn)
 }

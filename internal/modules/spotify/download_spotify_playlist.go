@@ -5,14 +5,15 @@ import (
 	"database/sql"
 	"log"
 
-	"github.com/gocraft/work"
 	"github.com/google/uuid"
 	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/modules/audio"
 	"github.com/kume1a/sonifybackend/internal/modules/playlist"
 	"github.com/kume1a/sonifybackend/internal/modules/playlistaudio"
+	"github.com/kume1a/sonifybackend/internal/modules/sharedmodule"
 	"github.com/kume1a/sonifybackend/internal/modules/userplaylist"
+	"github.com/kume1a/sonifybackend/internal/modules/ws"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
@@ -24,10 +25,17 @@ func DownloadSpotifyPlaylistAudios(
 ) error {
 	playlistID, err := playlist.GetPlaylistIDBySpotifyID(ctx, resouceConfig.DB, playlistSpotifyID)
 	if err != nil {
+		setPlaylistImportStatusToFailed(ctx, resouceConfig.DB, playlistID)
 		return err
 	}
 
 	playlistItems, err := getAllSpotifyPlaylistItems(spotifyAccessToken, playlistSpotifyID)
+	if err != nil {
+		setPlaylistImportStatusToFailed(ctx, resouceConfig.DB, playlistID)
+		return err
+	}
+
+	userPlaylistUserIDs, err := userplaylist.GetUserPlaylistUserIDsByPlaylistID(ctx, resouceConfig.DB, playlistID)
 	if err != nil {
 		setPlaylistImportStatusToFailed(ctx, resouceConfig.DB, playlistID)
 		return err
@@ -64,7 +72,7 @@ func DownloadSpotifyPlaylistAudios(
 				audioImportStatus = database.ProcessStatusCOMPLETED
 			}
 
-			playlist.UpdatePlaylistByID(
+			updatedPlaylist, err := playlist.UpdatePlaylistByID(
 				ctx, resouceConfig.DB,
 				database.UpdatePlaylistByIDParams{
 					PlaylistID:        playlistID,
@@ -73,6 +81,20 @@ func DownloadSpotifyPlaylistAudios(
 					AudioImportStatus: database.NullProcessStatus{ProcessStatus: audioImportStatus, Valid: true},
 				},
 			)
+			if err != nil {
+				log.Println("Error updating playlist by id:", err)
+				return
+			}
+
+			for _, userPlaylistUserID := range userPlaylistUserIDs {
+				updatedPlaylistDTO := sharedmodule.PlaylistEntityToDto(*updatedPlaylist)
+
+				ws.SendWSPayload(ws.SendWSPayloadInput{
+					ToSocketId:  userPlaylistUserID.String(),
+					MessageType: ws.MessageTypePlaylistUpdated,
+					Payload:     updatedPlaylistDTO,
+				})
+			}
 		},
 	); err != nil {
 		log.Println("Error downloading Spotify playlist audios: ", err)
@@ -194,12 +216,10 @@ func downloadSpotifyPlaylist(
 		return nil, err
 	}
 
-	if _, err := apiCfg.WorkEnqueuer.EnqueueUnique(
-		shared.BackgroundJobDownloadPlaylistAudios,
-		work.Q{
-			"spotifyPlaylistID":  spotifyPlaylistID,
-			"spotifyAccessToken": spotifyAccessToken,
-		},
+	if err := enqueueDownloadPlaylistAudios(
+		apiCfg,
+		spotifyPlaylistID,
+		spotifyAccessToken,
 	); err != nil {
 		return nil, err
 	}
@@ -265,12 +285,10 @@ func downloadSpotifyUserSavedPlaylists(
 	}
 
 	for _, spotifyPlaylist := range spotifyPlaylists.Items {
-		if _, err := apiCfg.WorkEnqueuer.EnqueueUnique(
-			shared.BackgroundJobDownloadPlaylistAudios,
-			work.Q{
-				"spotifyPlaylistID":  spotifyPlaylist.ID,
-				"spotifyAccessToken": spotifyAccessToken,
-			},
+		if err := enqueueDownloadPlaylistAudios(
+			apiCfg,
+			spotifyPlaylist.ID,
+			spotifyAccessToken,
 		); err != nil {
 			return err
 		}

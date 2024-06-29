@@ -200,6 +200,33 @@ func (q *Queries) GetUserPlaylistIDsByUserID(ctx context.Context, userID uuid.UU
 	return items, nil
 }
 
+const getUserPlaylistUserIDsByPlaylistID = `-- name: GetUserPlaylistUserIDsByPlaylistID :many
+SELECT user_id FROM user_playlists WHERE playlist_id = $1
+`
+
+func (q *Queries) GetUserPlaylistUserIDsByPlaylistID(ctx context.Context, playlistID uuid.UUID) ([]uuid.UUID, error) {
+	rows, err := q.db.QueryContext(ctx, getUserPlaylistUserIDsByPlaylistID, playlistID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []uuid.UUID
+	for rows.Next() {
+		var user_id uuid.UUID
+		if err := rows.Scan(&user_id); err != nil {
+			return nil, err
+		}
+		items = append(items, user_id)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getUserPlaylists = `-- name: GetUserPlaylists :many
 SELECT id, created_at, user_id, playlist_id, is_spotify_saved_playlist FROM user_playlists
 WHERE user_id = $1 
