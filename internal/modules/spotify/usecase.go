@@ -178,16 +178,17 @@ func enqueueDownloadPlaylistAudios(
 	apiCfg *config.ApiConfig,
 	spotifyPlaylistID string,
 	spotifyAccessToken string,
-) error {
-	if _, err := apiCfg.WorkEnqueuer.EnqueueUnique(
+) (string, error) {
+	job, err := apiCfg.WorkEnqueuer.EnqueueUnique(
 		shared.BackgroundJobDownloadPlaylistAudios,
 		work.Q{
 			"spotifyPlaylistID":  spotifyPlaylistID,
 			"spotifyAccessToken": spotifyAccessToken,
 		},
-	); err != nil {
-		return err
+	)
+	if err != nil {
+		return "", err
 	}
 
-	return nil
+	return job.ID, nil
 }

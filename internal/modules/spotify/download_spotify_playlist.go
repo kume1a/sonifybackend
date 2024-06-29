@@ -216,7 +216,7 @@ func downloadSpotifyPlaylist(
 		return nil, err
 	}
 
-	if err := enqueueDownloadPlaylistAudios(
+	if _, err := enqueueDownloadPlaylistAudios(
 		apiCfg,
 		spotifyPlaylistID,
 		spotifyAccessToken,
@@ -285,7 +285,7 @@ func downloadSpotifyUserSavedPlaylists(
 	}
 
 	for _, spotifyPlaylist := range spotifyPlaylists.Items {
-		if err := enqueueDownloadPlaylistAudios(
+		if _, err := enqueueDownloadPlaylistAudios(
 			apiCfg,
 			spotifyPlaylist.ID,
 			spotifyAccessToken,
