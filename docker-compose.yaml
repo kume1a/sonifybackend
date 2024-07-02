@@ -13,6 +13,7 @@ services:
       sonifydb:
         condition: service_healthy
       sonifyredis:
+        condition: service_healthy
     volumes:
       - /root/sonifybackendpublic:/app/public
 
@@ -42,4 +43,9 @@ services:
     volumes:
       - local_redis_data:/data
     command: /bin/sh -c "redis-server --requirepass ${REDIS_PASSWORD}"
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a ${REDIS_PASSWORD} ping || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     
