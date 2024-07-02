@@ -9,6 +9,19 @@ services:
     build: ./
     ports:
       - "8000:8000"
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT}
+      PORT: ${PORT}
+      DB_URL: ${DB_URL}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      GOOGLE_CLIENT_KEY: ${GOOGLE_CLIENT_KEY}
+      ACCESS_TOKEN_SECRET: ${ACCESS_TOKEN_SECRET}
+      ACCESS_TOKEN_EXP_MILLIS: ${ACCESS_TOKEN_EXP_MILLIS}
+      PUBLIC_DIR: ${PUBLIC_DIR}
+      SPOTIFY_CLIENT_ID: ${SPOTIFY_CLIENT_ID}
+      SPOTIFY_CLIENT_SECRET: ${SPOTIFY_CLIENT_SECRET}
+      SPOTIFY_REDIRECT_URI: ${SPOTIFY_REDIRECT_URI}
+      MAX_UPLOAD_SIZE_BYTES: ${MAX_UPLOAD_SIZE_BYTES}
     depends_on:
       sonifydb:
         condition: service_healthy

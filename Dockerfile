@@ -2,7 +2,7 @@ FROM golang:1.22.0 AS build-stage
 
 WORKDIR /app
 
-COPY go.mod go.sum Makefile ./.env.production ./
+COPY go.mod go.sum Makefile ./
 RUN go mod download
 
 COPY *.go ./
