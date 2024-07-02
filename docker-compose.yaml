@@ -37,6 +37,8 @@ services:
     container_name: sonify_redis
     ports:
       - "6379:6379"
+    environment:
+      - REDIS_PASSWORD: ${REDIS_PASSWORD}
     volumes:
       - local_redis_data:/data
     command: /bin/sh -c "redis-server --requirepass ${REDIS_PASSWORD}"
