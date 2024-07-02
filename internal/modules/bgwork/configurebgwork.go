@@ -29,7 +29,11 @@ func createRedisPool() *redis.Pool {
 		MaxIdle:   100,
 		Wait:      true,
 		Dial: func() (redis.Conn, error) {
-			return redis.Dial("tcp", ":6379", redis.DialPassword(envVars.RedisPassword))
+			return redis.Dial(
+				"tcp",
+				envVars.RedisAddress,
+				redis.DialPassword(envVars.RedisPassword),
+			)
 		},
 	}
 }

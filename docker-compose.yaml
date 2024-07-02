@@ -14,6 +14,7 @@ services:
       PORT: ${PORT}
       DB_URL: ${DB_URL}
       REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_ADDRESS: ${REDIS_ADDRESS}
       GOOGLE_CLIENT_KEY: ${GOOGLE_CLIENT_KEY}
       ACCESS_TOKEN_SECRET: ${ACCESS_TOKEN_SECRET}
       ACCESS_TOKEN_EXP_MILLIS: ${ACCESS_TOKEN_EXP_MILLIS}
@@ -22,6 +23,7 @@ services:
       SPOTIFY_CLIENT_SECRET: ${SPOTIFY_CLIENT_SECRET}
       SPOTIFY_REDIRECT_URI: ${SPOTIFY_REDIRECT_URI}
       MAX_UPLOAD_SIZE_BYTES: ${MAX_UPLOAD_SIZE_BYTES}
+
     depends_on:
       sonifydb:
         condition: service_healthy
@@ -55,10 +57,9 @@ services:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
     volumes:
       - local_redis_data:/data
-    command: /bin/sh -c "redis-server --requirepass ${REDIS_PASSWORD}"
+    command: /bin/sh -c "redis-server --requirepass $$REDIS_PASSWORD"
     healthcheck:
-      test: ["CMD-SHELL", "redis-cli -a ${REDIS_PASSWORD} ping || exit 1"]
+      test: ["CMD-SHELL", "redis-cli -a $$REDIS_PASSWORD ping || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
-    

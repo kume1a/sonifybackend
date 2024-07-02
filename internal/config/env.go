@@ -21,11 +21,13 @@ func LoadEnv() {
 	//   godotenv.Load(".env.local")
 	// }
 
-	envPath := ".env." + env
+	if env == "development" {
+		envPath := ".env." + env
 
-	log.Println("Loading env file: " + envPath)
+		log.Println("Loading env file: " + envPath)
 
-	godotenv.Load(envPath)
+		godotenv.Load(envPath)
+	}
 }
 
 type EnvVariables struct {
@@ -42,6 +44,7 @@ type EnvVariables struct {
 	SpotifyClientSecret  string
 	SpotifyRedirectURI   string
 	RedisPassword        string
+	RedisAddress         string
 }
 
 func ParseEnv() (*EnvVariables, error) {
@@ -105,6 +108,11 @@ func ParseEnv() (*EnvVariables, error) {
 		return nil, err
 	}
 
+	redisAddress, err := getEnv("REDIS_ADDRESS")
+	if err != nil {
+		return nil, err
+	}
+
 	return &EnvVariables{
 		IsDevelopment:        environment == "development",
 		IsProduction:         environment == "production",
@@ -119,6 +127,7 @@ func ParseEnv() (*EnvVariables, error) {
 		SpotifyClientSecret:  spotifyClientSecret,
 		SpotifyRedirectURI:   spotifyRedirectURI,
 		RedisPassword:        redisPassword,
+		RedisAddress:         redisAddress,
 	}, nil
 }
 
