@@ -19,16 +19,16 @@ jobs:
         run: docker-compose build --no-cache
       - name: run the image
         run: docker-compose up -d
-  env:
-    ENVIRONMENT: ${{ vars.ENVIRONMENT }}
-    PORT: ${{ vars.PORT }}
-    DB_URL: ${{ vars.DB_URL }}
-    REDIS_PASSWORD: ${{ vars.REDIS_PASSWORD }}
-    GOOGLE_CLIENT_KEY: ${{ vars.GOOGLE_CLIENT_KEY }}
-    ACCESS_TOKEN_SECRET: ${{ vars.ACCESS_TOKEN_SECRET }}
-    ACCESS_TOKEN_EXP_MILLIS: ${{ vars.ACCESS_TOKEN_EXP_MILLIS }}
-    PUBLIC_DIR: ${{ vars.PUBLIC_DIR }}
-    SPOTIFY_CLIENT_ID: ${{ vars.SPOTIFY_CLIENT_ID }}
-    SPOTIFY_CLIENT_SECRET: ${{ vars.SPOTIFY_CLIENT_SECRET }}
-    SPOTIFY_REDIRECT_URI: ${{ vars.SPOTIFY_REDIRECT_URI }}
-    MAX_UPLOAD_SIZE_BYTES: ${{ vars.MAX_UPLOAD_SIZE_BYTES }}
+    env:
+      ENVIRONMENT: ${{ vars.ENVIRONMENT }}
+      PORT: ${{ vars.PORT }}
+      DB_URL: ${{ vars.DB_URL }}
+      REDIS_PASSWORD: ${{ vars.REDIS_PASSWORD }}
+      GOOGLE_CLIENT_KEY: ${{ vars.GOOGLE_CLIENT_KEY }}
+      ACCESS_TOKEN_SECRET: ${{ vars.ACCESS_TOKEN_SECRET }}
+      ACCESS_TOKEN_EXP_MILLIS: ${{ vars.ACCESS_TOKEN_EXP_MILLIS }}
+      PUBLIC_DIR: ${{ vars.PUBLIC_DIR }}
+      SPOTIFY_CLIENT_ID: ${{ vars.SPOTIFY_CLIENT_ID }}
+      SPOTIFY_CLIENT_SECRET: ${{ vars.SPOTIFY_CLIENT_SECRET }}
+      SPOTIFY_REDIRECT_URI: ${{ vars.SPOTIFY_REDIRECT_URI }}
+      MAX_UPLOAD_SIZE_BYTES: ${{ vars.MAX_UPLOAD_SIZE_BYTES }}
