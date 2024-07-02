@@ -23,6 +23,9 @@ jobs:
       ENVIRONMENT: ${{ vars.ENVIRONMENT }}
       PORT: ${{ vars.PORT }}
       DB_URL: ${{ vars.DB_URL }}
+      POSTGRES_PASSWORD: ${{ vars.POSTGRES_PASSWORD }}
+      POSTGRES_USERNAME: ${{ vars.POSTGRES_USERNAME }}
+      POSTGRES_DB: ${{ vars.POSTGRES_DB }}
       REDIS_PASSWORD: ${{ vars.REDIS_PASSWORD }}
       GOOGLE_CLIENT_KEY: ${{ vars.GOOGLE_CLIENT_KEY }}
       ACCESS_TOKEN_SECRET: ${{ vars.ACCESS_TOKEN_SECRET }}
