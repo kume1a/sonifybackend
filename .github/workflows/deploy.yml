@@ -28,6 +28,7 @@ jobs:
       POSTGRES_USERNAME: ${{ secrets.POSTGRES_USERNAME }}
       POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
       REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+      REDIS_ADDRESS: ${{ secrets.REDIS_ADDRESS }}
       GOOGLE_CLIENT_KEY: ${{ secrets.GOOGLE_CLIENT_KEY }}
       ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
       ACCESS_TOKEN_EXP_MILLIS: ${{ secrets.ACCESS_TOKEN_EXP_MILLIS }}
