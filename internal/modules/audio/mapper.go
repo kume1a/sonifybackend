@@ -20,6 +20,7 @@ func GetUserAudiosByAudioIdsRowToUserAudioWithRelDTO(
 
 	return &sharedmodule.UserAudioWithRelDTO{
 		UserAudioDTO: &sharedmodule.UserAudioDTO{
+			ID:        e.ID,
 			CreatedAt: e.CreatedAt,
 			UserId:    e.UserID,
 			AudioId:   e.AudioID,

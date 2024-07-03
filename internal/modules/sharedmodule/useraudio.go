@@ -8,6 +8,7 @@ import (
 )
 
 type UserAudioDTO struct {
+	ID        uuid.UUID `json:"id"`
 	UserId    uuid.UUID `json:"userId"`
 	AudioId   uuid.UUID `json:"audioId"`
 	CreatedAt time.Time `json:"createdAt"`
