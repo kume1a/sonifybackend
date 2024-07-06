@@ -1,5 +1,5 @@
-check lib for http: https://github.com/levigross/grequests?utm_campaign=awesomego&utm_medium=referral&utm_source=awesomego
+check libs for http: 
+  * https://github.com/levigross/grequests?utm_campaign=awesomego&utm_medium=referral&utm_source=awesomego
+  * https://github.com/go-resty/resty
 
-- update playlist changes in db when reimporting from spotify
-- import all audios and all playlist, use paging of spotify limit is currently 50
 - migrate validation to validate
