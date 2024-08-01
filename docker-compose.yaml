@@ -30,7 +30,7 @@ services:
       sonifyredis:
         condition: service_healthy
     volumes:
-      - /root/sonifybackendpublic:/app/public
+      - /home/toko/dev/sonify/sonifybackendpublic:/app/public
 
   sonifydb:
     image: postgres:14.5-alpine
