@@ -17,6 +17,12 @@ SELECT COUNT(*) FROM user_audios
   INNER JOIN audios ON user_audios.audio_id = audios.id 
   WHERE user_audios.user_id = $1 AND audios.local_id = $2;
 
+-- name: CountUserAudio :one
+SELECT COUNT(1) 
+FROM user_audios 
+WHERE user_id = $1
+  AND audio_id = $2;
+
 -- name: GetUserAudioIDs :many
 SELECT audio_id FROM user_audios WHERE user_id = $1;
 
@@ -43,3 +49,6 @@ FROM user_audios
 INNER JOIN audios ON user_audios.audio_id = audios.id
 LEFT JOIN audio_likes ON audio_likes.audio_id = audios.id
 WHERE user_audios.user_id = sqlc.arg(user_id) AND audios.id = ANY(sqlc.arg(audio_ids)::uuid[]);
+
+-- name: DeleteUserAudio :exec
+DELETE FROM user_audios WHERE user_id = $1 AND audio_id = $2;

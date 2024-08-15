@@ -25,4 +25,5 @@ const (
 	ErrAudioNotFound                 = "AUDIO_NOT_FOUND"
 	ErrNotImplemented                = "NOT_IMPLEMENTED"
 	ErrSocketNotFound                = "SOCKET_NOT_FOUND"
+	ErrUserAudioNotFound             = "USER_AUDIO_NOT_FOUND"
 )
