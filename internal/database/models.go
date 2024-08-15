@@ -139,6 +139,13 @@ type AudioLike struct {
 	AudioID   uuid.UUID
 }
 
+type HiddenUserAudio struct {
+	ID        uuid.UUID
+	CreatedAt time.Time
+	UserID    uuid.UUID
+	AudioID   uuid.UUID
+}
+
 type Playlist struct {
 	ID                uuid.UUID
 	CreatedAt         time.Time

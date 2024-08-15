@@ -1,4 +1,4 @@
-package audiolike
+package hiddenuseraudio
 
 import (
 	"context"
@@ -11,41 +11,41 @@ import (
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
-type LikeUnlikeAudioParams struct {
+type HideUnhideAudioParams struct {
 	UserID  uuid.UUID
 	AudioID uuid.UUID
 }
 
-func LikeAudio(
+func HideUserAudio(
 	ctx context.Context,
 	db *database.Queries,
-	params LikeUnlikeAudioParams,
-) (*database.AudioLike, error) {
+	params HideUnhideAudioParams,
+) (*database.HiddenUserAudio, error) {
 	err := sharedmodule.ValidateAudioExistsByID(ctx, db, params.AudioID)
 	if err != nil {
 		return nil, err
 	}
 
-	newAudioLike, err := db.CreateAudioLike(ctx, database.CreateAudioLikeParams{
+	newHiddenUserAudio, err := db.CreateHiddenUserAudio(ctx, database.CreateHiddenUserAudioParams{
 		UserID:    params.UserID,
 		AudioID:   params.AudioID,
 		ID:        uuid.New(),
 		CreatedAt: time.Now().UTC(),
 	})
 	if err != nil {
-		log.Println("Error creating audio like: ", err)
+		log.Println("Error creating hidden user audio: ", err)
 		return nil, shared.InternalServerErrorDef()
 	}
 
-	return &newAudioLike, nil
+	return &newHiddenUserAudio, nil
 }
 
-func UnlikeAudio(
+func UnhideAudio(
 	ctx context.Context,
 	db *database.Queries,
-	params LikeUnlikeAudioParams,
+	params HideUnhideAudioParams,
 ) error {
-	err := db.DeleteAudioLike(ctx, database.DeleteAudioLikeParams{
+	err := db.DeleteHiddenUserAudio(ctx, database.DeleteHiddenUserAudioParams{
 		UserID:  params.UserID,
 		AudioID: params.AudioID,
 	})
@@ -61,29 +61,29 @@ func UnlikeAudio(
 	return nil
 }
 
-func GetAudioLikesByUserID(
+func GetHiddenUserAudiosByUserID(
 	ctx context.Context,
 	db *database.Queries,
 	userID uuid.UUID,
-) ([]database.AudioLike, error) {
-	entities, err := db.GetAudioLikesByUserID(ctx, userID)
+) ([]database.HiddenUserAudio, error) {
+	entities, err := db.GetHiddenUserAudiosByUserID(ctx, userID)
 
 	if err != nil {
-		log.Println("Error getting audio likes by user ID:", err)
+		log.Println("Error getting hidden user audios by user ID:", err)
 	}
 
 	return entities, err
 }
 
-func GetAudioLikesByUserIDAndAudioIDs(
+func GetHiddenUserAudiosByUserIDAndAudioIDs(
 	ctx context.Context,
 	db *database.Queries,
-	params database.GetAudioLikesByUserIDAndAudioIDsParams,
-) ([]database.AudioLike, error) {
-	entities, err := db.GetAudioLikesByUserIDAndAudioIDs(ctx, params)
+	params database.GetHiddenUserAudiosByUserIDAndAudioIDsParams,
+) ([]database.HiddenUserAudio, error) {
+	entities, err := db.GetHiddenUserAudiosByUserIDAndAudioIDs(ctx, params)
 
 	if err != nil {
-		log.Println("Error getting audio likes by user ID and audio IDs:", err)
+		log.Println("Error getting hidden user audios by user ID and audio IDs:", err)
 	}
 
 	return entities, err

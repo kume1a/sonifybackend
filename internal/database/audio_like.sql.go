@@ -62,20 +62,6 @@ func (q *Queries) DeleteAudioLike(ctx context.Context, arg DeleteAudioLikeParams
 	return err
 }
 
-const deleteUserAudioLikesByAudioIDs = `-- name: DeleteUserAudioLikesByAudioIDs :exec
-DELETE FROM audio_likes WHERE user_id = $1 AND audio_id = ANY($2::uuid[])
-`
-
-type DeleteUserAudioLikesByAudioIDsParams struct {
-	UserID   uuid.UUID
-	AudioIds []uuid.UUID
-}
-
-func (q *Queries) DeleteUserAudioLikesByAudioIDs(ctx context.Context, arg DeleteUserAudioLikesByAudioIDsParams) error {
-	_, err := q.db.ExecContext(ctx, deleteUserAudioLikesByAudioIDs, arg.UserID, pq.Array(arg.AudioIds))
-	return err
-}
-
 const getAudioLikesByUserID = `-- name: GetAudioLikesByUserID :many
 SELECT id, created_at, user_id, audio_id 
 FROM audio_likes 
