@@ -35,9 +35,9 @@ func handleHideUserAudio(apiCfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		audioLikeDTO := HiddenUserAudioEntityToDTO(newHiddenUserAudio)
+		resDTO := HiddenUserAudioEntityToDTO(newHiddenUserAudio)
 
-		shared.ResOK(w, audioLikeDTO)
+		shared.ResOK(w, resDTO)
 	}
 }
 
