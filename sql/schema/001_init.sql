@@ -189,3 +189,14 @@ DROP TABLE user_playlists;
 DROP TABLE user_sync_data;
 DROP TABLE users;
 
+DROP INDEX idx_audios_created_at;
+DROP INDEX idx_audios_spotify_id;
+DROP INDEX idx_artist_audios_created_at;
+DROP INDEX idx_artists_created_at;
+DROP INDEX idx_audio_likes_created_at;
+DROP INDEX idx_playlist_audios_created_at;
+DROP INDEX idx_playlists_created_at;
+DROP INDEX idx_user_audios_created_at;
+DROP INDEX idx_user_playlists_created_at;
+DROP INDEX idx_users_created_at;
+DROP INDEX idx_users_email;

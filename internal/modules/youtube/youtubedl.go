@@ -92,9 +92,11 @@ func GetYoutubeVideoInfo(videoID string) (*youtubeVideoInfoDTO, error) {
 	cmd := exec.Command(
 		"yt-dlp",
 		"--print",
-		"{\"title\": \"%(title)s\", \"uploader\": \"%(uploader)s\", \"durationSeconds\": %(duration)s}",
+		"{\"title\": \"%(title)s\", \"uploader\": \"%(uploader)s\", \"durationSeconds\": \"%(duration)s:\"}",
 		"https://www.youtube.com/watch?v="+videoID,
 	)
+
+	// yt-dlp --print {"title": "%(title)s", "uploader": "%(uploader)s", "durationSeconds": "%(duration)s"} https://www.youtube.com/watch?v=japBNRP47-8
 
 	output, err := cmd.Output()
 	if err != nil {

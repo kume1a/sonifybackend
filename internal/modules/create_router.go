@@ -12,6 +12,7 @@ import (
 	"github.com/kume1a/sonifybackend/internal/modules/audio"
 	"github.com/kume1a/sonifybackend/internal/modules/audiolike"
 	"github.com/kume1a/sonifybackend/internal/modules/auth"
+	"github.com/kume1a/sonifybackend/internal/modules/hiddenuseraudio"
 	"github.com/kume1a/sonifybackend/internal/modules/playlist"
 	"github.com/kume1a/sonifybackend/internal/modules/playlistaudio"
 	"github.com/kume1a/sonifybackend/internal/modules/spotify"
@@ -67,6 +68,7 @@ func CreateRouter(apiCfg *config.ApiConfig) *mux.Router {
 	v1Router.Handle("", userplaylist.Router(apiCfg, v1Router))
 	v1Router.Handle("", playlistaudio.Router(apiCfg, v1Router))
 	v1Router.Handle("", useraudio.Router(apiCfg, v1Router))
+	v1Router.Handle("", hiddenuseraudio.Router(apiCfg, v1Router))
 
 	router.Handle("", v1Router)
 
