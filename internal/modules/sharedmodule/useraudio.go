@@ -21,6 +21,7 @@ type UserAudioWithRelDTO struct {
 
 func UserAudioEntityToDTO(e *database.UserAudio) *UserAudioDTO {
 	return &UserAudioDTO{
+		ID:        e.ID,
 		CreatedAt: e.CreatedAt,
 		UserId:    e.UserID,
 		AudioId:   e.AudioID,
