@@ -26,7 +26,7 @@ RUN apt-get -y install make
 EXPOSE 8000
 
 ENV SONIFY_ENV=production
-ENV PATH="$PATH:~/.local/bin"
+ENV PATH="$PATH:/root/.local/bin"
 
 # ENTRYPOINT ["tail", "-f", "/dev/null"]
 
