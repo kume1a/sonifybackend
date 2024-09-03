@@ -10,6 +10,7 @@ func Router(apiCfg *config.ApiConfig, router *mux.Router) *mux.Router {
 	r := router.PathPrefix("/useraudio").Subrouter()
 
 	r.HandleFunc("/createForAuthUser", shared.AuthMW(handleCreateUserAudiosForAuthUser(apiCfg))).Methods("POST")
+	r.HandleFunc("/deleteForAuthUser", shared.AuthMW(handleDeleteUserAudioForAuthUser(apiCfg))).Methods("DELETE")
 
 	return r
 }

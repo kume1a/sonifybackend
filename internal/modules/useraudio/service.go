@@ -117,3 +117,40 @@ func GetUserAudiosByAudioIds(
 
 	return audios, err
 }
+
+func UserAudioExists(
+	ctx context.Context,
+	db *database.Queries,
+	params database.CountUserAudioParams,
+) (bool, error) {
+	count, err := db.CountUserAudio(ctx, params)
+
+	if err != nil {
+		log.Println("Error checking if user audio exists: ", err)
+		return false, err
+	}
+
+	return count > 0, nil
+}
+
+func DeleteUserAudio(
+	ctx context.Context,
+	db *database.Queries,
+	params database.DeleteUserAudioParams,
+) error {
+	count, err := db.CountUserAudio(ctx, database.CountUserAudioParams{
+		UserID:  params.UserID,
+		AudioID: params.AudioID,
+	})
+
+	if err != nil {
+		log.Println("Error counting user audio: ", err)
+		return err
+	}
+
+	if count == 0 {
+		return shared.NotFound(shared.ErrUserAudioNotFound)
+	}
+
+	return db.DeleteUserAudio(ctx, params)
+}

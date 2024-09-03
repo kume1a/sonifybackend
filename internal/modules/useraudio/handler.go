@@ -42,3 +42,34 @@ func handleCreateUserAudiosForAuthUser(apiCfg *config.ApiConfig) http.HandlerFun
 		shared.ResCreated(w, useraudioDTOs)
 	}
 }
+
+func handleDeleteUserAudioForAuthUser(apiCfg *config.ApiConfig) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		authUser, err := shared.GetAuthPayload(r)
+		if err != nil {
+			shared.ResUnauthorized(w, err.Error())
+			return
+		}
+
+		body, err := shared.ValidateRequestBody[*shared.AudioIDDTO](r)
+		if err != nil {
+			shared.ResBadRequest(w, err.Error())
+			return
+		}
+
+		err = DeleteUserAudio(
+			r.Context(),
+			apiCfg.DB,
+			database.DeleteUserAudioParams{
+				UserID:  authUser.UserID,
+				AudioID: body.AudioID,
+			},
+		)
+		if err != nil {
+			shared.ResTryHttpError(w, err)
+			return
+		}
+
+		shared.ResNoContent(w)
+	}
+}
