@@ -15,8 +15,13 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o /sonifybin
 RUN go install github.com/pressly/goose/v3/cmd/goose@latest
 
 # Install dependencies
+RUN mkdir ~/.local
+RUN mkdir ~/.local/bin
+RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o ~/.local/bin/yt-dlp
+RUN chmod a+rx ~/.local/bin/yt-dlp
+RUN export PATH="$PATH:~/.local/bin"
+
 RUN apt update
-RUN apt install yt-dlp -y
 RUN apt-get -y install make
 
 EXPOSE 8000
