@@ -23,6 +23,7 @@ RUN export PATH="$PATH:~/.local/bin"
 
 RUN apt update
 RUN apt-get -y install make
+RUN apt install ffmpeg -y
 
 EXPOSE 8000
 
