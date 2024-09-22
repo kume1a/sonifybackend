@@ -7,3 +7,4 @@ temp
 .DS_STORE
 
 .env*
+!.env.example
