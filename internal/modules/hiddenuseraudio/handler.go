@@ -3,6 +3,7 @@ package hiddenuseraudio
 import (
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/shared"
@@ -22,12 +23,18 @@ func handleHideUserAudio(apiCfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
+		audioID, err := uuid.Parse(body.AudioID)
+		if err != nil {
+			shared.ResBadRequest(w, shared.ErrInvalidUUID)
+			return
+		}
+
 		newHiddenUserAudio, err := HideUserAudio(
 			r.Context(),
 			apiCfg.DB,
 			HideUnhideAudioParams{
 				UserID:  authPayload.UserID,
-				AudioID: body.AudioID,
+				AudioID: audioID,
 			},
 		)
 		if err != nil {
@@ -55,9 +62,15 @@ func handleUnhideUserAudio(apiCfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
+		audioID, err := uuid.Parse(body.AudioID)
+		if err != nil {
+			shared.ResBadRequest(w, shared.ErrInvalidUUID)
+			return
+		}
+
 		err = UnhideAudio(r.Context(), apiCfg.DB, HideUnhideAudioParams{
 			UserID:  authPayload.UserID,
-			AudioID: body.AudioID,
+			AudioID: audioID,
 		})
 		if err != nil {
 			shared.ResTryHttpError(w, err)

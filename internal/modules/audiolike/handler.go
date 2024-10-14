@@ -3,6 +3,7 @@ package audiolike
 import (
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/modules/sharedmodule"
@@ -23,9 +24,15 @@ func handleLikeAudio(apiCfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
+		audioID, err := uuid.Parse(body.AudioID)
+		if err != nil {
+			shared.ResBadRequest(w, shared.ErrInvalidUUID)
+			return
+		}
+
 		newAudioLike, err := LikeAudio(r.Context(), apiCfg.DB, LikeUnlikeAudioParams{
 			UserID:  authPayload.UserID,
-			AudioID: body.AudioID,
+			AudioID: audioID,
 		})
 		if err != nil {
 			shared.ResTryHttpError(w, err)
@@ -52,9 +59,15 @@ func handleUnlikeAudio(apiCfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
+		audioID, err := uuid.Parse(body.AudioID)
+		if err != nil {
+			shared.ResBadRequest(w, shared.ErrInvalidUUID)
+			return
+		}
+
 		err = UnlikeAudio(r.Context(), apiCfg.DB, LikeUnlikeAudioParams{
 			UserID:  authPayload.UserID,
-			AudioID: body.AudioID,
+			AudioID: audioID,
 		})
 		if err != nil {
 			shared.ResTryHttpError(w, err)

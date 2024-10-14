@@ -23,7 +23,7 @@ type KeywordDTO struct {
 }
 
 type AudioIDDTO struct {
-	AudioID uuid.UUID `json:"audioId" valid:"required"`
+	AudioID string `json:"audioId" valid:"required,uuid"`
 }
 
 type AudioIDsDTO struct {

@@ -3,6 +3,7 @@ package useraudio
 import (
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/modules/sharedmodule"
@@ -57,12 +58,18 @@ func handleDeleteUserAudioForAuthUser(apiCfg *config.ApiConfig) http.HandlerFunc
 			return
 		}
 
+		audioID, err := uuid.Parse(body.AudioID)
+		if err != nil {
+			shared.ResBadRequest(w, shared.ErrInvalidUUID)
+			return
+		}
+
 		err = DeleteUserAudio(
 			r.Context(),
 			apiCfg.DB,
 			database.DeleteUserAudioParams{
 				UserID:  authUser.UserID,
-				AudioID: body.AudioID,
+				AudioID: audioID,
 			},
 		)
 		if err != nil {
