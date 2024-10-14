@@ -23,6 +23,7 @@ type SendWSPayloadInput struct {
 func SendWSPayload(input SendWSPayloadInput) error {
 	ws, exists := GetManager().GetConnection(input.ToSocketId)
 	if !exists {
+		log.Println("Socket not found:", input.ToSocketId)
 		return errors.New(shared.ErrSocketNotFound)
 	}
 
@@ -33,6 +34,7 @@ func SendWSPayload(input SendWSPayloadInput) error {
 
 	payloadJSON, err := json.Marshal(fullPayload)
 	if err != nil {
+		log.Println("Error marshalling payload to JSON:", err)
 		return errors.New(shared.ErrInvalidJSON)
 	}
 
