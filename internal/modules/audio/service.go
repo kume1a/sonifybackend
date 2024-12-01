@@ -83,6 +83,20 @@ func UpdateAudioByID(
 	return &entity, nil
 }
 
+func DeleteUnusedAudios(
+	ctx context.Context,
+	db *database.Queries,
+) (int64, error) {
+	deletedCount, err := db.DeleteUnusedAudios(ctx)
+
+	if err != nil {
+		log.Println("Error deleting unused audios:", err)
+		return 0, shared.InternalServerErrorDef()
+	}
+
+	return deletedCount, nil
+}
+
 func DoesAudioExistByLocalId(
 	ctx context.Context,
 	db *database.Queries,

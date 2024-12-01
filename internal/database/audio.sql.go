@@ -92,13 +92,17 @@ func (q *Queries) CreateAudio(ctx context.Context, arg CreateAudioParams) (Audio
 	return i, err
 }
 
-const deleteAudioById = `-- name: DeleteAudioById :exec
-DELETE FROM audios WHERE id = $1
+const deleteUnusedAudios = `-- name: DeleteUnusedAudios :one
+DELETE FROM audios 
+WHERE playlist_audio_count = 0 AND user_audio_count = 0
+RETURNING COUNT(*)
 `
 
-func (q *Queries) DeleteAudioById(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.ExecContext(ctx, deleteAudioById, id)
-	return err
+func (q *Queries) DeleteUnusedAudios(ctx context.Context) (int64, error) {
+	row := q.db.QueryRowContext(ctx, deleteUnusedAudios)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
 }
 
 const getAllAudioIDs = `-- name: GetAllAudioIDs :many

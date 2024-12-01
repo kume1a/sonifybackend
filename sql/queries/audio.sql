@@ -24,8 +24,10 @@ SELECT
 -- name: GetAllAudioIDs :many
 SELECT id FROM audios;
 
--- name: DeleteAudioById :exec
-DELETE FROM audios WHERE id = $1;
+-- name: DeleteUnusedAudios :one
+DELETE FROM audios 
+WHERE playlist_audio_count = 0 AND user_audio_count = 0
+RETURNING COUNT(*);
 
 -- name: GetAudioById :one
 SELECT * FROM audios WHERE id = $1;

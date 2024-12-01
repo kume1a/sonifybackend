@@ -11,7 +11,7 @@ COPY ./sql ./sql
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o /sonifybin
 
-## Install goose
+# Install goose
 RUN go install github.com/pressly/goose/v3/cmd/goose@latest
 
 # Install dependencies
