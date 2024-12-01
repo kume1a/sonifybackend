@@ -20,23 +20,23 @@ func DeleteSpotifyUserSavedPlaylists(
 		return err
 	}
 
-	if _, err := shared.RunDBTransaction(ctx, resourceConfig, func(tx *database.Queries) (any, error) {
-		err = DeleteSpotifyUserSavedPlaylistJoins(ctx, tx, userId)
-		if err != nil {
-			return nil, err
-		}
+	return shared.RunNoResultDBTransaction(
+		ctx,
+		resourceConfig,
+		func(tx *database.Queries) error {
+			err = DeleteSpotifyUserSavedPlaylistJoins(ctx, tx, userId)
+			if err != nil {
+				return err
+			}
 
-		err = DeletePlaylistsByIDs(ctx, tx, playlistIds)
-		if err != nil {
-			return nil, err
-		}
+			err = DeletePlaylistsByIDs(ctx, tx, playlistIds)
+			if err != nil {
+				return err
+			}
 
-		return nil, nil
-	}); err != nil {
-		return err
-	}
-
-	return nil
+			return nil
+		},
+	)
 }
 
 func DeletePlaylistAndPlaylistAudiosBySpotifyID(
@@ -54,21 +54,21 @@ func DeletePlaylistAndPlaylistAudiosBySpotifyID(
 		return err
 	}
 
-	if _, err := shared.RunDBTransaction(ctx, resourceConfig, func(tx *database.Queries) (any, error) {
-		err = playlistaudio.DeletePlaylistAudiosByPlaylistID(ctx, tx, playlistId)
-		if err != nil {
-			return nil, err
-		}
+	return shared.RunNoResultDBTransaction(
+		ctx,
+		resourceConfig,
+		func(tx *database.Queries) error {
+			if err = playlistaudio.DeletePlaylistAudiosByPlaylistID(
+				ctx, tx, playlistId,
+			); err != nil {
+				return err
+			}
 
-		err = DeletePlaylistByID(ctx, tx, playlistId)
-		if err != nil {
-			return nil, err
-		}
+			if err := DeletePlaylistByID(ctx, tx, playlistId); err != nil {
+				return err
+			}
 
-		return nil, nil
-	}); err != nil {
-		return err
-	}
-
-	return nil
+			return nil
+		},
+	)
 }

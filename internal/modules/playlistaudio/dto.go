@@ -12,6 +12,11 @@ type createPlaylistAudioDTO struct {
 	AudioID    uuid.UUID `json:"audioId" valid:"required"`
 }
 
+type deletePlaylistAudioDTO struct {
+	PlaylistID uuid.UUID `json:"playlistId" valid:"required"`
+	AudioID    uuid.UUID `json:"audioId" valid:"required"`
+}
+
 type PlaylistAudioDTO struct {
 	ID         uuid.UUID              `json:"id"`
 	CreatedAt  time.Time              `json:"createdAt"`

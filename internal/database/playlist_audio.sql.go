@@ -59,6 +59,20 @@ func (q *Queries) CreatePlaylistAudio(ctx context.Context, arg CreatePlaylistAud
 	return i, err
 }
 
+const deletePlaylistAudioByPlaylistIDAndAudioID = `-- name: DeletePlaylistAudioByPlaylistIDAndAudioID :exec
+DELETE FROM playlist_audios WHERE playlist_id = $1 AND audio_id = $2
+`
+
+type DeletePlaylistAudioByPlaylistIDAndAudioIDParams struct {
+	PlaylistID uuid.UUID
+	AudioID    uuid.UUID
+}
+
+func (q *Queries) DeletePlaylistAudioByPlaylistIDAndAudioID(ctx context.Context, arg DeletePlaylistAudioByPlaylistIDAndAudioIDParams) error {
+	_, err := q.db.ExecContext(ctx, deletePlaylistAudioByPlaylistIDAndAudioID, arg.PlaylistID, arg.AudioID)
+	return err
+}
+
 const deletePlaylistAudiosByIDs = `-- name: DeletePlaylistAudiosByIDs :exec
 DELETE FROM playlist_audios 
   WHERE playlist_id = $1

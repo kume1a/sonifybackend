@@ -63,7 +63,7 @@ func ValidateAudioExistsByID(
 	return nil
 }
 
-func IncrementUserAudioCountByID(
+func IncrementAudioUserAudioCountByID(
 	ctx context.Context,
 	db *database.Queries,
 	audioID uuid.UUID,
@@ -76,7 +76,7 @@ func IncrementUserAudioCountByID(
 	return nil
 }
 
-func DecrementUserAudioCountByID(
+func DecrementAudioUserAudioCountByID(
 	ctx context.Context,
 	db *database.Queries,
 	audioID uuid.UUID,
@@ -89,7 +89,7 @@ func DecrementUserAudioCountByID(
 	return nil
 }
 
-func IncrementPlaylistAudioCountByID(
+func IncrementAudioPlaylistAudioCountByID(
 	ctx context.Context,
 	db *database.Queries,
 	audioID uuid.UUID,
@@ -102,7 +102,7 @@ func IncrementPlaylistAudioCountByID(
 	return nil
 }
 
-func DecrementPlaylistAudioCountByID(
+func DecrementAudioPlaylistAudioCountByID(
 	ctx context.Context,
 	db *database.Queries,
 	audioID uuid.UUID,

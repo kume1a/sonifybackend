@@ -260,25 +260,25 @@ func downloadSpotifyUserSavedPlaylists(
 		createUserPlaylistParams = append(createUserPlaylistParams, userPlaylistEntityCreateParams)
 	}
 
-	if _, err := shared.RunDBTransaction(
+	if err := shared.RunNoResultDBTransaction(
 		ctx,
 		apiCfg.ResourceConfig,
-		func(queries *database.Queries) (any, error) {
+		func(queries *database.Queries) error {
 			for _, params := range createPlaylistParams {
 				_, err := playlist.CreatePlaylist(ctx, queries, params)
 				if err != nil {
-					return nil, err
+					return err
 				}
 			}
 
 			for _, params := range createUserPlaylistParams {
 				_, err := userplaylist.CreateUserPlaylist(ctx, queries, params)
 				if err != nil {
-					return nil, err
+					return err
 				}
 			}
 
-			return nil, nil
+			return nil
 		},
 	); err != nil {
 		return err

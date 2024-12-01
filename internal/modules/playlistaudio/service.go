@@ -31,7 +31,7 @@ func CreatePlaylistAudio(
 		return nil, shared.InternalServerErrorDef()
 	}
 
-	if err := sharedmodule.IncrementPlaylistAudioCountByID(
+	if err := sharedmodule.IncrementAudioPlaylistAudioCountByID(
 		ctx, db, params.AudioID,
 	); err != nil {
 		log.Println("Error incrementing playlist audio count:", err)
@@ -104,6 +104,41 @@ func DeletePlaylistAudiosByPlaylistID(
 
 	if err != nil {
 		log.Println("Error deleting playlist audios by playlist ID:", err)
+	}
+
+	return err
+}
+
+func DeletePlaylistAudioByPlaylistIDAndAudioIDTx(
+	ctx context.Context,
+	resourceConfig *config.ResourceConfig,
+	params database.DeletePlaylistAudioByPlaylistIDAndAudioIDParams,
+) error {
+	return shared.RunNoResultDBTransaction(
+		ctx,
+		resourceConfig,
+		func(tx *database.Queries) error {
+			return DeletePlaylistAudioByPlaylistIDAndAudioID(ctx, tx, params)
+		},
+	)
+}
+
+func DeletePlaylistAudioByPlaylistIDAndAudioID(
+	ctx context.Context,
+	db *database.Queries,
+	params database.DeletePlaylistAudioByPlaylistIDAndAudioIDParams,
+) error {
+	err := db.DeletePlaylistAudioByPlaylistIDAndAudioID(ctx, params)
+
+	if err != nil {
+		log.Println("Error deleting playlist audio by playlist ID and audio ID:", err)
+	}
+
+	if err := sharedmodule.DecrementAudioPlaylistAudioCountByID(
+		ctx, db, params.AudioID,
+	); err != nil {
+		log.Println("Error decrementing playlist audio count:", err)
+		return shared.InternalServerErrorDef()
 	}
 
 	return err

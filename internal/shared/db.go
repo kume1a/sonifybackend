@@ -8,12 +8,6 @@ import (
 	"github.com/kume1a/sonifybackend/internal/database"
 )
 
-type DBOverrideOptions struct {
-	OverrideID        bool `default:"true"`
-	OverrideCreatedAt bool `default:"true"`
-	OverrideUpdatedAt bool `default:"true"`
-}
-
 func RunDBTransaction[T interface{}](
 	ctx context.Context,
 	resourceConfig *config.ResourceConfig,
@@ -38,6 +32,31 @@ func RunDBTransaction[T interface{}](
 	}
 
 	return result, nil
+}
+
+func RunNoResultDBTransaction(
+	ctx context.Context,
+	resourceConfig *config.ResourceConfig,
+	f func(queries *database.Queries) error,
+) error {
+	tx, err := resourceConfig.SqlDB.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	defer tx.Rollback()
+
+	qtx := resourceConfig.DB.WithTx(tx)
+
+	if err := f(qtx); err != nil {
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func IsDBErrorNotFound(err error) bool {

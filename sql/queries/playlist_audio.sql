@@ -54,6 +54,9 @@ DELETE FROM playlist_audios
 -- name: DeletePlaylistAudiosByPlaylistID :exec
 DELETE FROM playlist_audios WHERE playlist_id = $1;
 
+-- name: DeletePlaylistAudioByPlaylistIDAndAudioID :exec
+DELETE FROM playlist_audios WHERE playlist_id = $1 AND audio_id = $2;
+
 -- name: GetPlaylistAudioJoinsBySpotifyIDs :many
 SELECT 
   playlist_audios.*,

@@ -30,7 +30,7 @@ func CreateUserAudio(
 		log.Println("Error creating user audio:", err)
 	}
 
-	if err := sharedmodule.IncrementUserAudioCountByID(
+	if err := sharedmodule.IncrementAudioUserAudioCountByID(
 		ctx, db, params.AudioID,
 	); err != nil {
 		log.Println("Error incrementing user audio count:", err)
@@ -161,21 +161,13 @@ func DeleteUserAudioTx(
 	resourceConfig *config.ResourceConfig,
 	params database.DeleteUserAudioParams,
 ) error {
-	if _, err := shared.RunDBTransaction(
+	return shared.RunNoResultDBTransaction(
 		ctx,
 		resourceConfig,
-		func(tx *database.Queries) (any, error) {
-			if err := DeleteUserAudio(ctx, tx, params); err != nil {
-				return nil, err
-			}
-
-			return nil, nil
+		func(tx *database.Queries) error {
+			return DeleteUserAudio(ctx, tx, params)
 		},
-	); err != nil {
-		return err
-	}
-
-	return nil
+	)
 }
 
 func DeleteUserAudio(
@@ -202,7 +194,7 @@ func DeleteUserAudio(
 		return shared.InternalServerErrorDef()
 	}
 
-	if err := sharedmodule.DecrementUserAudioCountByID(
+	if err := sharedmodule.DecrementAudioUserAudioCountByID(
 		ctx, tx, params.AudioID,
 	); err != nil {
 		log.Println("Error decrementing user audio count: ", err)
