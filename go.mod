@@ -18,4 +18,4 @@ require (
 	golang.org/x/exp v0.0.0-20240613232115-7f521ea00fb8
 )
 
-require github.com/robfig/cron v1.2.0 // indirect
+require github.com/robfig/cron v1.2.0
