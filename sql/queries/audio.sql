@@ -24,11 +24,6 @@ SELECT
 -- name: GetAllAudioIDs :many
 SELECT id FROM audios;
 
--- name: DeleteUnusedAudios :one
-DELETE FROM audios 
-WHERE playlist_audio_count = 0 AND user_audio_count = 0
-RETURNING COUNT(*);
-
 -- name: GetAudioById :one
 SELECT * FROM audios WHERE id = $1;
 
@@ -66,6 +61,12 @@ SELECT
   id, spotify_id 
 FROM audios
 WHERE spotify_id = ANY(sqlc.arg(spotify_ids)::text[]);
+
+-- name: GetUnusedAudios :many
+SELECT * FROM audios WHERE playlist_audio_count = 0 AND user_audio_count = 0;
+
+-- name: DeleteAudioByID :exec
+DELETE FROM audios WHERE id = $1;
 
 -- name: GetAudioIDsBySpotifyIDs :many
 SELECT 

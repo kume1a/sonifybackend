@@ -3,6 +3,7 @@ package bgwork
 import (
 	"context"
 	"log"
+	"os"
 	"time"
 
 	"github.com/gocraft/work"
@@ -33,7 +34,7 @@ func CreateHandleDownloadPlaylistAudios(
 
 func CreateHandleDeleteUnusedAudios(resourceConfig *config.ResourceConfig) func() {
 	return func() {
-		deletedCount, err := audio.DeleteUnusedAudios(
+		unusedAudios, err := audio.GetUnusedAudios(
 			context.Background(),
 			resourceConfig.DB,
 		)
@@ -43,6 +44,22 @@ func CreateHandleDeleteUnusedAudios(resourceConfig *config.ResourceConfig) func(
 			return
 		}
 
-		log.Println("Deleted ", deletedCount, " unused audios")
+		for _, unusedAudio := range unusedAudios {
+			if err := audio.DeleteAudioByID(
+				context.Background(),
+				resourceConfig.DB,
+				unusedAudio.ID,
+			); err != nil {
+				log.Println("Error deleting audio: ", err)
+				return
+			}
+
+			if err := os.Remove(unusedAudio.Path.String); err != nil {
+				log.Println("Error removing unused audio file: ", err)
+				return
+			}
+		}
+
+		log.Println("Deleted ", len(unusedAudios), " unused audios")
 	}
 }
