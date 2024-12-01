@@ -124,7 +124,7 @@ func DownloadSpotifyPlaylistAudios(
 		)
 	}
 
-	if _, err := playlistaudio.BulkCreatePlaylistAudios(
+	if _, err := playlistaudio.BulkCreatePlaylistAudiosTx(
 		ctx,
 		resouceConfig,
 		createPlaylistAudioParams,

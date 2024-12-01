@@ -17,10 +17,14 @@ func handleCreatePlaylistAudio(apiCfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		playlistAudio, err := CreatePlaylistAudio(r.Context(), apiCfg.DB, database.CreatePlaylistAudioParams{
-			PlaylistID: body.PlaylistID,
-			AudioID:    body.AudioID,
-		})
+		playlistAudio, err := CreatePlaylistAudioTx(
+			r.Context(),
+			apiCfg.ResourceConfig,
+			database.CreatePlaylistAudioParams{
+				PlaylistID: body.PlaylistID,
+				AudioID:    body.AudioID,
+			},
+		)
 		if err != nil {
 			shared.ResInternalServerErrorDef(w)
 			return
@@ -47,7 +51,11 @@ func handleGetPlaylistAudiosByAuthUser(apiCfg *config.ApiConfig) http.HandlerFun
 			return
 		}
 
-		userPlaylistIDs, err := userplaylist.GetPlaylistIDsByUserID(r.Context(), apiCfg.DB, authPayload.UserID)
+		userPlaylistIDs, err := userplaylist.GetPlaylistIDsByUserID(
+			r.Context(),
+			apiCfg.DB,
+			authPayload.UserID,
+		)
 		if err != nil {
 			shared.ResInternalServerErrorDef(w)
 			return
@@ -80,7 +88,11 @@ func handleGetPlaylistAudioIDsByAuthUser(apiCfg *config.ApiConfig) http.HandlerF
 			return
 		}
 
-		playlistAudioIDs, err := GetPlaylistAudioIDsByUserID(r.Context(), apiCfg.DB, authPayload.UserID)
+		playlistAudioIDs, err := GetPlaylistAudioIDsByUserID(
+			r.Context(),
+			apiCfg.DB,
+			authPayload.UserID,
+		)
 		if err != nil {
 			shared.ResInternalServerErrorDef(w)
 			return

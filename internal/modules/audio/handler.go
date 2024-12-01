@@ -56,7 +56,7 @@ func handleUploadUserLocalMusic(apiCfg *config.ApiConfig) http.HandlerFunc {
 
 		res := sharedmodule.UserAudioWithRelDTO{
 			UserAudioDTO: sharedmodule.UserAudioEntityToDTO(userAudioWithAudio.UserAudio),
-			Audio:        sharedmodule.AudioEntityToDto(*userAudioWithAudio.Audio),
+			Audio:        sharedmodule.AudioEntityToDto(userAudioWithAudio.Audio),
 		}
 
 		shared.ResCreated(w, res)

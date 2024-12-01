@@ -26,7 +26,7 @@ type AudioDTO struct {
 	AudioLike      *AudioLikeDTO `json:"audioLike"`
 }
 
-func AudioEntityToDto(e database.Audio) *AudioDTO {
+func AudioEntityToDto(e *database.Audio) *AudioDTO {
 	return &AudioDTO{
 		ID:             e.ID,
 		CreatedAt:      e.CreatedAt,
@@ -58,6 +58,58 @@ func ValidateAudioExistsByID(
 
 	if count == 0 {
 		return shared.NotFound(shared.ErrAudioNotFound)
+	}
+
+	return nil
+}
+
+func IncrementUserAudioCountByID(
+	ctx context.Context,
+	db *database.Queries,
+	audioID uuid.UUID,
+) error {
+	if err := db.IncrementUserAudioCountByID(ctx, audioID); err != nil {
+		log.Println("Error incrementing user audio count by ID: ", err)
+		return shared.InternalServerErrorDef()
+	}
+
+	return nil
+}
+
+func DecrementUserAudioCountByID(
+	ctx context.Context,
+	db *database.Queries,
+	audioID uuid.UUID,
+) error {
+	if err := db.DecrementUserAudioCountByID(ctx, audioID); err != nil {
+		log.Println("Error decrementing user audio count by ID: ", err)
+		return shared.InternalServerErrorDef()
+	}
+
+	return nil
+}
+
+func IncrementPlaylistAudioCountByID(
+	ctx context.Context,
+	db *database.Queries,
+	audioID uuid.UUID,
+) error {
+	if err := db.IncrementPlaylistAudioCountByID(ctx, audioID); err != nil {
+		log.Println("Error incrementing playlist audio count by ID: ", err)
+		return shared.InternalServerErrorDef()
+	}
+
+	return nil
+}
+
+func DecrementPlaylistAudioCountByID(
+	ctx context.Context,
+	db *database.Queries,
+	audioID uuid.UUID,
+) error {
+	if err := db.DecrementPlaylistAudioCountByID(ctx, audioID); err != nil {
+		log.Println("Error decrementing playlist audio count by ID: ", err)
+		return shared.InternalServerErrorDef()
 	}
 
 	return nil

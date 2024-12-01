@@ -60,7 +60,7 @@ func handleDownloadYoutubeAudio(apiCfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		userAudio, savedAudio, httpErr := DownloadYoutubeAudioAndSave(DownloadYoutubeAudioParams{
+		userAudioWithAudio, httpErr := DownloadYoutubeAudioAndSave(DownloadYoutubeAudioParams{
 			ApiConfig: apiCfg,
 			Context:   r.Context(),
 			UserID:    authPayload.UserID,
@@ -72,8 +72,8 @@ func handleDownloadYoutubeAudio(apiCfg *config.ApiConfig) http.HandlerFunc {
 		}
 
 		res := sharedmodule.UserAudioWithRelDTO{
-			UserAudioDTO: sharedmodule.UserAudioEntityToDTO(userAudio),
-			Audio:        sharedmodule.AudioEntityToDto(*savedAudio),
+			UserAudioDTO: sharedmodule.UserAudioEntityToDTO(userAudioWithAudio.UserAudio),
+			Audio:        sharedmodule.AudioEntityToDto(userAudioWithAudio.Audio),
 		}
 
 		shared.ResCreated(w, res)

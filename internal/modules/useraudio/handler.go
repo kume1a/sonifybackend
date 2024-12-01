@@ -32,7 +32,7 @@ func handleCreateUserAudiosForAuthUser(apiCfg *config.ApiConfig) http.HandlerFun
 			})
 		}
 
-		useraudios, err := BulkCreateUserAudios(r.Context(), apiCfg.ResourceConfig, params)
+		useraudios, err := BulkCreateUserAudiosTx(r.Context(), apiCfg.ResourceConfig, params)
 		if err != nil {
 			shared.ResTryHttpError(w, err)
 			return
@@ -64,15 +64,14 @@ func handleDeleteUserAudioForAuthUser(apiCfg *config.ApiConfig) http.HandlerFunc
 			return
 		}
 
-		err = DeleteUserAudio(
+		if err := DeleteUserAudioTx(
 			r.Context(),
-			apiCfg.DB,
+			apiCfg.ResourceConfig,
 			database.DeleteUserAudioParams{
 				UserID:  authUser.UserID,
 				AudioID: audioID,
 			},
-		)
-		if err != nil {
+		); err != nil {
 			shared.ResTryHttpError(w, err)
 			return
 		}

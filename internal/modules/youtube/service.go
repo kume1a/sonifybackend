@@ -21,8 +21,7 @@ type DownloadYoutubeAudioParams struct {
 }
 
 func DownloadYoutubeAudioAndSave(params DownloadYoutubeAudioParams) (
-	*database.UserAudio,
-	*database.Audio,
+	*audio.UserAudioWithAudio,
 	*shared.HttpError,
 ) {
 	// check if the user already has the audio
@@ -34,50 +33,72 @@ func DownloadYoutubeAudioAndSave(params DownloadYoutubeAudioParams) (
 			YoutubeVideoID: sql.NullString{String: params.VideoID, Valid: true},
 		},
 	); err == nil {
-		return nil, nil, shared.Conflict(shared.ErrAudioAlreadyExists)
+		return nil, shared.Conflict(shared.ErrAudioAlreadyExists)
 	}
 
 	videoInfo, err := GetYoutubeVideoInfo(params.VideoID)
 	if err != nil {
-		return nil, nil, shared.InternalServerErrorDef()
+		return nil, shared.InternalServerErrorDef()
 	}
 
-	filePath, thumbnailPath, err := DownloadYoutubeAudio(params.VideoID, DownloadYoutubeAudioOptions{
-		DownloadThumbnail: true,
-	})
+	filePath, thumbnailPath, err := DownloadYoutubeAudio(
+		params.VideoID,
+		DownloadYoutubeAudioOptions{
+			DownloadThumbnail: true,
+		},
+	)
 	if err != nil {
-		return nil, nil, shared.InternalServerErrorDef()
+		return nil, shared.InternalServerErrorDef()
 	}
 
 	fileSize, err := shared.GetFileSize(filePath)
 	if err != nil {
-		return nil, nil, shared.InternalServerErrorDef()
+		return nil, shared.InternalServerErrorDef()
 	}
 
-	newAudio, err := audio.CreateAudio(
+	txResult, err := shared.RunDBTransaction(
 		params.Context,
-		params.ApiConfig.DB,
-		database.CreateAudioParams{
-			Title:          sql.NullString{String: strings.TrimSpace(videoInfo.Title), Valid: true},
-			Author:         sql.NullString{String: strings.TrimSpace(videoInfo.Uploader), Valid: true},
-			DurationMs:     sql.NullInt32{Int32: int32(videoInfo.DurationSeconds * 1000), Valid: true},
-			Path:           sql.NullString{String: filePath, Valid: true},
-			SizeBytes:      sql.NullInt64{Int64: fileSize.Bytes, Valid: true},
-			YoutubeVideoID: sql.NullString{String: params.VideoID, Valid: true},
-			ThumbnailPath:  sql.NullString{String: thumbnailPath, Valid: true},
+		params.ApiConfig.ResourceConfig,
+		func(tx *database.Queries) (audio.UserAudioWithAudio, error) {
+			newAudio, err := audio.CreateAudio(
+				params.Context,
+				params.ApiConfig.DB,
+				database.CreateAudioParams{
+					Title:          sql.NullString{String: strings.TrimSpace(videoInfo.Title), Valid: true},
+					Author:         sql.NullString{String: strings.TrimSpace(videoInfo.Uploader), Valid: true},
+					DurationMs:     sql.NullInt32{Int32: int32(videoInfo.DurationSeconds * 1000), Valid: true},
+					Path:           sql.NullString{String: filePath, Valid: true},
+					SizeBytes:      sql.NullInt64{Int64: fileSize.Bytes, Valid: true},
+					YoutubeVideoID: sql.NullString{String: params.VideoID, Valid: true},
+					ThumbnailPath:  sql.NullString{String: thumbnailPath, Valid: true},
+				},
+			)
+			if err != nil {
+				return audio.UserAudioWithAudio{}, shared.InternalServerErrorDef()
+			}
+
+			userAudio, err := useraudio.CreateUserAudio(
+				params.Context,
+				params.ApiConfig.DB,
+				database.CreateUserAudioParams{
+					UserID:  params.UserID,
+					AudioID: newAudio.ID,
+				},
+			)
+			if err != nil {
+				return audio.UserAudioWithAudio{}, shared.InternalServerErrorDef()
+			}
+
+			return audio.UserAudioWithAudio{
+				UserAudio: userAudio,
+				Audio:     newAudio,
+			}, nil
 		},
 	)
+
 	if err != nil {
-		return nil, nil, shared.InternalServerErrorDef()
+		return nil, shared.InternalServerErrorDef()
 	}
 
-	userAudio, err := useraudio.CreateUserAudio(params.Context, params.ApiConfig.DB, database.CreateUserAudioParams{
-		UserID:  params.UserID,
-		AudioID: newAudio.ID,
-	})
-	if err != nil {
-		return nil, nil, shared.InternalServerErrorDef()
-	}
-
-	return userAudio, newAudio, nil
+	return &txResult, nil
 }

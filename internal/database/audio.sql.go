@@ -92,6 +92,24 @@ func (q *Queries) CreateAudio(ctx context.Context, arg CreateAudioParams) (Audio
 	return i, err
 }
 
+const decrementPlaylistAudioCountByID = `-- name: DecrementPlaylistAudioCountByID :exec
+UPDATE audios SET playlist_audio_count = playlist_audio_count - 1 WHERE id = $1
+`
+
+func (q *Queries) DecrementPlaylistAudioCountByID(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, decrementPlaylistAudioCountByID, id)
+	return err
+}
+
+const decrementUserAudioCountByID = `-- name: DecrementUserAudioCountByID :exec
+UPDATE audios SET user_audio_count = user_audio_count - 1 WHERE id = $1
+`
+
+func (q *Queries) DecrementUserAudioCountByID(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, decrementUserAudioCountByID, id)
+	return err
+}
+
 const deleteUnusedAudios = `-- name: DeleteUnusedAudios :one
 DELETE FROM audios 
 WHERE playlist_audio_count = 0 AND user_audio_count = 0
@@ -267,6 +285,24 @@ func (q *Queries) GetAudiosByUserID(ctx context.Context, userID uuid.UUID) ([]Au
 		return nil, err
 	}
 	return items, nil
+}
+
+const incrementPlaylistAudioCountByID = `-- name: IncrementPlaylistAudioCountByID :exec
+UPDATE audios SET playlist_audio_count = playlist_audio_count + 1 WHERE id = $1
+`
+
+func (q *Queries) IncrementPlaylistAudioCountByID(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, incrementPlaylistAudioCountByID, id)
+	return err
+}
+
+const incrementUserAudioCountByID = `-- name: IncrementUserAudioCountByID :exec
+UPDATE audios SET user_audio_count = user_audio_count + 1 WHERE id = $1
+`
+
+func (q *Queries) IncrementUserAudioCountByID(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, incrementUserAudioCountByID, id)
+	return err
 }
 
 const updateAudioByID = `-- name: UpdateAudioByID :one

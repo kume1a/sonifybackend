@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
+	"github.com/kume1a/sonifybackend/internal/modules/sharedmodule"
 	"github.com/kume1a/sonifybackend/internal/modules/userplaylist"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
@@ -25,15 +26,36 @@ func CreatePlaylistAudio(
 	}
 
 	entity, err := db.CreatePlaylistAudio(ctx, params)
-
 	if err != nil {
 		log.Println("Error creating playlist audio:", err)
+		return nil, shared.InternalServerErrorDef()
+	}
+
+	if err := sharedmodule.IncrementPlaylistAudioCountByID(
+		ctx, db, params.AudioID,
+	); err != nil {
+		log.Println("Error incrementing playlist audio count:", err)
+		return nil, shared.InternalServerErrorDef()
 	}
 
 	return &entity, err
 }
 
-func BulkCreatePlaylistAudios(
+func CreatePlaylistAudioTx(
+	ctx context.Context,
+	resourceConfig *config.ResourceConfig,
+	params database.CreatePlaylistAudioParams,
+) (*database.PlaylistAudio, error) {
+	return shared.RunDBTransaction(
+		ctx,
+		resourceConfig,
+		func(tx *database.Queries) (*database.PlaylistAudio, error) {
+			return CreatePlaylistAudio(ctx, tx, params)
+		},
+	)
+}
+
+func BulkCreatePlaylistAudiosTx(
 	ctx context.Context,
 	resourceConfig *config.ResourceConfig,
 	params []database.CreatePlaylistAudioParams,
@@ -59,7 +81,7 @@ func BulkCreatePlaylistAudios(
 	)
 }
 
-func DeletePlaylistAudiosByIds(
+func DeletePlaylistAudiosByIDs(
 	ctx context.Context,
 	db *database.Queries,
 	params database.DeletePlaylistAudiosByIDsParams,

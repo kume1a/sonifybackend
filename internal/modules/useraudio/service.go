@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
+	"github.com/kume1a/sonifybackend/internal/modules/sharedmodule"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
@@ -23,16 +24,23 @@ func CreateUserAudio(
 		params.CreatedAt = time.Now().UTC()
 	}
 
-	entity, err := db.CreateUserAudio(ctx, params)
+	userAudio, err := db.CreateUserAudio(ctx, params)
 
 	if err != nil {
 		log.Println("Error creating user audio:", err)
 	}
 
-	return &entity, err
+	if err := sharedmodule.IncrementUserAudioCountByID(
+		ctx, db, params.AudioID,
+	); err != nil {
+		log.Println("Error incrementing user audio count:", err)
+		return nil, shared.InternalServerErrorDef()
+	}
+
+	return &userAudio, err
 }
 
-func BulkCreateUserAudios(
+func BulkCreateUserAudiosTx(
 	ctx context.Context,
 	resourceConfig *config.ResourceConfig,
 	params []database.CreateUserAudioParams,
@@ -41,19 +49,19 @@ func BulkCreateUserAudios(
 		ctx,
 		resourceConfig,
 		func(tx *database.Queries) ([]database.UserAudio, error) {
-			audios := make([]database.UserAudio, 0, len(params))
+			userAudios := make([]database.UserAudio, 0, len(params))
 
 			for _, param := range params {
-				audio, err := CreateUserAudio(ctx, tx, param)
+				userAudio, err := CreateUserAudio(ctx, tx, param)
 				if err != nil {
 					log.Println("Error creating user audio:", err)
 					return nil, shared.InternalServerErrorDef()
 				}
 
-				audios = append(audios, *audio)
+				userAudios = append(userAudios, *userAudio)
 			}
 
-			return audios, nil
+			return userAudios, nil
 		},
 	)
 }
@@ -148,12 +156,37 @@ func UserAudioExists(
 	return count > 0, nil
 }
 
-func DeleteUserAudio(
+func DeleteUserAudioTx(
 	ctx context.Context,
-	db *database.Queries,
+	resourceConfig *config.ResourceConfig,
 	params database.DeleteUserAudioParams,
 ) error {
-	count, err := db.CountUserAudio(ctx, database.CountUserAudioParams(params))
+	if _, err := shared.RunDBTransaction(
+		ctx,
+		resourceConfig,
+		func(tx *database.Queries) (any, error) {
+			if err := DeleteUserAudio(ctx, tx, params); err != nil {
+				return nil, err
+			}
+
+			return nil, nil
+		},
+	); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func DeleteUserAudio(
+	ctx context.Context,
+	tx *database.Queries,
+	params database.DeleteUserAudioParams,
+) error {
+	count, err := tx.CountUserAudio(
+		ctx,
+		database.CountUserAudioParams(params),
+	)
 
 	if err != nil {
 		log.Println("Error counting user audio: ", err)
@@ -164,5 +197,17 @@ func DeleteUserAudio(
 		return shared.NotFound(shared.ErrUserAudioNotFound)
 	}
 
-	return db.DeleteUserAudio(ctx, params)
+	if err := tx.DeleteUserAudio(ctx, params); err != nil {
+		log.Println("Error deleting user audio: ", err)
+		return shared.InternalServerErrorDef()
+	}
+
+	if err := sharedmodule.DecrementUserAudioCountByID(
+		ctx, tx, params.AudioID,
+	); err != nil {
+		log.Println("Error decrementing user audio count: ", err)
+		return shared.InternalServerErrorDef()
+	}
+
+	return nil
 }

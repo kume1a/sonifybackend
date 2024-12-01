@@ -49,6 +49,18 @@ UPDATE audios SET
 WHERE id = sqlc.narg(audio_id)
 RETURNING *;
 
+-- name: IncrementUserAudioCountByID :exec
+UPDATE audios SET user_audio_count = user_audio_count + 1 WHERE id = $1;
+
+-- name: DecrementUserAudioCountByID :exec
+UPDATE audios SET user_audio_count = user_audio_count - 1 WHERE id = $1;
+
+-- name: IncrementPlaylistAudioCountByID :exec
+UPDATE audios SET playlist_audio_count = playlist_audio_count + 1 WHERE id = $1;
+
+-- name: DecrementPlaylistAudioCountByID :exec
+UPDATE audios SET playlist_audio_count = playlist_audio_count - 1 WHERE id = $1;
+
 -- name: GetAudioSpotifyIDsBySpotifyIDs :many
 SELECT 
   id, spotify_id 
