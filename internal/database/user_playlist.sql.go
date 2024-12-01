@@ -266,3 +266,19 @@ func (q *Queries) GetUserPlaylists(ctx context.Context, arg GetUserPlaylistsPara
 	}
 	return items, nil
 }
+
+const userPlaylistExistsByUserIDAndPlaylistID = `-- name: UserPlaylistExistsByUserIDAndPlaylistID :one
+SELECT EXISTS(SELECT 1 FROM user_playlists WHERE user_id = $1 AND playlist_id = $2)
+`
+
+type UserPlaylistExistsByUserIDAndPlaylistIDParams struct {
+	UserID     uuid.UUID
+	PlaylistID uuid.UUID
+}
+
+func (q *Queries) UserPlaylistExistsByUserIDAndPlaylistID(ctx context.Context, arg UserPlaylistExistsByUserIDAndPlaylistIDParams) (bool, error) {
+	row := q.db.QueryRowContext(ctx, userPlaylistExistsByUserIDAndPlaylistID, arg.UserID, arg.PlaylistID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}

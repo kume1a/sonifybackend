@@ -48,3 +48,6 @@ SELECT id FROM user_playlists WHERE user_id = $1;
 
 -- name: GetUserPlaylistUserIDsByPlaylistID :many
 SELECT user_id FROM user_playlists WHERE playlist_id = $1;
+
+-- name: UserPlaylistExistsByUserIDAndPlaylistID :one
+SELECT EXISTS(SELECT 1 FROM user_playlists WHERE user_id = $1 AND playlist_id = $2);

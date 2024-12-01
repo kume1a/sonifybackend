@@ -99,3 +99,17 @@ func GetUserPlaylistUserIDsByPlaylistID(
 
 	return userIds, err
 }
+
+func UserPlaylistExistsByUserIDAndPlaylistID(
+	ctx context.Context,
+	db *database.Queries,
+	params database.UserPlaylistExistsByUserIDAndPlaylistIDParams,
+) (bool, error) {
+	exists, err := db.UserPlaylistExistsByUserIDAndPlaylistID(ctx, params)
+
+	if err != nil {
+		log.Println("Error checking user playlist exists by user ID and playlist ID:", err)
+	}
+
+	return exists, err
+}

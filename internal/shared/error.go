@@ -27,4 +27,5 @@ const (
 	ErrSocketNotFound                = "SOCKET_NOT_FOUND"
 	ErrUserAudioNotFound             = "USER_AUDIO_NOT_FOUND"
 	ErrInvalidUUID                   = "INVALID_UUID"
+	ErrUserPlaylistNotFound          = "USER_PLAYLIST_NOT_FOUND"
 )

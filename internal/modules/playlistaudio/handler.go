@@ -11,9 +11,33 @@ import (
 
 func handleCreatePlaylistAudio(apiCfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		authPayload, err := shared.GetAuthPayload(r)
+		if err != nil {
+			shared.ResUnauthorized(w, shared.ErrUnauthorized)
+			return
+		}
+
 		body, err := shared.ValidateRequestBody[*createPlaylistAudioDTO](r)
 		if err != nil {
 			shared.ResBadRequest(w, err.Error())
+			return
+		}
+
+		exists, err := userplaylist.UserPlaylistExistsByUserIDAndPlaylistID(
+			r.Context(),
+			apiCfg.DB,
+			database.UserPlaylistExistsByUserIDAndPlaylistIDParams{
+				UserID:     authPayload.UserID,
+				PlaylistID: body.PlaylistID,
+			},
+		)
+		if err != nil {
+			shared.ResInternalServerErrorDef(w)
+			return
+		}
+
+		if !exists {
+			shared.ResForbidden(w, shared.ErrUserPlaylistNotFound)
 			return
 		}
 
