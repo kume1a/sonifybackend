@@ -26,7 +26,7 @@ func DownloadYoutubeAudioAndSave(params DownloadYoutubeAudioParams) (
 	*shared.HttpError,
 ) {
 	// check if the user already has the audio
-	if _, err := useraudio.GetUserAudioByYoutubeVideoId(
+	if _, err := useraudio.GetUserAudioByYoutubeVideoID(
 		params.Context,
 		params.ApiConfig.DB,
 		database.GetUserAudioByVideoIDParams{

@@ -23,6 +23,9 @@ FROM user_audios
 WHERE user_id = $1
   AND audio_id = $2;
 
+-- name: CountUserAudiosByAudioID :one
+SELECT COUNT(1) FROM user_audios WHERE audio_id = $1;
+
 -- name: GetUserAudioIDs :many
 SELECT audio_id FROM user_audios WHERE user_id = $1;
 

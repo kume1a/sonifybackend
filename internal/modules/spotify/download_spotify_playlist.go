@@ -107,7 +107,7 @@ func DownloadSpotifyPlaylistAudios(
 		func(playlistItem spotifyPlaylistItemDTO) string { return playlistItem.Track.ID },
 	)
 
-	playlistAudioIDs, err := audio.GetAudioIdsBySpotifyIds(ctx, resouceConfig.DB, playlistItemSpotifyIDs)
+	playlistAudioIDs, err := audio.GetAudioIDsBySpotifyIDs(ctx, resouceConfig.DB, playlistItemSpotifyIDs)
 	if err != nil {
 		setPlaylistImportStatusToFailed(ctx, resouceConfig.DB, playlistID)
 		return err

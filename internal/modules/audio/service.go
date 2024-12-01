@@ -63,8 +63,33 @@ func BulkCreateAudios(
 	)
 }
 
-func DoesAudioExistByLocalId(ctx context.Context, db *database.Queries, userID uuid.UUID, localID string) (bool, error) {
-	count, err := useraudio.CountUserAudioByLocalId(
+func UpdateAudioByID(
+	ctx context.Context,
+	db *database.Queries,
+	params database.UpdateAudioByIDParams,
+) (*database.Audio, error) {
+	entity, err := db.UpdateAudioByID(ctx, params)
+
+	if err != nil {
+		log.Println("Error updating audio by id:", err)
+
+		if shared.IsDBErrorNotFound(err) {
+			return nil, shared.NotFound(shared.ErrAudioNotFound)
+		}
+
+		return nil, shared.InternalServerErrorDef()
+	}
+
+	return &entity, nil
+}
+
+func DoesAudioExistByLocalId(
+	ctx context.Context,
+	db *database.Queries,
+	userID uuid.UUID,
+	localID string,
+) (bool, error) {
+	count, err := useraudio.CountUserAudioByLocalID(
 		ctx, db,
 		database.CountUserAudioByLocalIDParams{
 			LocalID: sql.NullString{String: localID, Valid: true},
@@ -95,7 +120,7 @@ func GetAudioSpotifyIdsBySpotifyIds(
 	return ids, err
 }
 
-func GetAudioIdsBySpotifyIds(
+func GetAudioIDsBySpotifyIDs(
 	ctx context.Context,
 	db *database.Queries,
 	spotifyIds []string,
@@ -104,6 +129,20 @@ func GetAudioIdsBySpotifyIds(
 
 	if err != nil {
 		log.Println("Error getting audio ids by spotify ids: ", err)
+		return nil, shared.InternalServerErrorDef()
+	}
+
+	return ids, err
+}
+
+func GetAllAudioIDs(
+	ctx context.Context,
+	db *database.Queries,
+) (uuid.UUIDs, error) {
+	ids, err := db.GetAllAudioIDs(ctx)
+
+	if err != nil {
+		log.Println("Error getting all audio ids: ", err)
 		return nil, shared.InternalServerErrorDef()
 	}
 

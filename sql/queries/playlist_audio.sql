@@ -43,6 +43,9 @@ SELECT id
 FROM playlist_audios
 WHERE playlist_id = ANY(sqlc.arg(playlist_ids)::uuid[]);
 
+-- name: CountPlaylistAudiosByAudioID :one
+SELECT COUNT(1) FROM playlist_audios WHERE audio_id = $1;
+
 -- name: DeletePlaylistAudiosByIDs :exec
 DELETE FROM playlist_audios 
   WHERE playlist_id = sqlc.arg(playlist_id)

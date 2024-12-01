@@ -3,10 +3,12 @@ package audio
 import (
 	"context"
 	"database/sql"
+	"log"
 
 	"github.com/google/uuid"
 	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
+	"github.com/kume1a/sonifybackend/internal/modules/playlistaudio"
 	"github.com/kume1a/sonifybackend/internal/modules/useraudio"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
@@ -74,4 +76,46 @@ func WriteUserImportedLocalMusic(params WriteUserImportedLocalMusicParams) (*Use
 	}
 
 	return res, nil
+}
+
+func WriteInitialAudioRelCount(
+	ctx context.Context,
+	resourceConfig *config.ResourceConfig,
+) *shared.HttpError {
+	if _, err := shared.RunDBTransaction(
+		ctx,
+		resourceConfig,
+		func(tx *database.Queries) (*UserAudioWithAudio, error) {
+			audioIDs, err := GetAllAudioIDs(ctx, tx)
+			if err != nil {
+				return nil, err
+			}
+
+			for _, audioID := range audioIDs {
+				userAudioCount, err := useraudio.CountUserAudiosByAudioID(ctx, tx, audioID)
+				if err != nil {
+					return nil, err
+				}
+
+				playlistAudioCount, err := playlistaudio.CountPlaylistAudiosByAudioID(ctx, tx, audioID)
+				if err != nil {
+					return nil, err
+				}
+
+				if _, err := UpdateAudioByID(ctx, tx, database.UpdateAudioByIDParams{
+					PlaylistAudioCount: sql.NullInt32{Int32: int32(playlistAudioCount), Valid: true},
+					UserAudioCount:     sql.NullInt32{Int32: int32(userAudioCount), Valid: true},
+				}); err != nil {
+					return nil, err
+				}
+			}
+
+			return nil, nil
+		},
+	); err != nil {
+		log.Println("Error in WriteInitialAudioRelCount transaction", err)
+		return shared.InternalServerErrorDef()
+	}
+
+	return nil
 }

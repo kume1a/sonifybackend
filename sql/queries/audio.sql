@@ -21,20 +21,30 @@ SELECT
   INNER JOIN audios ON user_audios.audio_id = audios.id
   WHERE user_id = $1;
 
+-- name: GetAllAudioIDs :many
+SELECT id FROM audios;
+
 -- name: DeleteAudioById :exec
 DELETE FROM audios WHERE id = $1;
 
 -- name: GetAudioById :one
 SELECT * FROM audios WHERE id = $1;
 
--- name: UpdateAudio :one
+-- name: UpdateAudioByID :one
 UPDATE audios SET 
-  title = $1, 
-  author = $2, 
-  duration_ms = $3, 
-  path = $4, 
-  thumbnail_path=$5 
-WHERE id = $6 
+  title = COALESCE(sqlc.narg(title), title),
+  author = COALESCE(sqlc.narg(author), author),
+  duration_ms = COALESCE(sqlc.narg(duration_ms), duration_ms),
+  path = COALESCE(sqlc.narg(path), path),
+  size_bytes = COALESCE(sqlc.narg(size_bytes), size_bytes),
+  youtube_video_id = COALESCE(sqlc.narg(youtube_video_id), youtube_video_id),
+  thumbnail_path = COALESCE(sqlc.narg(thumbnail_path), thumbnail_path),
+  spotify_id = COALESCE(sqlc.narg(spotify_id), spotify_id),
+  thumbnail_url = COALESCE(sqlc.narg(thumbnail_url), thumbnail_url),
+  local_id = COALESCE(sqlc.narg(local_id), local_id),
+  playlist_audio_count = COALESCE(sqlc.narg(playlist_audio_count), playlist_audio_count),
+  user_audio_count = COALESCE(sqlc.narg(user_audio_count), user_audio_count)
+WHERE id = sqlc.narg(audio_id)
 RETURNING *;
 
 -- name: GetAudioSpotifyIDsBySpotifyIDs :many

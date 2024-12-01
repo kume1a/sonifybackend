@@ -14,5 +14,8 @@ func Router(apiCfg *config.ApiConfig, router *mux.Router) *mux.Router {
 
 	r.HandleFunc("/uploadUserLocalMusic", shared.AuthMW(handleUploadUserLocalMusic(apiCfg))).Methods("POST")
 
+	// TEMPORARY datamigration, remove after used
+	r.HandleFunc("/writeInitialRelCount", handleWriteInitialAudioRelCount(apiCfg)).Methods("POST")
+
 	return r
 }

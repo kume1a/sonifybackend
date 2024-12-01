@@ -71,7 +71,7 @@ func handleGetAuthUserAudioIds(apiCfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		userAudioIds, err := useraudio.GetUserAudioIds(r.Context(), apiCfg.DB, authPayload.UserID)
+		userAudioIds, err := useraudio.GetUserAudioIDs(r.Context(), apiCfg.DB, authPayload.UserID)
 		if err != nil {
 			shared.ResInternalServerErrorDef(w)
 			return
@@ -96,7 +96,7 @@ func handleGetAuthUserUserAudiosByIDs(apiCfg *config.ApiConfig) http.HandlerFunc
 			return
 		}
 
-		audios, err := useraudio.GetUserAudiosByAudioIds(r.Context(), apiCfg.DB, database.GetUserAudiosByAudioIdsParams{
+		audios, err := useraudio.GetUserAudiosByAudioIDs(r.Context(), apiCfg.DB, database.GetUserAudiosByAudioIdsParams{
 			UserID:   authPayload.UserID,
 			AudioIds: body.AudioIDs,
 		})
@@ -111,5 +111,16 @@ func handleGetAuthUserUserAudiosByIDs(apiCfg *config.ApiConfig) http.HandlerFunc
 		}
 
 		shared.ResOK(w, res)
+	}
+}
+
+func handleWriteInitialAudioRelCount(apiCfg *config.ApiConfig) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if err := WriteInitialAudioRelCount(r.Context(), apiCfg.ResourceConfig); err != nil {
+			shared.ResTryHttpError(w, err)
+			return
+		}
+
+		shared.ResOK(w, nil)
 	}
 }

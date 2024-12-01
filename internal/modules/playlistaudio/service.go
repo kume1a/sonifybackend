@@ -134,3 +134,18 @@ func GetPlaylistAudioIDsByUserID(
 
 	return playlistAudioIds, nil
 }
+
+func CountPlaylistAudiosByAudioID(
+	ctx context.Context,
+	db *database.Queries,
+	audioID uuid.UUID,
+) (int64, error) {
+	count, err := db.CountPlaylistAudiosByAudioID(ctx, audioID)
+
+	if err != nil {
+		log.Println("Error counting playlist audios by audio ID:", err)
+		return 0, shared.InternalServerErrorDef()
+	}
+
+	return count, err
+}

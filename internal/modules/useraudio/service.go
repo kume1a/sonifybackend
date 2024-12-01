@@ -58,7 +58,7 @@ func BulkCreateUserAudios(
 	)
 }
 
-func GetUserAudioByYoutubeVideoId(
+func GetUserAudioByYoutubeVideoID(
 	ctx context.Context,
 	db *database.Queries,
 	params database.GetUserAudioByVideoIDParams,
@@ -72,7 +72,7 @@ func GetUserAudioByYoutubeVideoId(
 	return &audio, err
 }
 
-func CountUserAudioByLocalId(
+func CountUserAudioByLocalID(
 	ctx context.Context,
 	db *database.Queries,
 	params database.CountUserAudioByLocalIDParams,
@@ -86,7 +86,7 @@ func CountUserAudioByLocalId(
 	return count, err
 }
 
-func GetUserAudioIds(
+func GetUserAudioIDs(
 	ctx context.Context,
 	db *database.Queries,
 	userId uuid.UUID,
@@ -100,7 +100,7 @@ func GetUserAudioIds(
 	return ids, err
 }
 
-func GetUserAudiosByAudioIds(
+func GetUserAudiosByAudioIDs(
 	ctx context.Context,
 	db *database.Queries,
 	params database.GetUserAudiosByAudioIdsParams,
@@ -116,6 +116,21 @@ func GetUserAudiosByAudioIds(
 	}
 
 	return audios, err
+}
+
+func CountUserAudiosByAudioID(
+	ctx context.Context,
+	db *database.Queries,
+	audioID uuid.UUID,
+) (int64, error) {
+	count, err := db.CountUserAudiosByAudioID(ctx, audioID)
+
+	if err != nil {
+		log.Println("Error counting user audios by audio id: ", err)
+		return 0, shared.InternalServerErrorDef()
+	}
+
+	return count, err
 }
 
 func UserAudioExists(
@@ -138,10 +153,7 @@ func DeleteUserAudio(
 	db *database.Queries,
 	params database.DeleteUserAudioParams,
 ) error {
-	count, err := db.CountUserAudio(ctx, database.CountUserAudioParams{
-		UserID:  params.UserID,
-		AudioID: params.AudioID,
-	})
+	count, err := db.CountUserAudio(ctx, database.CountUserAudioParams(params))
 
 	if err != nil {
 		log.Println("Error counting user audio: ", err)
