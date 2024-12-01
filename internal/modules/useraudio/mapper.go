@@ -1,4 +1,4 @@
-package audio
+package useraudio
 
 import (
 	"github.com/kume1a/sonifybackend/internal/database"

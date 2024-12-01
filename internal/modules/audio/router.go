@@ -9,9 +9,6 @@ import (
 func Router(apiCfg *config.ApiConfig, router *mux.Router) *mux.Router {
 	r := router.PathPrefix("/audio").Subrouter()
 
-	r.HandleFunc("/myAudioIds", shared.AuthMW(handleGetAuthUserAudioIds(apiCfg))).Methods("GET")
-	r.HandleFunc("/myUserAudiosByIds", shared.AuthMW(handleGetAuthUserUserAudiosByIDs(apiCfg))).Methods("GET")
-
 	r.HandleFunc("/uploadUserLocalMusic", shared.AuthMW(handleUploadUserLocalMusic(apiCfg))).Methods("POST")
 
 	// TEMPORARY datamigration, remove after used

@@ -79,3 +79,58 @@ func handleDeleteUserAudioForAuthUser(apiCfg *config.ApiConfig) http.HandlerFunc
 		shared.ResNoContent(w)
 	}
 }
+
+func handleGetAuthUserAudioIDs(apiCfg *config.ApiConfig) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		authPayload, err := shared.GetAuthPayload(r)
+		if err != nil {
+			shared.ResUnauthorized(w, err.Error())
+			return
+		}
+
+		userAudioIds, err := GetUserAudioIDs(r.Context(), apiCfg.DB, authPayload.UserID)
+		if err != nil {
+			shared.ResInternalServerErrorDef(w)
+			return
+		}
+
+		shared.ResOK(w, userAudioIds)
+	}
+}
+
+func handleGetAuthUserUserAudiosByAudioIDs(apiCfg *config.ApiConfig) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		authPayload, err := shared.GetAuthPayload(r)
+		if err != nil {
+			shared.ResUnauthorized(w, err.Error())
+			return
+		}
+
+		// user body for big payload
+		body, err := shared.GetRequestBody[*shared.AudioIDsDTO](r)
+		if err != nil {
+			shared.ResBadRequest(w, err.Error())
+			return
+		}
+
+		audios, err := GetUserAudiosByAudioIDs(
+			r.Context(),
+			apiCfg.DB,
+			database.GetUserAudiosByAudioIdsParams{
+				UserID:   authPayload.UserID,
+				AudioIds: body.AudioIDs,
+			},
+		)
+		if err != nil {
+			shared.ResInternalServerErrorDef(w)
+			return
+		}
+
+		res := make([]*sharedmodule.UserAudioWithRelDTO, 0, len(audios))
+		for _, audio := range audios {
+			res = append(res, GetUserAudiosByAudioIdsRowToUserAudioWithRelDTO(audio))
+		}
+
+		shared.ResOK(w, res)
+	}
+}
