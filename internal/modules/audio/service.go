@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/modules/useraudio"
 	"github.com/kume1a/sonifybackend/internal/shared"
@@ -35,32 +34,6 @@ func CreateAudio(
 	}
 
 	return &entity, err
-}
-
-func BulkCreateAudios(
-	ctx context.Context,
-	resourceConfig *config.ResourceConfig,
-	params []database.CreateAudioParams,
-) ([]database.Audio, error) {
-	return shared.RunDBTransaction(
-		ctx,
-		resourceConfig,
-		func(tx *database.Queries) ([]database.Audio, error) {
-			audios := make([]database.Audio, 0, len(params))
-
-			for _, param := range params {
-				audio, err := CreateAudio(ctx, tx, param)
-				if err != nil {
-					log.Println("Error creating audio:", err)
-					return nil, shared.InternalServerErrorDef()
-				}
-
-				audios = append(audios, *audio)
-			}
-
-			return audios, nil
-		},
-	)
 }
 
 func UpdateAudioByID(

@@ -1,7 +1,6 @@
 package shared
 
 import (
-	"log"
 	"os/exec"
 )
 
@@ -49,7 +48,7 @@ func ConvertMedia(inputFile string, outputFile string) error {
 	cmd := exec.Command("ffmpeg", "-i", inputFile, outputFile)
 
 	if err := cmd.Run(); err != nil {
-		log.Println("Error converting media format ", err)
+		LogCommandError(err, "ConvertMedia")
 		return err
 	}
 

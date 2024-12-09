@@ -64,13 +64,15 @@ func DownloadYoutubeAudioAndSave(params DownloadYoutubeAudioParams) (
 				params.Context,
 				params.ApiConfig.DB,
 				database.CreateAudioParams{
-					Title:          sql.NullString{String: strings.TrimSpace(videoInfo.Title), Valid: true},
-					Author:         sql.NullString{String: strings.TrimSpace(videoInfo.Uploader), Valid: true},
-					DurationMs:     sql.NullInt32{Int32: int32(videoInfo.DurationSeconds * 1000), Valid: true},
-					Path:           sql.NullString{String: filePath, Valid: true},
-					SizeBytes:      sql.NullInt64{Int64: fileSize.Bytes, Valid: true},
-					YoutubeVideoID: sql.NullString{String: params.VideoID, Valid: true},
-					ThumbnailPath:  sql.NullString{String: thumbnailPath, Valid: true},
+					Title:              sql.NullString{String: strings.TrimSpace(videoInfo.Title), Valid: true},
+					Author:             sql.NullString{String: strings.TrimSpace(videoInfo.Uploader), Valid: true},
+					DurationMs:         sql.NullInt32{Int32: int32(videoInfo.DurationSeconds * 1000), Valid: true},
+					Path:               sql.NullString{String: filePath, Valid: true},
+					SizeBytes:          sql.NullInt64{Int64: fileSize.Bytes, Valid: true},
+					YoutubeVideoID:     sql.NullString{String: params.VideoID, Valid: true},
+					ThumbnailPath:      sql.NullString{String: thumbnailPath, Valid: true},
+					PlaylistAudioCount: 0,
+					UserAudioCount:     1,
 				},
 			)
 			if err != nil {

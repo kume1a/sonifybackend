@@ -38,23 +38,27 @@ INSERT INTO audios(
   thumbnail_path,
   spotify_id,
   thumbnail_url,
-  local_id
-) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id, created_at, title, author, duration_ms, path, size_bytes, youtube_video_id, thumbnail_path, spotify_id, thumbnail_url, local_id, playlist_audio_count, user_audio_count
+  local_id,
+  playlist_audio_count,
+  user_audio_count
+) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING id, created_at, title, author, duration_ms, path, size_bytes, youtube_video_id, thumbnail_path, spotify_id, thumbnail_url, local_id, playlist_audio_count, user_audio_count
 `
 
 type CreateAudioParams struct {
-	ID             uuid.UUID
-	CreatedAt      time.Time
-	Title          sql.NullString
-	Author         sql.NullString
-	DurationMs     sql.NullInt32
-	Path           sql.NullString
-	SizeBytes      sql.NullInt64
-	YoutubeVideoID sql.NullString
-	ThumbnailPath  sql.NullString
-	SpotifyID      sql.NullString
-	ThumbnailUrl   sql.NullString
-	LocalID        sql.NullString
+	ID                 uuid.UUID
+	CreatedAt          time.Time
+	Title              sql.NullString
+	Author             sql.NullString
+	DurationMs         sql.NullInt32
+	Path               sql.NullString
+	SizeBytes          sql.NullInt64
+	YoutubeVideoID     sql.NullString
+	ThumbnailPath      sql.NullString
+	SpotifyID          sql.NullString
+	ThumbnailUrl       sql.NullString
+	LocalID            sql.NullString
+	PlaylistAudioCount int32
+	UserAudioCount     int32
 }
 
 func (q *Queries) CreateAudio(ctx context.Context, arg CreateAudioParams) (Audio, error) {
@@ -71,6 +75,8 @@ func (q *Queries) CreateAudio(ctx context.Context, arg CreateAudioParams) (Audio
 		arg.SpotifyID,
 		arg.ThumbnailUrl,
 		arg.LocalID,
+		arg.PlaylistAudioCount,
+		arg.UserAudioCount,
 	)
 	var i Audio
 	err := row.Scan(

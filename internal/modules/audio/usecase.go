@@ -39,13 +39,15 @@ func WriteUserImportedLocalMusic(params WriteUserImportedLocalMusicParams) (*Use
 				params.Context,
 				tx,
 				database.CreateAudioParams{
-					Title:         sql.NullString{String: params.AudioTitle, Valid: true},
-					Author:        sql.NullString{String: params.AudioAuthor, Valid: params.AudioAuthor != ""},
-					Path:          sql.NullString{String: params.AudioPath, Valid: true},
-					ThumbnailPath: sql.NullString{String: params.AudioThumbnailPath, Valid: params.AudioThumbnailPath != ""},
-					LocalID:       sql.NullString{String: params.AudioLocalId, Valid: params.AudioLocalId != ""},
-					DurationMs:    sql.NullInt32{Int32: params.AudioDurationMs, Valid: params.AudioDurationMs != 0},
-					SizeBytes:     sql.NullInt64{Int64: audioFileSize.Bytes, Valid: true},
+					Title:              sql.NullString{String: params.AudioTitle, Valid: true},
+					Author:             sql.NullString{String: params.AudioAuthor, Valid: params.AudioAuthor != ""},
+					Path:               sql.NullString{String: params.AudioPath, Valid: true},
+					ThumbnailPath:      sql.NullString{String: params.AudioThumbnailPath, Valid: params.AudioThumbnailPath != ""},
+					LocalID:            sql.NullString{String: params.AudioLocalId, Valid: params.AudioLocalId != ""},
+					DurationMs:         sql.NullInt32{Int32: params.AudioDurationMs, Valid: params.AudioDurationMs != 0},
+					SizeBytes:          sql.NullInt64{Int64: audioFileSize.Bytes, Valid: true},
+					PlaylistAudioCount: 0,
+					UserAudioCount:     1,
 				},
 			)
 			if err != nil {

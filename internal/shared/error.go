@@ -1,5 +1,10 @@
 package shared
 
+import (
+	"log"
+	"os/exec"
+)
+
 const (
 	ErrInternal                      = "INTERNAL"
 	ErrNotFound                      = "NOT_FOUND"
@@ -29,3 +34,11 @@ const (
 	ErrInvalidUUID                   = "INVALID_UUID"
 	ErrUserPlaylistNotFound          = "USER_PLAYLIST_NOT_FOUND"
 )
+
+func LogCommandError(err error, label string) {
+	if exitError, ok := err.(*exec.ExitError); ok {
+		log.Printf("[%s] Command stderr: %s", label, exitError.Stderr)
+	} else {
+		log.Printf("[%s] Error executing command: %v", label, err)
+	}
+}

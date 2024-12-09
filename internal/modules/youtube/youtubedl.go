@@ -18,7 +18,7 @@ func GetYoutubeAudioUrl(videoID string) (string, error) {
 
 	output, err := cmd.Output()
 	if err != nil {
-		log.Println("Error getting youtube music url:", err)
+		shared.LogCommandError(err, "GetYoutubeAudioUrl")
 		return "", err
 	}
 
@@ -52,9 +52,9 @@ func DownloadYoutubeAudio(videoID string, options DownloadYoutubeAudioOptions) (
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
+		shared.LogCommandError(err, "DownloadYoutubeAudio")
 		errorMessage := fmt.Sprintf("Error downloading youtube audio: %v, output: %s", err, output)
-		log.Println(errorMessage)
-		return "", "", fmt.Errorf(errorMessage)
+		return "", "", errors.New(errorMessage)
 	}
 
 	audioOutputLocation, err := shared.ProcessUnknownExtMediaFile(shared.ProcessUnknownExtMediaFileParams{
@@ -98,7 +98,7 @@ func GetYoutubeVideoInfo(videoID string) (*youtubeVideoInfoDTO, error) {
 
 	output, err := cmd.Output()
 	if err != nil {
-		log.Println("Error getting youtube video info: ", err)
+		shared.LogCommandError(err, "GetYoutubeVideoInfo")
 		return nil, err
 	}
 
@@ -116,7 +116,7 @@ func GetYoutubeAudioURL(query string) (string, error) {
 
 	output, err := cmd.Output()
 	if err != nil {
-		log.Println("Error searching youtube music video:", err)
+		shared.LogCommandError(err, "GetYoutubeAudioURL")
 		return "", err
 	}
 
@@ -134,7 +134,7 @@ func GetYoutubeSearchBestMatchVideoID(query string) (string, error) {
 
 	output, err := cmd.Output()
 	if err != nil {
-		log.Println("Error searching youtube: ", err)
+		shared.LogCommandError(err, "GetYoutubeSearchBestMatchVideoID")
 		return "", err
 	}
 

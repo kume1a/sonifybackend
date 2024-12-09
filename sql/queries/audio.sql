@@ -11,8 +11,10 @@ INSERT INTO audios(
   thumbnail_path,
   spotify_id,
   thumbnail_url,
-  local_id
-) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING *;
+  local_id,
+  playlist_audio_count,
+  user_audio_count
+) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING *;
 
 -- name: GetAudiosByUserID :many
 SELECT 

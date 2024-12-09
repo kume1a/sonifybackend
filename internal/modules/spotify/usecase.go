@@ -61,13 +61,17 @@ func DownloadWriteSpotifyAudios(
 		return nil
 	}
 
-	filteredInputs := shared.Where(inputs, func(input DownloadSpotifyAudioInput) bool {
-		return !shared.ContainsWhereP(
-			dbSpotifyIDs,
-			func(dbSpotifyID *database.GetAudioSpotifyIDsBySpotifyIDsRow) bool {
-				return dbSpotifyID.SpotifyID.String == input.SpotifyID
-			})
-	})
+	filteredInputs := shared.Where(
+		inputs,
+		func(input DownloadSpotifyAudioInput) bool {
+			return !shared.ContainsWhereP(
+				dbSpotifyIDs,
+				func(dbSpotifyID *database.GetAudioSpotifyIDsBySpotifyIDsRow) bool {
+					return dbSpotifyID.SpotifyID.String == input.SpotifyID
+				},
+			)
+		},
+	)
 
 	for inputIndex, input := range filteredInputs {
 		log.Println("Downloading audio for track: ", input.TrackName, " by ", input.ArtistName, " with Spotify ID: ", input.SpotifyID)
@@ -105,7 +109,22 @@ func DownloadWriteSpotifyAudios(
 			ArtistName:     input.ArtistName,
 		}
 
-		if err := writeDownloadedSpotifyAudio(ctx, resouceConfig, downloadedSpotifyAudio); err != nil {
+		if _, err := audio.CreateAudio(
+			ctx,
+			resouceConfig.DB,
+			database.CreateAudioParams{
+				SpotifyID:          sql.NullString{String: downloadedSpotifyAudio.SpotifyID, Valid: true},
+				YoutubeVideoID:     sql.NullString{String: downloadedSpotifyAudio.YoutubeVideoID, Valid: true},
+				Path:               sql.NullString{String: downloadedSpotifyAudio.AudioPath, Valid: true},
+				SizeBytes:          sql.NullInt64{Int64: downloadedSpotifyAudio.AudioFileSize.Bytes, Valid: true},
+				DurationMs:         sql.NullInt32{Int32: downloadedSpotifyAudio.DurationMs, Valid: true},
+				ThumbnailUrl:       sql.NullString{String: downloadedSpotifyAudio.ThumbnailURL, Valid: true},
+				Title:              sql.NullString{String: downloadedSpotifyAudio.TrackName, Valid: true},
+				Author:             sql.NullString{String: downloadedSpotifyAudio.ArtistName, Valid: true},
+				PlaylistAudioCount: 1,
+				UserAudioCount:     0,
+			},
+		); err != nil {
 			return err
 		}
 
@@ -113,27 +132,6 @@ func DownloadWriteSpotifyAudios(
 	}
 
 	return nil
-}
-
-func writeDownloadedSpotifyAudio(
-	ctx context.Context,
-	resourceConfig *config.ResourceConfig,
-	downloadedSpotifyAudio DownloadedSpotifyAudio,
-) error {
-	params := database.CreateAudioParams{
-		SpotifyID:      sql.NullString{String: downloadedSpotifyAudio.SpotifyID, Valid: true},
-		YoutubeVideoID: sql.NullString{String: downloadedSpotifyAudio.YoutubeVideoID, Valid: true},
-		Path:           sql.NullString{String: downloadedSpotifyAudio.AudioPath, Valid: true},
-		SizeBytes:      sql.NullInt64{Int64: downloadedSpotifyAudio.AudioFileSize.Bytes, Valid: true},
-		DurationMs:     sql.NullInt32{Int32: downloadedSpotifyAudio.DurationMs, Valid: true},
-		ThumbnailUrl:   sql.NullString{String: downloadedSpotifyAudio.ThumbnailURL, Valid: true},
-		Title:          sql.NullString{String: downloadedSpotifyAudio.TrackName, Valid: true},
-		Author:         sql.NullString{String: downloadedSpotifyAudio.ArtistName, Valid: true},
-	}
-
-	_, err := audio.CreateAudio(ctx, resourceConfig.DB, params)
-
-	return err
 }
 
 func mergeSpotifySearchWithDBPlaylists(
