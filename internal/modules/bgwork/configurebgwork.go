@@ -12,7 +12,7 @@ import (
 
 func ConfigureBackgroundWork(resourceConfig *config.ResourceConfig) (*work.Enqueuer, *work.WorkerPool) {
 	crontab := cron.New()
-	// crontab.AddFunc("0 6 */2 * *", CreateHandleDeleteUnusedAudios(resourceConfig))
+	crontab.AddFunc("0 6 */2 * *", CreateHandleDeleteUnusedAudios(resourceConfig))
 
 	crontab.Start()
 
