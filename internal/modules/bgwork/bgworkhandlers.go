@@ -8,8 +8,10 @@ import (
 
 	"github.com/gocraft/work"
 	"github.com/kume1a/sonifybackend/internal/config"
+	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/modules/audio"
 	"github.com/kume1a/sonifybackend/internal/modules/spotify"
+	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
 func CreateHandleDownloadPlaylistAudios(
@@ -34,8 +36,10 @@ func CreateHandleDownloadPlaylistAudios(
 
 func CreateHandleDeleteUnusedAudios(resourceConfig *config.ResourceConfig) func() {
 	return func() {
+		ctx := context.Background()
+
 		unusedAudios, err := audio.GetUnusedAudios(
-			context.Background(),
+			ctx,
 			resourceConfig.DB,
 		)
 
@@ -45,21 +49,38 @@ func CreateHandleDeleteUnusedAudios(resourceConfig *config.ResourceConfig) func(
 		}
 
 		for _, unusedAudio := range unusedAudios {
-			if err := audio.DeleteAudioByID(
-				context.Background(),
-				resourceConfig.DB,
-				unusedAudio.ID,
-			); err != nil {
-				log.Println("Error deleting audio: ", err)
-				return
-			}
+			if err := shared.RunNoResultDBTransaction(
+				ctx,
+				resourceConfig,
+				func(tx *database.Queries) error {
+					if err := audio.DeleteAudioByID(
+						context.Background(),
+						resourceConfig.DB,
+						unusedAudio.ID,
+					); err != nil {
+						log.Println("Error deleting audio: ", err)
+						return err
+					}
 
-			if err := os.Remove(unusedAudio.Path.String); err != nil {
-				log.Println("Error removing unused audio file: ", err)
-				return
+					if err := os.Remove(unusedAudio.Path.String); err != nil {
+						log.Println("Error removing unused audio file: ", err)
+						return err
+					}
+					if err := os.Remove(unusedAudio.ThumbnailPath.String); err != nil {
+						log.Println("Error removing unused audio thumbnail file: ", err)
+						return err
+					}
+
+					return nil
+				},
+			); err != nil {
+				log.Println("Error deleting unused audio: ", err)
 			}
 		}
 
-		log.Println("Deleted ", len(unusedAudios), " unused audios")
+		deletedCount := len(unusedAudios)
+		if deletedCount > 0 {
+			log.Println("Deleted ", len(unusedAudios), " unused audios")
+		}
 	}
 }
