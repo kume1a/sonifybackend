@@ -105,6 +105,7 @@ func WriteInitialAudioRelCount(
 				}
 
 				if _, err := UpdateAudioByID(ctx, tx, database.UpdateAudioByIDParams{
+					AudioID:            uuid.NullUUID{UUID: audioID, Valid: true},
 					PlaylistAudioCount: sql.NullInt32{Int32: int32(playlistAudioCount), Valid: true},
 					UserAudioCount:     sql.NullInt32{Int32: int32(userAudioCount), Valid: true},
 				}); err != nil {
