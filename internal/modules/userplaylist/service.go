@@ -104,6 +104,10 @@ func UpdateUserPlaylist(
 		return nil, err
 	}
 
+	if userPlaylist.UserID != params.UserID {
+		return nil, shared.Forbidden(shared.ErrUserPlaylistNotYours)
+	}
+
 	entity, err := db.UpdatePlaylistByID(
 		ctx,
 		database.UpdatePlaylistByIDParams{

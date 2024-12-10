@@ -33,6 +33,7 @@ const (
 	ErrUserAudioNotFound             = "USER_AUDIO_NOT_FOUND"
 	ErrInvalidUUID                   = "INVALID_UUID"
 	ErrUserPlaylistNotFound          = "USER_PLAYLIST_NOT_FOUND"
+	ErrUserPlaylistNotYours          = "USER_PLAYLIST_NOT_YOURS"
 )
 
 func LogCommandError(err error, label string) {
