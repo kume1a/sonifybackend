@@ -68,7 +68,7 @@ func handleImportSpotifyPlaylist(apiCfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		playlistDTO := sharedmodule.PlaylistEntityToDto(*playlistEntity)
+		playlistDTO := sharedmodule.PlaylistEntityToDTO(playlistEntity)
 
 		shared.ResCreated(w, playlistDTO)
 	}

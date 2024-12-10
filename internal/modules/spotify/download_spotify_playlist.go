@@ -87,7 +87,7 @@ func DownloadSpotifyPlaylistAudios(
 			}
 
 			for _, userPlaylistUserID := range userPlaylistUserIDs {
-				updatedPlaylistDTO := sharedmodule.PlaylistEntityToDto(*updatedPlaylist)
+				updatedPlaylistDTO := sharedmodule.PlaylistEntityToDTO(updatedPlaylist)
 
 				ws.SendWSPayload(ws.SendWSPayloadInput{
 					ToSocketId:  userPlaylistUserID.String(),

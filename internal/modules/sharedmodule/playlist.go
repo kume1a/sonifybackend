@@ -19,8 +19,8 @@ type PlaylistDTO struct {
 	TotalAudioCount   int32                  `json:"totalAudioCount"`
 }
 
-func PlaylistEntityToDto(e database.Playlist) PlaylistDTO {
-	return PlaylistDTO{
+func PlaylistEntityToDTO(e *database.Playlist) *PlaylistDTO {
+	return &PlaylistDTO{
 		ID:                e.ID,
 		CreatedAt:         e.CreatedAt,
 		Name:              e.Name,

@@ -30,6 +30,9 @@ WHERE user_playlists.user_id = sqlc.arg(user_id)
   AND (sqlc.arg(playlist_ids)::uuid[] IS NULL OR playlists.id = ANY(sqlc.arg(playlist_ids)::uuid[]))
 ORDER BY user_playlists.created_at DESC;
 
+-- name: GetUserPlaylistByID :one
+SELECT * FROM user_playlists WHERE id = $1;
+
 -- name: GetUserPlaylists :many
 SELECT * FROM user_playlists
 WHERE user_id = sqlc.arg(user_id) 

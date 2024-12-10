@@ -5,7 +5,7 @@ import (
 
 	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
-	"github.com/kume1a/sonifybackend/internal/modules/userplaylist"
+	"github.com/kume1a/sonifybackend/internal/modules/sharedmodule"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
@@ -23,7 +23,7 @@ func handleCreatePlaylistAudio(apiCfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		exists, err := userplaylist.UserPlaylistExistsByUserIDAndPlaylistID(
+		exists, err := sharedmodule.UserPlaylistExists(
 			r.Context(),
 			apiCfg.DB,
 			database.UserPlaylistExistsByUserIDAndPlaylistIDParams{
@@ -74,7 +74,7 @@ func handleDeletePlaylistAudio(apiCfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		exists, err := userplaylist.UserPlaylistExistsByUserIDAndPlaylistID(
+		exists, err := sharedmodule.UserPlaylistExists(
 			r.Context(),
 			apiCfg.DB,
 			database.UserPlaylistExistsByUserIDAndPlaylistIDParams{
@@ -123,7 +123,7 @@ func handleGetPlaylistAudiosByAuthUser(apiCfg *config.ApiConfig) http.HandlerFun
 			return
 		}
 
-		userPlaylistIDs, err := userplaylist.GetPlaylistIDsByUserID(
+		userPlaylistIDs, err := sharedmodule.GetPlaylistIDsByUserID(
 			r.Context(),
 			apiCfg.DB,
 			authPayload.UserID,

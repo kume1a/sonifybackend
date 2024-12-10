@@ -3,6 +3,7 @@ package shared
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"mime/multipart"
@@ -12,6 +13,9 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/google/uuid"
+	"github.com/gorilla/mux"
+
 	"github.com/kume1a/sonifybackend/internal/config"
 )
 
@@ -19,25 +23,35 @@ type Validatable interface {
 	Validate() error
 }
 
-type XWWWFormUrlencodedParams struct {
-	URL     string
-	Form    url.Values
-	Headers map[string]string
-}
-
-type HandleUploadFileArgs struct {
-	ResponseWriter   http.ResponseWriter
-	Request          *http.Request
-	FieldName        string
-	Dir              string
-	AllowedMimeTypes []string
-	IsOptional       bool
-}
-
 type HttpGetParams struct {
 	URL     string
 	Headers map[string]string
 	Query   url.Values
+}
+
+func GetURLParamString(r *http.Request, key string) (string, error) {
+	vars := mux.Vars(r)
+
+	value, ok := vars[key]
+	if !ok {
+		return "", fmt.Errorf("missing URL parameter: %s", key)
+	}
+
+	return value, nil
+}
+
+func GetURLParamUUID(r *http.Request, key string) (uuid.UUID, error) {
+	value, err := GetURLParamString(r, key)
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	id, err := uuid.Parse(value)
+	if err != nil {
+		return uuid.Nil, fmt.Errorf("invalid UUID: %s", value)
+	}
+
+	return id, nil
 }
 
 func HttpGetWithResponse[DTO interface{}](params HttpGetParams) (*DTO, error) {
@@ -75,6 +89,12 @@ func HttpGetWithResponse[DTO interface{}](params HttpGetParams) (*DTO, error) {
 	return &dto, nil
 }
 
+type XWWWFormUrlencodedParams struct {
+	URL     string
+	Form    url.Values
+	Headers map[string]string
+}
+
 func XWWWFormUrlencoded(params XWWWFormUrlencodedParams) (
 	httpResp *http.Response,
 	respBody string,
@@ -106,6 +126,15 @@ func XWWWFormUrlencoded(params XWWWFormUrlencodedParams) (
 	return resp, string(body), nil
 }
 
+type HandleUploadFileArgs struct {
+	ResponseWriter   http.ResponseWriter
+	Request          *http.Request
+	FieldName        string
+	Dir              string
+	AllowedMimeTypes []string
+	IsOptional       bool
+}
+
 func HandleUploadFile(args HandleUploadFileArgs) (string, *HttpError) {
 	env, err := config.ParseEnv()
 	if err != nil {
@@ -116,7 +145,11 @@ func HandleUploadFile(args HandleUploadFileArgs) (string, *HttpError) {
 		return "", MethodNotAllowed(ErrMethodNotAllowed)
 	}
 
-	args.Request.Body = http.MaxBytesReader(args.ResponseWriter, args.Request.Body, env.MaxUploadSizeBytes)
+	args.Request.Body = http.MaxBytesReader(
+		args.ResponseWriter,
+		args.Request.Body,
+		env.MaxUploadSizeBytes,
+	)
 	if err := args.Request.ParseMultipartForm(env.MaxUploadSizeBytes); err != nil {
 		return "", BadRequest(ErrExceededMaxUploadSize)
 	}

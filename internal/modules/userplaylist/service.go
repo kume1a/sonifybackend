@@ -2,11 +2,16 @@ package userplaylist
 
 import (
 	"context"
+	"database/sql"
 	"log"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
+	"github.com/kume1a/sonifybackend/internal/modules/playlist"
+	"github.com/kume1a/sonifybackend/internal/modules/sharedmodule"
+	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
 func CreateUserPlaylist(
@@ -28,6 +33,93 @@ func CreateUserPlaylist(
 	}
 
 	return &entity, err
+}
+
+type CreatePlaylistAndUserPlaylistParams struct {
+	Name   string
+	UserID uuid.UUID
+}
+
+func CreatePlaylistAndUserPlaylist(
+	ctx context.Context,
+	resourceConfig *config.ResourceConfig,
+	params CreatePlaylistAndUserPlaylistParams,
+) (*sharedmodule.UserPlaylistWithRel, error) {
+	return shared.RunDBTransaction(
+		ctx,
+		resourceConfig,
+		func(tx *database.Queries) (*sharedmodule.UserPlaylistWithRel, error) {
+			playlist, err := playlist.CreatePlaylist(
+				ctx, tx,
+				database.CreatePlaylistParams{
+					Name:              params.Name,
+					AudioCount:        0,
+					TotalAudioCount:   0,
+					AudioImportStatus: database.ProcessStatusCOMPLETED,
+				},
+			)
+			if err != nil {
+				return nil, err
+			}
+
+			userPlaylist, err := CreateUserPlaylist(
+				ctx, tx,
+				database.CreateUserPlaylistParams{
+					PlaylistID:             playlist.ID,
+					UserID:                 params.UserID,
+					IsSpotifySavedPlaylist: false,
+				},
+			)
+			if err != nil {
+				return nil, err
+			}
+
+			return &sharedmodule.UserPlaylistWithRel{
+				UserPlaylist: userPlaylist,
+				Playlist:     playlist,
+			}, nil
+		},
+	)
+}
+
+type UpdateUserPlaylistParams struct {
+	UserID         uuid.UUID
+	UserPlaylistID uuid.UUID
+	Name           string
+}
+
+func UpdateUserPlaylist(
+	ctx context.Context,
+	db *database.Queries,
+	params UpdateUserPlaylistParams,
+) (*sharedmodule.UserPlaylistWithRel, error) {
+	userPlaylist, err := db.GetUserPlaylistByID(ctx, params.UserPlaylistID)
+	if err != nil {
+		log.Println("Error getting user playlist by ID:", err)
+
+		if shared.IsDBErrorNotFound(err) {
+			return nil, shared.NotFound(shared.ErrUserPlaylistNotFound)
+		}
+
+		return nil, err
+	}
+
+	entity, err := db.UpdatePlaylistByID(
+		ctx,
+		database.UpdatePlaylistByIDParams{
+			PlaylistID: userPlaylist.PlaylistID,
+			Name:       sql.NullString{String: params.Name, Valid: true},
+		},
+	)
+	if err != nil {
+		log.Println("Error updating user playlist:", err)
+		return nil, err
+	}
+
+	return &sharedmodule.UserPlaylistWithRel{
+		UserPlaylist: &userPlaylist,
+		Playlist:     &entity,
+	}, nil
 }
 
 func GetUserPlaylistsFull(
@@ -58,20 +150,6 @@ func GetUserPlaylistsByUserID(
 	return playlists, err
 }
 
-func GetPlaylistIDsByUserID(
-	ctx context.Context,
-	db *database.Queries,
-	userId uuid.UUID,
-) (uuid.UUIDs, error) {
-	playlistIds, err := db.GetPlaylistIDsByUserID(ctx, userId)
-
-	if err != nil {
-		log.Println("Error getting user playlist ids:", err)
-	}
-
-	return playlistIds, err
-}
-
 func GetUserPlaylistIDsByUserID(
 	ctx context.Context,
 	db *database.Queries,
@@ -98,18 +176,4 @@ func GetUserPlaylistUserIDsByPlaylistID(
 	}
 
 	return userIds, err
-}
-
-func UserPlaylistExistsByUserIDAndPlaylistID(
-	ctx context.Context,
-	db *database.Queries,
-	params database.UserPlaylistExistsByUserIDAndPlaylistIDParams,
-) (bool, error) {
-	exists, err := db.UserPlaylistExistsByUserIDAndPlaylistID(ctx, params)
-
-	if err != nil {
-		log.Println("Error checking user playlist exists by user ID and playlist ID:", err)
-	}
-
-	return exists, err
 }

@@ -2,7 +2,6 @@ package playlist
 
 import (
 	"github.com/google/uuid"
-	"github.com/kume1a/sonifybackend/internal/modules/playlistaudio"
 	"github.com/kume1a/sonifybackend/internal/modules/sharedmodule"
 )
 
@@ -11,6 +10,6 @@ type playlistIDDTO struct {
 }
 
 type PlaylistFullDTO struct {
-	sharedmodule.PlaylistDTO
-	PlaylistAudios []playlistaudio.PlaylistAudioDTO `json:"playlistAudios"`
+	*sharedmodule.PlaylistDTO
+	PlaylistAudios []sharedmodule.PlaylistAudioDTO `json:"playlistAudios"`
 }

@@ -9,7 +9,6 @@ import (
 	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/modules/sharedmodule"
-	"github.com/kume1a/sonifybackend/internal/modules/userplaylist"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
@@ -178,7 +177,7 @@ func GetPlaylistAudioIDsByUserID(
 	db *database.Queries,
 	userID uuid.UUID,
 ) (uuid.UUIDs, error) {
-	userPlaylistIDs, err := userplaylist.GetPlaylistIDsByUserID(ctx, db, userID)
+	userPlaylistIDs, err := sharedmodule.GetPlaylistIDsByUserID(ctx, db, userID)
 	if err != nil {
 		return nil, err
 	}

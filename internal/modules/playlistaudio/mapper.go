@@ -5,8 +5,10 @@ import (
 	"github.com/kume1a/sonifybackend/internal/modules/sharedmodule"
 )
 
-func playlistAudioEntityToDTO(e *database.PlaylistAudio) PlaylistAudioDTO {
-	return PlaylistAudioDTO{
+func playlistAudioEntityToDTO(
+	e *database.PlaylistAudio,
+) sharedmodule.PlaylistAudioDTO {
+	return sharedmodule.PlaylistAudioDTO{
 		ID:         e.ID,
 		CreatedAt:  e.CreatedAt,
 		PlaylistID: e.PlaylistID,
@@ -14,7 +16,9 @@ func playlistAudioEntityToDTO(e *database.PlaylistAudio) PlaylistAudioDTO {
 	}
 }
 
-func GetPlaylistAudioRowToDTO(e database.GetPlaylistAudiosRow) PlaylistAudioDTO {
+func GetPlaylistAudioRowToDTO(
+	e database.GetPlaylistAudiosRow,
+) sharedmodule.PlaylistAudioDTO {
 	var audioLikeDTO *sharedmodule.AudioLikeDTO
 	if e.AudioLikesID.Valid {
 		audioLikeDTO = &sharedmodule.AudioLikeDTO{
@@ -44,7 +48,7 @@ func GetPlaylistAudioRowToDTO(e database.GetPlaylistAudiosRow) PlaylistAudioDTO 
 		}
 	}
 
-	return PlaylistAudioDTO{
+	return sharedmodule.PlaylistAudioDTO{
 		ID:         e.PlaylistAudioID,
 		CreatedAt:  e.PlaylistAudioCreatedAt,
 		PlaylistID: e.PlaylistAudioPlaylistID,
@@ -53,18 +57,12 @@ func GetPlaylistAudioRowToDTO(e database.GetPlaylistAudiosRow) PlaylistAudioDTO 
 	}
 }
 
-func getPlaylistAudioRowListToDTO(e []database.GetPlaylistAudiosRow) []PlaylistAudioDTO {
-	dto := make([]PlaylistAudioDTO, 0, len(e))
+func getPlaylistAudioRowListToDTO(
+	e []database.GetPlaylistAudiosRow,
+) []sharedmodule.PlaylistAudioDTO {
+	dto := make([]sharedmodule.PlaylistAudioDTO, 0, len(e))
 	for _, v := range e {
 		dto = append(dto, GetPlaylistAudioRowToDTO(v))
-	}
-	return dto
-}
-
-func playlistAudioEntityListToDTO(e []database.PlaylistAudio) []PlaylistAudioDTO {
-	dto := make([]PlaylistAudioDTO, 0, len(e))
-	for _, v := range e {
-		dto = append(dto, playlistAudioEntityToDTO(&v))
 	}
 	return dto
 }

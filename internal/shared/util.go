@@ -1,6 +1,8 @@
 package shared
 
-import "golang.org/x/exp/constraints"
+import (
+	"golang.org/x/exp/constraints"
+)
 
 func Contains[T comparable](elems []T, v T) bool {
 	for _, s := range elems {
