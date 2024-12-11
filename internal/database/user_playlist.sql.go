@@ -63,6 +63,15 @@ func (q *Queries) DeleteSpotifyUserSavedPlaylistJoins(ctx context.Context, userI
 	return err
 }
 
+const deleteUserPlaylistByID = `-- name: DeleteUserPlaylistByID :exec
+DELETE FROM user_playlists WHERE id = $1
+`
+
+func (q *Queries) DeleteUserPlaylistByID(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deleteUserPlaylistByID, id)
+	return err
+}
+
 const getFullUserPlaylists = `-- name: GetFullUserPlaylists :many
 SELECT 
   user_playlists.id as user_playlist_id,

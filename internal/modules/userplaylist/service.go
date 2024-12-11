@@ -126,10 +126,15 @@ func UpdateUserPlaylist(
 	}, nil
 }
 
+type DeleteUserPlaylistParams struct {
+	UserID         uuid.UUID
+	UserPlaylistID uuid.UUID
+}
+
 func DeleteUserPlaylist(
 	ctx context.Context,
 	db *database.Queries,
-	params database.DeleteUserPlaylistParams,
+	params DeleteUserPlaylistParams,
 ) error {
 	userPlaylist, err := db.GetUserPlaylistByID(ctx, params.UserPlaylistID)
 	if err != nil {
