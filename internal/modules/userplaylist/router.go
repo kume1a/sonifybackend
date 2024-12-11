@@ -21,6 +21,12 @@ func Router(apiCfg *config.ApiConfig, router *mux.Router) *mux.Router {
 		shared.AuthMW(handleUpdateUserPlaylist(apiCfg)),
 	).Methods("PATCH")
 
+	// DELETE
+	r.HandleFunc(
+		"/{userPlaylistID}",
+		shared.AuthMW(handleDeleteUserPlaylist(apiCfg)),
+	).Methods("DELETE")
+
 	// GET
 	r.HandleFunc(
 		"/myUserPlaylists/full",

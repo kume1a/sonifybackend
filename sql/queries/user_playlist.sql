@@ -43,6 +43,9 @@ DELETE FROM user_playlists
   WHERE user_playlists.user_id = $1
   AND user_playlists.is_spotify_saved_playlist = true;
 
+-- name: DeleteUserPlaylistByID :exec
+DELETE FROM user_playlists WHERE id = $1;
+
 -- name: GetPlaylistIDsByUserID :many
 SELECT playlist_id FROM user_playlists WHERE user_id = $1;
 

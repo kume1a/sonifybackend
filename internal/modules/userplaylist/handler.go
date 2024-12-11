@@ -77,6 +77,36 @@ func handleUpdateUserPlaylist(apiCfg *config.ApiConfig) http.HandlerFunc {
 	}
 }
 
+func handleDeleteUserPlaylist(apiCfg *config.ApiConfig) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		authPayload, err := shared.GetAuthPayload(r)
+		if err != nil {
+			shared.ResUnauthorized(w, shared.ErrUnauthorized)
+			return
+		}
+
+		userPlaylistID, err := shared.GetURLParamUUID(r, "userPlaylistID")
+		if err != nil {
+			shared.ResBadRequest(w, err.Error())
+			return
+		}
+
+		err = DeleteUserPlaylist(
+			r.Context(), apiCfg.DB,
+			DeleteUserPlaylistParams{
+				UserID:         authPayload.UserID,
+				UserPlaylistID: userPlaylistID,
+			},
+		)
+		if err != nil {
+			shared.ResTryHttpError(w, err)
+			return
+		}
+
+		shared.ResOK(w, nil)
+	}
+}
+
 func handleGetUserPlaylistsFullByAuthUserID(apiCfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authPayload, err := shared.GetAuthPayload(r)

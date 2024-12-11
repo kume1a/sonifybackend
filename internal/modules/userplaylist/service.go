@@ -126,6 +126,35 @@ func UpdateUserPlaylist(
 	}, nil
 }
 
+func DeleteUserPlaylist(
+	ctx context.Context,
+	db *database.Queries,
+	params database.DeleteUserPlaylistParams,
+) error {
+	userPlaylist, err := db.GetUserPlaylistByID(ctx, params.UserPlaylistID)
+	if err != nil {
+		log.Println("Error getting user playlist by ID:", err)
+
+		if shared.IsDBErrorNotFound(err) {
+			return shared.NotFound(shared.ErrUserPlaylistNotFound)
+		}
+
+		return err
+	}
+
+	if userPlaylist.UserID != params.UserID {
+		return shared.Forbidden(shared.ErrUserPlaylistNotYours)
+	}
+
+	err = db.DeleteUserPlaylistByID(ctx, params.UserPlaylistID)
+	if err != nil {
+		log.Println("Error deleting user playlist by ID:", err)
+		return err
+	}
+
+	return nil
+}
+
 func GetUserPlaylistsFull(
 	ctx context.Context,
 	db *database.Queries,
