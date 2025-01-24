@@ -7,14 +7,13 @@ import (
 	"github.com/gomodule/redigo/redis"
 	"github.com/kume1a/sonifybackend/internal/config"
 	"github.com/kume1a/sonifybackend/internal/shared"
-	"github.com/robfig/cron"
 )
 
 func ConfigureBackgroundWork(resourceConfig *config.ResourceConfig) (*work.Enqueuer, *work.WorkerPool) {
-	crontab := cron.New()
-	crontab.AddFunc("0 6 */2 * *", CreateHandleDeleteUnusedAudios(resourceConfig))
+	// crontab := cron.New()
+	// crontab.AddFunc("0 6 */2 * *", CreateHandleDeleteUnusedAudios(resourceConfig))
 
-	crontab.Start()
+	// crontab.Start()
 
 	redisPool := createRedisPool()
 
