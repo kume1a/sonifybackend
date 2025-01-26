@@ -66,18 +66,18 @@ func BulkCreateUserAudiosTx(
 	)
 }
 
-func GetUserAudioByYoutubeVideoID(
+func UserAudioExistsByYoutubeVideoID(
 	ctx context.Context,
 	db *database.Queries,
-	params database.GetUserAudioByVideoIDParams,
-) (*database.GetUserAudioByVideoIDRow, error) {
-	audio, err := db.GetUserAudioByVideoID(ctx, params)
+	params database.UserAudioExistsByYoutubeVideoIDParams,
+) (bool, error) {
+	exists, err := db.UserAudioExistsByYoutubeVideoID(ctx, params)
 
 	if err != nil {
-		log.Println("Error getting user audio by youtube video id: ", err)
+		log.Println("Error checking if user audio exists by youtube video id: ", err)
 	}
 
-	return &audio, err
+	return exists, err
 }
 
 func CountUserAudioByLocalID(

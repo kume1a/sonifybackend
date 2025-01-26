@@ -16,37 +16,35 @@ import (
 )
 
 type DownloadYoutubeAudioAndSaveToUserLibraryParams struct {
-	ApiConfig *config.ApiConfig
-	Context   context.Context
-	UserID    uuid.UUID
-	VideoID   string
+	ApiConfig     *config.ApiConfig
+	Context       context.Context
+	UserID        uuid.UUID
+	YoutueVideoID string
 }
 
 func DownloadYoutubeAudioAndSaveToUserLibrary(
 	params DownloadYoutubeAudioAndSaveToUserLibraryParams,
 ) (
 	*audio.UserAudioWithAudio,
-	*shared.HttpError,
+	error,
 ) {
 	// check if the user already has the audio
-	if _, err := useraudio.GetUserAudioByYoutubeVideoID(
-		params.Context,
-		params.ApiConfig.DB,
-		database.GetUserAudioByVideoIDParams{
-			UserID:         params.UserID,
-			YoutubeVideoID: sql.NullString{String: params.VideoID, Valid: true},
-		},
-	); err == nil {
-		return nil, shared.Conflict(shared.ErrAudioAlreadyExists)
+	if err := useraudio.ValidateUserAudioDoesNotExist(&useraudio.ValidateUserAudioDoesNotExistParams{
+		Context:        params.Context,
+		ApiConfig:      params.ApiConfig,
+		UserID:         params.UserID,
+		YoutubeVideoID: params.YoutueVideoID,
+	}); err != nil {
+		return nil, err
 	}
 
-	videoInfo, err := GetYoutubeVideoInfo(params.VideoID)
+	videoInfo, err := GetYoutubeVideoInfo(params.YoutueVideoID)
 	if err != nil {
 		return nil, shared.InternalServerErrorDef()
 	}
 
 	filePath, thumbnailPath, err := DownloadYoutubeAudio(
-		params.VideoID,
+		params.YoutueVideoID,
 		DownloadYoutubeAudioOptions{
 			DownloadThumbnail: true,
 		},
@@ -73,7 +71,7 @@ func DownloadYoutubeAudioAndSaveToUserLibrary(
 					DurationMs:         sql.NullInt32{Int32: int32(videoInfo.DurationSeconds * 1000), Valid: true},
 					Path:               sql.NullString{String: filePath, Valid: true},
 					SizeBytes:          sql.NullInt64{Int64: fileSize.Bytes, Valid: true},
-					YoutubeVideoID:     sql.NullString{String: params.VideoID, Valid: true},
+					YoutubeVideoID:     sql.NullString{String: params.YoutueVideoID, Valid: true},
 					ThumbnailPath:      sql.NullString{String: thumbnailPath, Valid: true},
 					PlaylistAudioCount: 0,
 					UserAudioCount:     1,

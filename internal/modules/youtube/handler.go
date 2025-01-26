@@ -43,14 +43,14 @@ func handleDownloadYoutubeAudioToUserLibrary(apiCfg *config.ApiConfig) http.Hand
 			return
 		}
 
-		userAudioWithAudio, httpErr := DownloadYoutubeAudioAndSaveToUserLibrary(DownloadYoutubeAudioAndSaveToUserLibraryParams{
-			ApiConfig: apiCfg,
-			Context:   r.Context(),
-			UserID:    authPayload.UserID,
-			VideoID:   body.VideoID,
+		userAudioWithAudio, err := DownloadYoutubeAudioAndSaveToUserLibrary(DownloadYoutubeAudioAndSaveToUserLibraryParams{
+			ApiConfig:     apiCfg,
+			Context:       r.Context(),
+			UserID:        authPayload.UserID,
+			YoutueVideoID: body.VideoID,
 		})
-		if httpErr != nil {
-			shared.ResHttpError(w, httpErr)
+		if err != nil {
+			shared.ResTryHttpError(w, err)
 			return
 		}
 
