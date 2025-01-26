@@ -8,23 +8,6 @@ import (
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
-func handleGetYoutubeMusicUrl(w http.ResponseWriter, r *http.Request) {
-	query, err := shared.ValidateRequestQuery[*getYoutubeMusicUrlDto](r)
-	if err != nil {
-		shared.ResBadRequest(w, err.Error())
-		return
-	}
-
-	url, err := GetYoutubeAudioUrl(query.VideoID[0])
-	if err != nil {
-		shared.ResInternalServerErrorDef(w)
-		return
-	}
-
-	dto := shared.UrlDTO{Url: url}
-	shared.ResOK(w, dto)
-}
-
 func handleGetYoutubeSearchSuggestions(w http.ResponseWriter, r *http.Request) {
 	query, err := shared.ValidateRequestQuery[*shared.KeywordDTO](r)
 	if err != nil {
