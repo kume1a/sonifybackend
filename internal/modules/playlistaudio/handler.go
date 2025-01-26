@@ -54,7 +54,7 @@ func handleCreatePlaylistAudio(apiCfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		dto := playlistAudioEntityToDTO(playlistAudio)
+		dto := sharedmodule.PlaylistAudioEntityToDTO(playlistAudio)
 
 		shared.ResCreated(w, dto)
 	}

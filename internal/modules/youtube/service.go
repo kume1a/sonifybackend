@@ -121,7 +121,6 @@ type DownloadYoutubeAudioAndSaveToPlaylistParams struct {
 
 // TODO check if audio already exists, don't just create it in both methods
 
-// TODO attach audio to playlist not user here
 func DownloadYoutubeAudioAndSaveToPlaylist(
 	params DownloadYoutubeAudioAndSaveToPlaylistParams,
 ) (
@@ -185,7 +184,7 @@ func DownloadYoutubeAudioAndSaveToPlaylist(
 	txResult, err := shared.RunDBTransaction(
 		params.Context,
 		params.ApiConfig.ResourceConfig,
-		func(tx *database.Queries) (audio.UserAudioWithAudio, error) {
+		func(tx *database.Queries) (playlistaudio.PlaylistAudioWithAudio, error) {
 			newAudio, err := audio.CreateAudio(
 				params.Context,
 				params.ApiConfig.DB,
@@ -205,24 +204,24 @@ func DownloadYoutubeAudioAndSaveToPlaylist(
 				},
 			)
 			if err != nil {
-				return audio.UserAudioWithAudio{}, shared.InternalServerErrorDef()
+				return playlistaudio.PlaylistAudioWithAudio{}, shared.InternalServerErrorDef()
 			}
 
-			userAudio, err := useraudio.CreateUserAudio(
+			playlistAudio, err := playlistaudio.CreatePlaylistAudio(
 				params.Context,
 				params.ApiConfig.DB,
-				database.CreateUserAudioParams{
-					UserID:  params.UserID,
-					AudioID: newAudio.ID,
+				database.CreatePlaylistAudioParams{
+					PlaylistID: params.PlaylistID,
+					AudioID:    newAudio.ID,
 				},
 			)
 			if err != nil {
-				return audio.UserAudioWithAudio{}, shared.InternalServerErrorDef()
+				return playlistaudio.PlaylistAudioWithAudio{}, shared.InternalServerErrorDef()
 			}
 
-			return audio.UserAudioWithAudio{
-				UserAudio: userAudio,
-				Audio:     newAudio,
+			return playlistaudio.PlaylistAudioWithAudio{
+				PlaylistAudio: playlistAudio,
+				Audio:         newAudio,
 			}, nil
 		},
 	)
