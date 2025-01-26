@@ -1,9 +1,13 @@
 package audio
 
 import (
+	"context"
+	"log"
 	"net/http"
+	"os"
 
 	"github.com/kume1a/sonifybackend/internal/config"
+	"github.com/kume1a/sonifybackend/internal/database"
 	"github.com/kume1a/sonifybackend/internal/modules/sharedmodule"
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
@@ -71,5 +75,60 @@ func handleWriteInitialAudioRelCount(apiCfg *config.ApiConfig) http.HandlerFunc 
 		}
 
 		shared.ResOK(w, nil)
+	}
+}
+
+func handleDeleteUnusedAudio(apiCfg *config.ApiConfig) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.Background()
+
+		unusedAudios, err := GetUnusedAudios(
+			ctx,
+			apiCfg.DB,
+		)
+
+		if err != nil {
+			log.Println("Error deleting unused audios: ", err)
+			return
+		}
+
+		for _, unusedAudio := range unusedAudios {
+			if err := shared.RunNoResultDBTransaction(
+				ctx,
+				apiCfg.ResourceConfig,
+				func(tx *database.Queries) error {
+					if err := DeleteAudioByID(
+						context.Background(),
+						apiCfg.DB,
+						unusedAudio.ID,
+					); err != nil {
+						log.Println("Error deleting audio: ", err)
+						return err
+					}
+
+					if err := os.Remove(unusedAudio.Path.String); err != nil {
+						log.Println("Error removing unused audio file: ", err)
+						return err
+					}
+					if err := os.Remove(unusedAudio.ThumbnailPath.String); err != nil {
+						log.Println("Error removing unused audio thumbnail file: ", err)
+						return err
+					}
+
+					return nil
+				},
+			); err != nil {
+				log.Println("Error deleting unused audio: ", err)
+			}
+		}
+
+		res := deleteUnusedAudioResultDTO{
+			DeletedCount: len(unusedAudios),
+			AudioNames: shared.Map(unusedAudios, func(audio database.Audio) string {
+				return audio.Title.String
+			}),
+		}
+
+		shared.ResOK(w, res)
 	}
 }

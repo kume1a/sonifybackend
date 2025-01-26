@@ -8,3 +8,8 @@ type uploadUserLocalMusicDTO struct {
 	ThumbnailPath string
 	DurationMs    int32
 }
+
+type deleteUnusedAudioResultDTO struct {
+	DeletedCount int      `json:"deletedCount"`
+	AudioNames   []string `json:"audioNames"`
+}
