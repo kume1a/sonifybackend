@@ -1,7 +1,14 @@
 package youtube
 
-type downloadYoutubeAudioDTO struct {
+import "github.com/google/uuid"
+
+type downloadYoutubeAudioToUserLibraryDTO struct {
 	VideoID string `json:"videoId" valid:"required"`
+}
+
+type downloadYoutubeAudioToPlaylistDTO struct {
+	VideoID    string    `json:"videoId" valid:"required"`
+	PlaylistID uuid.UUID `json:"playlistId" valid:"required"`
 }
 
 type youtubeSearchSuggestions struct {

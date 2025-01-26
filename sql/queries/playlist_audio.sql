@@ -64,3 +64,10 @@ SELECT
 FROM playlist_audios
 INNER JOIN audios ON playlist_audios.audio_id = audios.id
 WHERE playlist_audios.playlist_id = sqlc.arg(playlist_id) AND audios.spotify_id = ANY(sqlc.arg(spotify_ids)::text[]);
+
+-- name: PlaylistAudioExistsByYoutubeVideoID :one
+SELECT EXISTS(
+  SELECT 1 FROM playlist_audios
+    INNER JOIN audios ON playlist_audios.audio_id = audios.id
+    WHERE playlist_audios.playlist_id = sqlc.arg(playlist_id) AND audios.youtube_video_id = sqlc.arg(youtube_video_id)
+);

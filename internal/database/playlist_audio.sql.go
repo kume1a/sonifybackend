@@ -282,3 +282,23 @@ func (q *Queries) GetPlaylistAudios(ctx context.Context, arg GetPlaylistAudiosPa
 	}
 	return items, nil
 }
+
+const playlistAudioExistsByYoutubeVideoID = `-- name: PlaylistAudioExistsByYoutubeVideoID :one
+SELECT EXISTS(
+  SELECT 1 FROM playlist_audios
+    INNER JOIN audios ON playlist_audios.audio_id = audios.id
+    WHERE playlist_audios.playlist_id = $1 AND audios.youtube_video_id = $2
+)
+`
+
+type PlaylistAudioExistsByYoutubeVideoIDParams struct {
+	PlaylistID     uuid.UUID
+	YoutubeVideoID sql.NullString
+}
+
+func (q *Queries) PlaylistAudioExistsByYoutubeVideoID(ctx context.Context, arg PlaylistAudioExistsByYoutubeVideoIDParams) (bool, error) {
+	row := q.db.QueryRowContext(ctx, playlistAudioExistsByYoutubeVideoID, arg.PlaylistID, arg.YoutubeVideoID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}

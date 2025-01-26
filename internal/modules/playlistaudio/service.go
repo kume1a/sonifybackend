@@ -205,3 +205,17 @@ func CountPlaylistAudiosByAudioID(
 
 	return count, err
 }
+
+func PlaylistAudioExistsByYoutubeVideoID(
+	ctx context.Context,
+	db *database.Queries,
+	params database.PlaylistAudioExistsByYoutubeVideoIDParams,
+) (bool, error) {
+	row, err := db.PlaylistAudioExistsByYoutubeVideoID(ctx, params)
+
+	if err != nil {
+		log.Println("Error checking if playlist audio exists by youtube video ID:", err)
+	}
+
+	return row, err
+}

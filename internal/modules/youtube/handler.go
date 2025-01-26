@@ -29,7 +29,7 @@ func handleGetYoutubeSearchSuggestions(w http.ResponseWriter, r *http.Request) {
 	shared.ResOK(w, res)
 }
 
-func handleDownloadYoutubeAudio(apiCfg *config.ApiConfig) http.HandlerFunc {
+func handleDownloadYoutubeAudioToUserLibrary(apiCfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authPayload, err := shared.GetAuthPayload(r)
 		if err != nil {
@@ -37,13 +37,13 @@ func handleDownloadYoutubeAudio(apiCfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		body, err := shared.ValidateRequestBody[*downloadYoutubeAudioDTO](r)
+		body, err := shared.ValidateRequestBody[*downloadYoutubeAudioToUserLibraryDTO](r)
 		if err != nil {
 			shared.ResBadRequest(w, err.Error())
 			return
 		}
 
-		userAudioWithAudio, httpErr := DownloadYoutubeAudioAndSave(DownloadYoutubeAudioParams{
+		userAudioWithAudio, httpErr := DownloadYoutubeAudioAndSaveToUserLibrary(DownloadYoutubeAudioAndSaveToUserLibraryParams{
 			ApiConfig: apiCfg,
 			Context:   r.Context(),
 			UserID:    authPayload.UserID,
@@ -57,6 +57,41 @@ func handleDownloadYoutubeAudio(apiCfg *config.ApiConfig) http.HandlerFunc {
 		res := sharedmodule.UserAudioWithRelDTO{
 			UserAudioDTO: sharedmodule.UserAudioEntityToDTO(userAudioWithAudio.UserAudio),
 			Audio:        sharedmodule.AudioEntityToDto(userAudioWithAudio.Audio),
+		}
+
+		shared.ResCreated(w, res)
+	}
+}
+
+func handleDownloadYoutubeAudioPlaylist(apiCfg *config.ApiConfig) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		authPayload, err := shared.GetAuthPayload(r)
+		if err != nil {
+			shared.ResUnauthorized(w, err.Error())
+			return
+		}
+
+		body, err := shared.ValidateRequestBody[*downloadYoutubeAudioToPlaylistDTO](r)
+		if err != nil {
+			shared.ResBadRequest(w, err.Error())
+			return
+		}
+
+		playlistAudioWithAudio, httpErr := DownloadYoutubeAudioAndSaveToPlaylist(DownloadYoutubeAudioAndSaveToPlaylistParams{
+			ApiConfig:  apiCfg,
+			Context:    r.Context(),
+			UserID:     authPayload.UserID,
+			VideoID:    body.VideoID,
+			PlaylistID: body.PlaylistID,
+		})
+		if httpErr != nil {
+			shared.ResHttpError(w, httpErr)
+			return
+		}
+
+		res := sharedmodule.PlaylistAudioWithRelDTO{
+			PlaylistAudioDTO: sharedmodule.PlaylistAudioEntityToDTO(playlistAudioWithAudio.PlaylistAudio),
+			Audio:            sharedmodule.AudioEntityToDto(playlistAudioWithAudio.Audio),
 		}
 
 		shared.ResCreated(w, res)
