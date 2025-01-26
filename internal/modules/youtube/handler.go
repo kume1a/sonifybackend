@@ -43,12 +43,14 @@ func handleDownloadYoutubeAudioToUserLibrary(apiCfg *config.ApiConfig) http.Hand
 			return
 		}
 
-		userAudioWithAudio, err := DownloadYoutubeAudioAndSaveToUserLibrary(DownloadYoutubeAudioAndSaveToUserLibraryParams{
-			ApiConfig:     apiCfg,
-			Context:       r.Context(),
-			UserID:        authPayload.UserID,
-			YoutueVideoID: body.VideoID,
-		})
+		userAudioWithAudio, err := DownloadYoutubeAudioAndSaveToUserLibrary(
+			DownloadYoutubeAudioAndSaveToUserLibraryParams{
+				ApiConfig:     apiCfg,
+				Context:       r.Context(),
+				UserID:        authPayload.UserID,
+				YoutueVideoID: body.VideoID,
+			},
+		)
 		if err != nil {
 			shared.ResTryHttpError(w, err)
 			return
@@ -77,15 +79,17 @@ func handleDownloadYoutubeAudioPlaylist(apiCfg *config.ApiConfig) http.HandlerFu
 			return
 		}
 
-		playlistAudioWithAudio, httpErr := DownloadYoutubeAudioAndSaveToPlaylist(DownloadYoutubeAudioAndSaveToPlaylistParams{
-			ApiConfig:  apiCfg,
-			Context:    r.Context(),
-			UserID:     authPayload.UserID,
-			VideoID:    body.VideoID,
-			PlaylistID: body.PlaylistID,
-		})
-		if httpErr != nil {
-			shared.ResHttpError(w, httpErr)
+		playlistAudioWithAudio, err := DownloadYoutubeAudioAndSaveToPlaylist(
+			DownloadYoutubeAudioAndSaveToPlaylistParams{
+				ApiConfig:      apiCfg,
+				Context:        r.Context(),
+				UserID:         authPayload.UserID,
+				YoutubeVideoID: body.VideoID,
+				PlaylistID:     body.PlaylistID,
+			},
+		)
+		if err != nil {
+			shared.ResTryHttpError(w, err)
 			return
 		}
 
