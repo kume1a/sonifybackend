@@ -14,6 +14,20 @@ import (
 	"github.com/lib/pq"
 )
 
+const audioExistsByYoutubeVideoID = `-- name: AudioExistsByYoutubeVideoID :one
+SELECT EXISTS(
+  SELECT 1 FROM audios
+    WHERE audios.youtube_video_id = $1
+)
+`
+
+func (q *Queries) AudioExistsByYoutubeVideoID(ctx context.Context, youtubeVideoID sql.NullString) (bool, error) {
+	row := q.db.QueryRowContext(ctx, audioExistsByYoutubeVideoID, youtubeVideoID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const countAudioByID = `-- name: CountAudioByID :one
 SELECT COUNT(*) FROM audios WHERE id = $1
 `
@@ -158,6 +172,32 @@ SELECT id, created_at, title, author, duration_ms, path, size_bytes, youtube_vid
 
 func (q *Queries) GetAudioById(ctx context.Context, id uuid.UUID) (Audio, error) {
 	row := q.db.QueryRowContext(ctx, getAudioById, id)
+	var i Audio
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.Title,
+		&i.Author,
+		&i.DurationMs,
+		&i.Path,
+		&i.SizeBytes,
+		&i.YoutubeVideoID,
+		&i.ThumbnailPath,
+		&i.SpotifyID,
+		&i.ThumbnailUrl,
+		&i.LocalID,
+		&i.PlaylistAudioCount,
+		&i.UserAudioCount,
+	)
+	return i, err
+}
+
+const getAudioByYoutubeVideoID = `-- name: GetAudioByYoutubeVideoID :one
+SELECT id, created_at, title, author, duration_ms, path, size_bytes, youtube_video_id, thumbnail_path, spotify_id, thumbnail_url, local_id, playlist_audio_count, user_audio_count FROM audios WHERE youtube_video_id = $1
+`
+
+func (q *Queries) GetAudioByYoutubeVideoID(ctx context.Context, youtubeVideoID sql.NullString) (Audio, error) {
+	row := q.db.QueryRowContext(ctx, getAudioByYoutubeVideoID, youtubeVideoID)
 	var i Audio
 	err := row.Scan(
 		&i.ID,

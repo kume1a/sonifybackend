@@ -15,6 +15,66 @@ import (
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
+type downloadYoutubeAudioPayload struct {
+	Title          string
+	Author         string
+	DurationMs     int32
+	Path           string
+	SizeBytes      int64
+	YoutubeVideoID string
+	ThumbnailPath  string
+}
+
+func downloadYoutubeAudioIfNotExists(
+	ctx context.Context,
+	apiConfig *config.ApiConfig,
+	youtubeVideoID string,
+) (*downloadYoutubeAudioPayload, error) {
+	audio, err := audio.GetAudioByYoutubeVideoID(
+		ctx,
+		apiConfig.DB,
+		sql.NullString{String: youtubeVideoID, Valid: true},
+	)
+
+	if err != nil && !shared.IsDBErrorNotFound(err) {
+		return nil, shared.InternalServerErrorDef()
+	}
+
+	if audio != nil {
+		return nil, nil
+	}
+
+	videoInfo, err := GetYoutubeVideoInfo(youtubeVideoID)
+	if err != nil {
+		return nil, shared.InternalServerErrorDef()
+	}
+
+	filePath, thumbnailPath, err := DownloadYoutubeAudio(
+		youtubeVideoID,
+		DownloadYoutubeAudioOptions{
+			DownloadThumbnail: true,
+		},
+	)
+	if err != nil {
+		return nil, shared.InternalServerErrorDef()
+	}
+
+	fileSize, err := shared.GetFileSize(filePath)
+	if err != nil {
+		return nil, shared.InternalServerErrorDef()
+	}
+
+	return &downloadYoutubeAudioPayload{
+		Title:          strings.TrimSpace(videoInfo.Title),
+		Author:         strings.TrimSpace(videoInfo.Uploader),
+		DurationMs:     int32(videoInfo.DurationSeconds * 1000),
+		Path:           filePath,
+		SizeBytes:      fileSize.Bytes,
+		YoutubeVideoID: youtubeVideoID,
+		ThumbnailPath:  thumbnailPath,
+	}, nil
+}
+
 type DownloadYoutubeAudioAndSaveToUserLibraryParams struct {
 	ApiConfig     *config.ApiConfig
 	Context       context.Context
@@ -149,24 +209,9 @@ func DownloadYoutubeAudioAndSaveToPlaylist(
 		return nil, err
 	}
 
-	videoInfo, err := GetYoutubeVideoInfo(params.YoutubeVideoID)
+	downloadAudioPayload, err := downloadYoutubeAudioIfNotExists(params.Context, params.ApiConfig, params.YoutubeVideoID)
 	if err != nil {
-		return nil, shared.InternalServerErrorDef()
-	}
-
-	filePath, thumbnailPath, err := DownloadYoutubeAudio(
-		params.YoutubeVideoID,
-		DownloadYoutubeAudioOptions{
-			DownloadThumbnail: true,
-		},
-	)
-	if err != nil {
-		return nil, shared.InternalServerErrorDef()
-	}
-
-	fileSize, err := shared.GetFileSize(filePath)
-	if err != nil {
-		return nil, shared.InternalServerErrorDef()
+		return nil, err
 	}
 
 	txResult, err := shared.RunDBTransaction(

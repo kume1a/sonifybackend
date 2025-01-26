@@ -20,9 +20,9 @@ func handleUploadUserLocalMusic(apiCfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		form, httpErr := ValidateUploadUserLocalMusicDTO(w, r)
-		if httpErr != nil {
-			shared.ResHttpError(w, httpErr)
+		form, err := ValidateUploadUserLocalMusicDTO(w, r)
+		if err != nil {
+			shared.ResTryHttpError(w, err)
 			return
 		}
 
