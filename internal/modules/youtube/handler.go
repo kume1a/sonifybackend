@@ -45,10 +45,10 @@ func handleDownloadYoutubeAudioToUserLibrary(apiCfg *config.ApiConfig) http.Hand
 
 		userAudioWithAudio, err := DownloadYoutubeAudioAndSaveToUserLibrary(
 			DownloadYoutubeAudioAndSaveToUserLibraryParams{
-				ApiConfig:     apiCfg,
-				Context:       r.Context(),
-				UserID:        authPayload.UserID,
-				YoutueVideoID: body.VideoID,
+				ApiConfig:      apiCfg,
+				Context:        r.Context(),
+				UserID:         authPayload.UserID,
+				YoutubeVideoID: body.VideoID,
 			},
 		)
 		if err != nil {
