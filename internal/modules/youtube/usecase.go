@@ -82,7 +82,7 @@ func DownloadYoutubeAudioAndSaveToUserLibrary(
 	dbYoutubeAudio, err := audio.GetAudioByYoutubeVideoID(
 		params.Context,
 		params.ApiConfig.DB,
-		sql.NullString{String: params.YoutubeVideoID, Valid: true},
+		params.YoutubeVideoID,
 	)
 
 	if err != nil && !shared.IsDBErrorNotFound(err) {
@@ -101,9 +101,8 @@ func DownloadYoutubeAudioAndSaveToUserLibrary(
 		params.Context,
 		params.ApiConfig.ResourceConfig,
 		func(tx *database.Queries) (audio.UserAudioWithAudio, error) {
-			var newAudio *database.Audio
 			if downloadAudioPayload != nil {
-				newAudio, err = audio.CreateAudio(
+				dbYoutubeAudio, err = audio.CreateAudio(
 					params.Context,
 					params.ApiConfig.DB,
 					database.CreateAudioParams{
@@ -131,21 +130,16 @@ func DownloadYoutubeAudioAndSaveToUserLibrary(
 				params.ApiConfig.DB,
 				database.CreateUserAudioParams{
 					UserID:  params.UserID,
-					AudioID: newAudio.ID,
+					AudioID: dbYoutubeAudio.ID,
 				},
 			)
 			if err != nil {
 				return audio.UserAudioWithAudio{}, shared.InternalServerErrorDef()
 			}
 
-			finalAudio := dbYoutubeAudio
-			if finalAudio == nil {
-				finalAudio = newAudio
-			}
-
 			return audio.UserAudioWithAudio{
 				UserAudio: userAudio,
-				Audio:     finalAudio,
+				Audio:     dbYoutubeAudio,
 			}, nil
 		},
 	)
@@ -167,6 +161,18 @@ type DownloadYoutubeAudioAndSaveToPlaylistParams struct {
 func DownloadYoutubeAudioAndSaveToPlaylist(
 	params DownloadYoutubeAudioAndSaveToPlaylistParams,
 ) (*playlistaudio.PlaylistAudioWithAudio, error) {
+	// check if the playlist already has the audio
+	if err := playlistaudio.ValidatePlaylistAudioDoesNotExistByYoutubeVideoID(
+		&playlistaudio.ValidatePlaylistAudioDoesNotExistByYoutubeVideoIDParams{
+			Context:        params.Context,
+			ApiConfig:      params.ApiConfig,
+			PlaylistID:     params.PlaylistID,
+			YoutubeVideoID: params.YoutubeVideoID,
+		},
+	); err != nil {
+		return nil, err
+	}
+
 	// check if playlist belongs to user
 	userPlaylistExists, err := sharedmodule.UserPlaylistExists(
 		params.Context,
@@ -184,22 +190,10 @@ func DownloadYoutubeAudioAndSaveToPlaylist(
 		return nil, shared.Forbidden(shared.ErrUserPlaylistNotFound)
 	}
 
-	// check if the playlist already has the audio
-	if err := playlistaudio.ValidatePlaylistAudioDoesNotExistByYoutubeVideoID(
-		&playlistaudio.ValidatePlaylistAudioDoesNotExistByYoutubeVideoIDParams{
-			Context:        params.Context,
-			ApiConfig:      params.ApiConfig,
-			PlaylistID:     params.PlaylistID,
-			YoutubeVideoID: params.YoutubeVideoID,
-		},
-	); err != nil {
-		return nil, err
-	}
-
 	dbYoutubeAudio, err := audio.GetAudioByYoutubeVideoID(
 		params.Context,
 		params.ApiConfig.DB,
-		sql.NullString{String: params.YoutubeVideoID, Valid: true},
+		params.YoutubeVideoID,
 	)
 
 	if err != nil && !shared.IsDBErrorNotFound(err) {
@@ -218,9 +212,8 @@ func DownloadYoutubeAudioAndSaveToPlaylist(
 		params.Context,
 		params.ApiConfig.ResourceConfig,
 		func(tx *database.Queries) (playlistaudio.PlaylistAudioWithAudio, error) {
-			var newAudio *database.Audio
 			if downloadAudioPayload != nil {
-				newAudio, err = audio.CreateAudio(
+				dbYoutubeAudio, err = audio.CreateAudio(
 					params.Context,
 					params.ApiConfig.DB,
 					database.CreateAudioParams{
@@ -248,21 +241,16 @@ func DownloadYoutubeAudioAndSaveToPlaylist(
 				params.ApiConfig.DB,
 				database.CreatePlaylistAudioParams{
 					PlaylistID: params.PlaylistID,
-					AudioID:    newAudio.ID,
+					AudioID:    dbYoutubeAudio.ID,
 				},
 			)
 			if err != nil {
 				return playlistaudio.PlaylistAudioWithAudio{}, shared.InternalServerErrorDef()
 			}
 
-			finalAudio := dbYoutubeAudio
-			if finalAudio == nil {
-				finalAudio = newAudio
-			}
-
 			return playlistaudio.PlaylistAudioWithAudio{
 				PlaylistAudio: playlistAudio,
-				Audio:         finalAudio,
+				Audio:         dbYoutubeAudio,
 			}, nil
 		},
 	)

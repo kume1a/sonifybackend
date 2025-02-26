@@ -172,7 +172,7 @@ func AudioExistsByYoutubeVideoID(
 func GetAudioByYoutubeVideoID(
 	ctx context.Context,
 	db *database.Queries,
-	youtubeVideoID sql.NullString,
+	youtubeVideoID string,
 ) (*database.Audio, error) {
 	audio, err := db.GetAudioByYoutubeVideoID(ctx, youtubeVideoID)
 

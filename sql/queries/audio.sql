@@ -86,4 +86,4 @@ SELECT EXISTS(
 );
 
 -- name: GetAudioByYoutubeVideoID :one
-SELECT * FROM audios WHERE youtube_video_id = $1;
+SELECT * FROM audios WHERE youtube_video_id = sqlc.arg(youtube_video_id)::text;
