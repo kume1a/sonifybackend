@@ -16,6 +16,8 @@ const (
 	ErrMissingToken                  = "MISSING_TOKEN"
 	ErrInvalidToken                  = "INVALID_TOKEN"
 	ErrAudioAlreadyExists            = "AUDIO_ALREADY_EXISTS"
+	ErrUserAudioAlreadyExists        = "USER_AUDIO_ALREADY_EXISTS"
+	ErrPlaylistAudioAlreadyExists    = "PLAYLIST_AUDIO_ALREADY_EXISTS"
 	ErrInvalidAuthMethod             = "INVALID_AUTH_METHOD"
 	ErrInvalidEmailOrPassword        = "INVALID_EMAIL_OR_PASSWORD"
 	ErrMethodNotAllowed              = "METHOD_NOT_ALLOWED"

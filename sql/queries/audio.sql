@@ -78,3 +78,12 @@ WHERE spotify_id = ANY(sqlc.arg(spotify_ids)::text[]);
 
 -- name: CountAudioByID :one
 SELECT COUNT(*) FROM audios WHERE id = $1;
+
+-- name: AudioExistsByYoutubeVideoID :one
+SELECT EXISTS(
+  SELECT 1 FROM audios
+    WHERE audios.youtube_video_id = sqlc.arg(youtube_video_id)
+);
+
+-- name: GetAudioByYoutubeVideoID :one
+SELECT * FROM audios WHERE youtube_video_id = sqlc.arg(youtube_video_id)::text;

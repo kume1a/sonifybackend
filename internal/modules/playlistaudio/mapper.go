@@ -5,17 +5,6 @@ import (
 	"github.com/kume1a/sonifybackend/internal/modules/sharedmodule"
 )
 
-func playlistAudioEntityToDTO(
-	e *database.PlaylistAudio,
-) sharedmodule.PlaylistAudioDTO {
-	return sharedmodule.PlaylistAudioDTO{
-		ID:         e.ID,
-		CreatedAt:  e.CreatedAt,
-		PlaylistID: e.PlaylistID,
-		AudioID:    e.AudioID,
-	}
-}
-
 func GetPlaylistAudioRowToDTO(
 	e database.GetPlaylistAudiosRow,
 ) sharedmodule.PlaylistAudioDTO {

@@ -1,6 +1,8 @@
 package audio
 
 import (
+	"context"
+	"database/sql"
 	"net/http"
 	"strconv"
 
@@ -9,8 +11,8 @@ import (
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
-func ValidateUploadUserLocalMusicDTO(w http.ResponseWriter, r *http.Request) (*uploadUserLocalMusicDTO, *shared.HttpError) {
-	thumbnailPath, httpErr := shared.HandleUploadFile(shared.HandleUploadFileArgs{
+func ValidateUploadUserLocalMusicDTO(w http.ResponseWriter, r *http.Request) (*uploadUserLocalMusicDTO, error) {
+	thumbnailPath, err := shared.HandleUploadFile(shared.HandleUploadFileArgs{
 		ResponseWriter:   w,
 		Request:          r,
 		FieldName:        "thumbnail",
@@ -18,11 +20,11 @@ func ValidateUploadUserLocalMusicDTO(w http.ResponseWriter, r *http.Request) (*u
 		AllowedMimeTypes: shared.ImageMimeTypes,
 		IsOptional:       true,
 	})
-	if httpErr != nil {
-		return nil, httpErr
+	if err != nil {
+		return nil, err
 	}
 
-	audioPath, httpErr := shared.HandleUploadFile(shared.HandleUploadFileArgs{
+	audioPath, err := shared.HandleUploadFile(shared.HandleUploadFileArgs{
 		ResponseWriter:   w,
 		Request:          r,
 		FieldName:        "audio",
@@ -30,8 +32,8 @@ func ValidateUploadUserLocalMusicDTO(w http.ResponseWriter, r *http.Request) (*u
 		AllowedMimeTypes: shared.AudioMimeTypes,
 		IsOptional:       false,
 	})
-	if httpErr != nil {
-		return nil, httpErr
+	if err != nil {
+		return nil, err
 	}
 
 	localId := r.FormValue("localId")
@@ -65,4 +67,30 @@ func ValidateUploadUserLocalMusicDTO(w http.ResponseWriter, r *http.Request) (*u
 		ThumbnailPath: thumbnailPath,
 		DurationMs:    int32(intDurationMs),
 	}, nil
+}
+
+type ValidateAudioDoesNotExistByYoutubeVideoIDParams struct {
+	Context        context.Context
+	ApiConfig      *config.ApiConfig
+	YoutubeVideoID string
+}
+
+func ValidateAudioDoesNotExistByYoutubeVideoID(
+	params *ValidateAudioDoesNotExistByYoutubeVideoIDParams,
+) error {
+	exists, err := AudioExistsByYoutubeVideoID(
+		params.Context,
+		params.ApiConfig.DB,
+		sql.NullString{String: params.YoutubeVideoID, Valid: true},
+	)
+
+	if err != nil {
+		return shared.InternalServerErrorDef()
+	}
+
+	if exists {
+		return shared.Conflict(shared.ErrAudioAlreadyExists)
+	}
+
+	return nil
 }

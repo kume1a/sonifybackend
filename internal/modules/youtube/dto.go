@@ -1,26 +1,14 @@
 package youtube
 
-import (
-	"fmt"
+import "github.com/google/uuid"
 
-	"github.com/asaskevich/govalidator"
-)
-
-type downloadYoutubeAudioDTO struct {
+type downloadYoutubeAudioToUserLibraryDTO struct {
 	VideoID string `json:"videoId" valid:"required"`
 }
 
-type getYoutubeMusicUrlDto struct {
-	VideoID []string `json:"videoId" valid:"required"`
-}
-
-func (dto *getYoutubeMusicUrlDto) Validate() error {
-	if len(dto.VideoID) != 1 {
-		return fmt.Errorf("VideoID must have exactly one element")
-	}
-
-	_, err := govalidator.ValidateStruct(dto)
-	return err
+type downloadYoutubeAudioToPlaylistDTO struct {
+	VideoID    string    `json:"videoId" valid:"required"`
+	PlaylistID uuid.UUID `json:"playlistId" valid:"required"`
 }
 
 type youtubeSearchSuggestions struct {

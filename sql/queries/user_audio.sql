@@ -7,10 +7,13 @@ INSERT INTO user_audios(
 ) VALUES ($1,$2,$3,$4) 
 RETURNING *;
 
--- name: GetUserAudioByVideoID :one
-SELECT * FROM user_audios
-  INNER JOIN audios ON user_audios.audio_id = audios.id
-  WHERE user_audios.user_id = sqlc.arg(user_id) AND audios.youtube_video_id = sqlc.arg(youtube_video_id);
+-- name: UserAudioExistsByYoutubeVideoID :one
+SELECT EXISTS(
+  SELECT 1 FROM user_audios
+    INNER JOIN audios ON user_audios.audio_id = audios.id
+    WHERE user_audios.user_id = sqlc.arg(user_id) 
+      AND audios.youtube_video_id = sqlc.arg(youtube_video_id)
+);
 
 -- name: CountUserAudioByLocalID :one
 SELECT COUNT(*) FROM user_audios 

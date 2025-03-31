@@ -9,9 +9,9 @@ import (
 func Router(apiCfg *config.ApiConfig, router *mux.Router) *mux.Router {
 	r := router.PathPrefix("/youtube").Subrouter()
 
-	r.HandleFunc("/downloadAudio", shared.AuthMW(handleDownloadYoutubeAudio(apiCfg))).Methods("POST")
+	r.HandleFunc("/downloadAudioToUserLibrary", shared.AuthMW(handleDownloadYoutubeAudioToUserLibrary(apiCfg))).Methods("POST")
+	r.HandleFunc("/downloadAudioToPlaylist", shared.AuthMW(handleDownloadYoutubeAudioPlaylist(apiCfg))).Methods("POST")
 
-	r.HandleFunc("/musicUrl", shared.AuthMW(handleGetYoutubeMusicUrl)).Methods("GET")
 	r.HandleFunc("/searchSuggestions", shared.AuthMW(handleGetYoutubeSearchSuggestions)).Methods("GET")
 
 	return r

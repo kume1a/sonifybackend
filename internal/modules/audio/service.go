@@ -159,3 +159,31 @@ func GetUnusedAudios(
 
 	return audios, nil
 }
+
+func AudioExistsByYoutubeVideoID(
+	ctx context.Context,
+	db *database.Queries,
+	youtubeVideoID sql.NullString,
+) (bool, error) {
+	row, err := db.AudioExistsByYoutubeVideoID(ctx, youtubeVideoID)
+
+	if err != nil {
+		log.Println("Error checking if audio exists by youtube video id: ", err)
+	}
+
+	return row, err
+}
+
+func GetAudioByYoutubeVideoID(
+	ctx context.Context,
+	db *database.Queries,
+	youtubeVideoID string,
+) (*database.Audio, error) {
+	audio, err := db.GetAudioByYoutubeVideoID(ctx, youtubeVideoID)
+
+	if err != nil {
+		log.Println("Error getting audio by youtube video id: ", err)
+	}
+
+	return &audio, nil
+}
