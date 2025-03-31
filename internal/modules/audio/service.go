@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/kume1a/sonifybackend/internal/database"
@@ -24,6 +25,10 @@ func CreateAudio(
 
 	if params.ID == uuid.Nil {
 		params.ID = uuid.New()
+	}
+
+	if params.CreatedAt.IsZero() {
+		params.CreatedAt = time.Now().UTC()
 	}
 
 	entity, err := db.CreateAudio(ctx, params)
