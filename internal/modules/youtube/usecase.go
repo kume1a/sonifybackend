@@ -90,7 +90,7 @@ func DownloadYoutubeAudioAndSaveToUserLibrary(
 	}
 
 	var downloadAudioPayload *downloadYoutubeAudioPayload
-	if dbYoutubeAudio == nil {
+	if dbYoutubeAudio == nil || shared.IsDBErrorNotFound(err) {
 		downloadAudioPayload, err = downloadYoutubeAudio(params.YoutubeVideoID)
 		if err != nil {
 			return nil, err
@@ -201,7 +201,7 @@ func DownloadYoutubeAudioAndSaveToPlaylist(
 	}
 
 	var downloadAudioPayload *downloadYoutubeAudioPayload
-	if dbYoutubeAudio == nil {
+	if dbYoutubeAudio == nil || shared.IsDBErrorNotFound(err) {
 		downloadAudioPayload, err = downloadYoutubeAudio(params.YoutubeVideoID)
 		if err != nil {
 			return nil, err

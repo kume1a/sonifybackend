@@ -185,5 +185,5 @@ func GetAudioByYoutubeVideoID(
 		log.Println("Error getting audio by youtube video id: ", err)
 	}
 
-	return &audio, nil
+	return &audio, err
 }
