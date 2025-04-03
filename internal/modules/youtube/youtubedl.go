@@ -76,23 +76,30 @@ func DownloadYoutubeAudio(videoID string, options DownloadYoutubeAudioOptions) (
 }
 
 func GetYoutubeVideoInfo(videoID string) (*youtubeVideoInfoDTO, error) {
+	formatString := `{"title": %(title)j, "uploader": %(uploader)j, "durationSeconds": %(duration)d}`
+
 	cmd := exec.Command(
 		"yt-dlp",
 		"--print",
-		"{\"title\": \"%(title)s\", \"uploader\": \"%(uploader)s\", \"durationSeconds\": %(duration)s}",
+		formatString,
+		"--skip-download",
+		"--no-warnings",
 		"https://www.youtube.com/watch?v="+videoID,
 	)
 
 	output, err := cmd.Output()
 	if err != nil {
+		log.Printf("yt-dlp raw output on error: %s", string(output))
 		shared.LogCommandError(err, "GetYoutubeVideoInfo")
-		return nil, err
+		return nil, fmt.Errorf("yt-dlp execution failed: %w", err)
 	}
 
+	trimmedOutput := strings.TrimSpace(string(output))
+
 	var info youtubeVideoInfoDTO
-	if err := json.Unmarshal(output, &info); err != nil {
-		log.Println("Error parsing youtube video info: ", err)
-		return nil, err
+	if err := json.Unmarshal([]byte(trimmedOutput), &info); err != nil {
+		log.Printf("Error parsing youtube video info from JSON: '%s'. Error: %v", trimmedOutput, err)
+		return nil, fmt.Errorf("failed to parse yt-dlp JSON output: %w", err)
 	}
 
 	return &info, nil

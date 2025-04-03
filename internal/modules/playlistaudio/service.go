@@ -24,6 +24,19 @@ func CreatePlaylistAudio(
 		params.CreatedAt = time.Now().UTC()
 	}
 
+	exists, err := db.PlaylistAudioExists(ctx, database.PlaylistAudioExistsParams{
+		PlaylistID: params.PlaylistID,
+		AudioID:    params.AudioID,
+	})
+	if err != nil {
+		log.Println("Error checking if playlist audio exists:", err)
+		return nil, shared.InternalServerErrorDef()
+	}
+
+	if exists {
+		return nil, shared.Conflict(shared.ErrPlaylistAudioAlreadyExists)
+	}
+
 	entity, err := db.CreatePlaylistAudio(ctx, params)
 	if err != nil {
 		log.Println("Error creating playlist audio:", err)
