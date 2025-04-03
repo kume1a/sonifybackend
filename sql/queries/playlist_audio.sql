@@ -71,3 +71,10 @@ SELECT EXISTS(
     INNER JOIN audios ON playlist_audios.audio_id = audios.id
     WHERE playlist_audios.playlist_id = sqlc.arg(playlist_id) AND audios.youtube_video_id = sqlc.arg(youtube_video_id)
 );
+
+-- name: PlaylistAudioExists :one
+SELECT EXISTS(
+  SELECT 1 FROM playlist_audios
+    WHERE playlist_audios.playlist_id = sqlc.arg(playlist_id) 
+    AND playlist_audios.audio_id = sqlc.arg(audio_id)
+);

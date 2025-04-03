@@ -50,7 +50,7 @@ func handleCreatePlaylistAudio(apiCfg *config.ApiConfig) http.HandlerFunc {
 			},
 		)
 		if err != nil {
-			shared.ResInternalServerErrorDef(w)
+			shared.ResTryHttpError(w, err)
 			return
 		}
 
