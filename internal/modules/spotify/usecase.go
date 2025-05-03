@@ -76,7 +76,7 @@ func DownloadWriteSpotifyAudios(
 	for inputIndex, input := range filteredInputs {
 		log.Println("Downloading audio for track: ", input.TrackName, " by ", input.ArtistName, " with Spotify ID: ", input.SpotifyID)
 
-		searchQuery := input.TrackName + " " + input.ArtistName + "\"topic\""
+		searchQuery := input.TrackName + " " + input.ArtistName + " \"topic\""
 
 		ytVideoID, err := youtube.GetYoutubeSearchBestMatchVideoID(searchQuery)
 		if err != nil {
