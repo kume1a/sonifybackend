@@ -144,10 +144,10 @@ func handleImportSpotifyUserPlaylists(apiCfg *config.ApiConfig) http.HandlerFunc
 			return
 		}
 
-		if _, err := usersync.UpdateUserSyncDatumByUserId(
+		if _, err := usersync.UpsertUserSyncDatumByUserId(
 			r.Context(),
 			apiCfg.DB,
-			database.UpdateUserSyncDatumByUserIDParams{
+			&database.UserSyncDatum{
 				UserID:              authPayload.UserID,
 				SpotifyLastSyncedAt: sql.NullTime{Time: time.Now().UTC(), Valid: true},
 			},
