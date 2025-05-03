@@ -24,9 +24,11 @@ type Validatable interface {
 }
 
 type HttpGetParams struct {
-	URL     string
-	Headers map[string]string
-	Query   url.Values
+	URL           string
+	Headers       map[string]string
+	Query         url.Values
+	PrintRequest  bool
+	PrintResponse bool
 }
 
 func GetURLParamString(r *http.Request, key string) (string, error) {
@@ -54,7 +56,7 @@ func GetURLParamUUID(r *http.Request, key string) (uuid.UUID, error) {
 	return id, nil
 }
 
-func HttpGetWithResponse[DTO interface{}](params HttpGetParams) (*DTO, error) {
+func HttpGetWithResponse[DTO any](params HttpGetParams) (*DTO, error) {
 	req, err := http.NewRequest("GET", params.URL, nil)
 	if err != nil {
 		return nil, err
@@ -68,6 +70,12 @@ func HttpGetWithResponse[DTO interface{}](params HttpGetParams) (*DTO, error) {
 		req.URL.RawQuery = params.Query.Encode()
 	}
 
+	if params.PrintRequest {
+		log.Println("Sending GET request to:", req.URL.String())
+		log.Println("Headers:", req.Header)
+		log.Println("Query:", req.URL.RawQuery)
+	}
+
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -78,6 +86,10 @@ func HttpGetWithResponse[DTO interface{}](params HttpGetParams) (*DTO, error) {
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
+	}
+
+	if params.PrintResponse {
+		log.Println("Response body as raw string:", string(body))
 	}
 
 	var dto DTO
