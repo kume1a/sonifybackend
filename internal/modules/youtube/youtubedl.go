@@ -106,7 +106,7 @@ func GetYoutubeVideoInfo(videoID string) (*youtubeVideoInfoDTO, error) {
 }
 
 func GetYoutubeAudioURL(query string) (string, error) {
-	cmd := exec.Command("yt-dlp", "-f", "bestaudio", "--get-url", "--default-search", "ytsearch", "\""+query+"\"")
+	cmd := exec.Command("yt-dlp", "-f", "bestaudio", "--get-url", "--default-search", "ytsearch", query)
 
 	output, err := cmd.Output()
 	if err != nil {
@@ -124,7 +124,7 @@ func GetYoutubeAudioURL(query string) (string, error) {
 }
 
 func GetYoutubeSearchBestMatchVideoID(query string) (string, error) {
-	cmd := exec.Command("yt-dlp", "--get-id", "--default-search", "ytsearch", "\""+query+"\"")
+	cmd := exec.Command("yt-dlp", "--get-id", "--default-search", "ytsearch", query)
 
 	output, err := cmd.Output()
 	if err != nil {

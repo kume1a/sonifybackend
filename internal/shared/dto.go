@@ -27,7 +27,7 @@ type AudioIDDTO struct {
 }
 
 type AudioIDsDTO struct {
-	AudioIDs []uuid.UUID `json:"audioIds" valid:"uuidSliceNotEmpty,optional"`
+	AudioIDs []uuid.UUID `json:"audioIds" valid:"-"`
 }
 
 type OkDTO struct {
