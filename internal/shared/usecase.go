@@ -16,6 +16,7 @@ type ProcessUnknownExtMediaFileParams struct {
 func ProcessUnknownExtMediaFile(params ProcessUnknownExtMediaFileParams) (string, error) {
 	downloadedFileName, err := FindFirstFile(params.TempOutputDir, params.PossibleExtensions)
 	if err != nil {
+		log.Println("Error finding first file: ", err)
 		return "", err
 	}
 
