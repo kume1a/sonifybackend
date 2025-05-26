@@ -22,6 +22,7 @@ const (
 	AudioExtWma  = ".wma"
 	AudioExtWmv  = ".wmv"
 	AudioExtWebm = ".webm"
+	AudioExtMp4  = ".mp4"
 )
 
 var AudioMimeTypes = []string{
@@ -41,7 +42,7 @@ var ImageExtensions = []string{
 var AudioExtensions = []string{
 	AudioExtMp3, AudioExtWav, AudioExtAiff,
 	AudioExtFlac, AudioExtOgg, AudioExtWma,
-	AudioExtWmv, AudioExtWebm,
+	AudioExtWmv, AudioExtWebm, AudioExtMp4,
 }
 
 func ConvertMedia(inputFile string, outputFile string) error {
