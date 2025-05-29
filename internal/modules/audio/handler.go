@@ -110,9 +110,12 @@ func handleDeleteUnusedAudio(apiCfg *config.ApiConfig) http.HandlerFunc {
 						log.Println("Error removing unused audio file: ", err)
 						return err
 					}
-					if err := os.Remove(unusedAudio.ThumbnailPath.String); err != nil {
-						log.Println("Error removing unused audio thumbnail file: ", err)
-						return err
+
+					if unusedAudio.ThumbnailPath.Valid {
+						if err := os.Remove(unusedAudio.ThumbnailPath.String); err != nil {
+							log.Println("Error removing unused audio thumbnail file: ", err)
+							return err
+						}
 					}
 
 					return nil
