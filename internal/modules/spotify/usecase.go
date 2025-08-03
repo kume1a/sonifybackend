@@ -48,7 +48,7 @@ func DownloadWriteSpotifyAudios(
 		return input.SpotifyID
 	})
 
-	dbSpotifyIDs, err := audio.GetAudioSpotifyIdsBySpotifyIds(ctx, resouceConfig.DB, spotifyIDs)
+	dbSpotifyIDs, err := audio.GetAudioSpotifyIDsBySpotifyIDs(ctx, resouceConfig.DB, spotifyIDs)
 	if err != nil {
 		return err
 	}

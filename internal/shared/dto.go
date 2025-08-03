@@ -34,7 +34,7 @@ type OkDTO struct {
 	Ok bool `json:"ok"`
 }
 
-type UserDto struct {
+type UserDTO struct {
 	ID           uuid.UUID             `json:"id"`
 	CreatedAt    time.Time             `json:"createdAt"`
 	Name         string                `json:"name"`
@@ -42,7 +42,7 @@ type UserDto struct {
 	AuthProvider database.AuthProvider `json:"authProvider"`
 }
 
-type LastCreatedAtPageParamsDto struct {
+type LastCreatedAtPageParamsDTO struct {
 	LastCreatedAt time.Time `json:"lastCreatedAt"`
 	Limit         int32     `json:"limit" valid:"required,max(200)"`
 }
@@ -65,7 +65,7 @@ func (dto *KeywordDTO) Validate() error {
 	return err
 }
 
-func (dto *LastCreatedAtPageParamsDto) Validate() error {
+func (dto *LastCreatedAtPageParamsDTO) Validate() error {
 	_, err := govalidator.ValidateStruct(dto)
 	return err
 }

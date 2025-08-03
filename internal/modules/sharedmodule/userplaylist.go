@@ -50,7 +50,7 @@ func GetPlaylistIDsByUserID(
 	playlistIds, err := db.GetPlaylistIDsByUserID(ctx, userId)
 
 	if err != nil {
-		log.Println("Error getting user playlist ids:", err)
+		log.Println("Error getting user playlist IDs:", err)
 	}
 
 	return playlistIds, err

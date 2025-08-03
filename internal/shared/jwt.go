@@ -54,9 +54,9 @@ func verifyJWT(tokenString string, secretKey string) (*TokenClaims, error) {
 		return nil, errors.New(ErrInvalidToken)
 	}
 
-	userId, ok := claims["userId"].(string)
+	userID, ok := claims["userId"].(string)
 	if !ok {
-		log.Println("Error parsing userId from token")
+		log.Println("Error parsing userID from token")
 		return nil, errors.New(ErrInvalidToken)
 	}
 
@@ -66,14 +66,14 @@ func verifyJWT(tokenString string, secretKey string) (*TokenClaims, error) {
 		return nil, errors.New(ErrInvalidToken)
 	}
 
-	userIdUUID, err := uuid.Parse(userId)
+	userIDUUID, err := uuid.Parse(userID)
 	if err != nil {
-		log.Println("Error parsing userId to UUID: ", err)
+		log.Println("Error parsing userID to UUID: ", err)
 		return nil, errors.New(ErrInvalidToken)
 	}
 
 	return &TokenClaims{
-		UserID: userIdUUID,
+		UserID: userIDUUID,
 		Email:  email,
 	}, nil
 }

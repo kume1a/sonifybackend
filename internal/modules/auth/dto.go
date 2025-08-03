@@ -8,7 +8,7 @@ type googleSignInDTO struct {
 
 type tokenPayloadDTO struct {
 	AccessToken string         `json:"accessToken"`
-	User        shared.UserDto `json:"user"`
+	User        shared.UserDTO `json:"user"`
 }
 
 type emailSignInDTO struct {

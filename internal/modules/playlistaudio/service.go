@@ -101,7 +101,7 @@ func DeletePlaylistAudiosByIDs(
 	err := db.DeletePlaylistAudiosByIDs(ctx, params)
 
 	if err != nil {
-		log.Println("Error deleting playlist audios by ids:", err)
+		log.Println("Error deleting playlist audios by IDs:", err)
 	}
 
 	return err
@@ -164,7 +164,7 @@ func GetPlaylistAudioJoinsBySpotifyIds(
 	entities, err := db.GetPlaylistAudioJoinsBySpotifyIDs(ctx, params)
 
 	if err != nil {
-		log.Println("Error getting playlist audio joins by spotify ids:", err)
+		log.Println("Error getting playlist audio joins by spotify IDs:", err)
 	}
 
 	return entities, err

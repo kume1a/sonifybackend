@@ -39,6 +39,6 @@ func getTokenPayloadDtoFromUserEntity(userEntity *database.User) (*tokenPayloadD
 
 	return &tokenPayloadDTO{
 		AccessToken: accessToken,
-		User:        user.UserEntityToDto(userEntity),
+		User:        user.UserEntityToDTO(userEntity),
 	}, nil
 }

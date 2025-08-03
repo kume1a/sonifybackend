@@ -6,8 +6,8 @@ import (
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
-func UserEntityToDto(userEntity *database.User) shared.UserDto {
-	return shared.UserDto{
+func UserEntityToDTO(userEntity *database.User) shared.UserDTO {
+	return shared.UserDTO{
 		ID:           userEntity.ID,
 		CreatedAt:    userEntity.CreatedAt,
 		Name:         userEntity.Name.String,

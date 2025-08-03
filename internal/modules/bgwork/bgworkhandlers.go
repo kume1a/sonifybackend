@@ -13,7 +13,7 @@ func CreateHandleDownloadPlaylistAudios(
 	resourceConfig *config.ResourceConfig,
 ) func(job *work.Job) error {
 	return func(job *work.Job) error {
-		playlistId := job.ArgString("spotifyPlaylistID")
+		playlistID := job.ArgString("spotifyPlaylistID")
 		spotifyAccessToken := job.ArgString("spotifyAccessToken")
 
 		if err := job.ArgError(); err != nil {
@@ -23,7 +23,7 @@ func CreateHandleDownloadPlaylistAudios(
 		ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
 		defer cancel()
 
-		spotify.DownloadSpotifyPlaylistAudios(ctx, resourceConfig, playlistId, spotifyAccessToken)
+		spotify.DownloadSpotifyPlaylistAudios(ctx, resourceConfig, playlistID, spotifyAccessToken)
 
 		return nil
 	}

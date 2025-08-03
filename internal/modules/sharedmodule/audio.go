@@ -26,7 +26,7 @@ type AudioDTO struct {
 	AudioLike      *AudioLikeDTO `json:"audioLike"`
 }
 
-func AudioEntityToDto(e *database.Audio) *AudioDTO {
+func AudioEntityToDTO(e *database.Audio) *AudioDTO {
 	return &AudioDTO{
 		ID:             e.ID,
 		CreatedAt:      e.CreatedAt,

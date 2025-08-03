@@ -191,27 +191,27 @@ func GetUserPlaylistsByUserID(
 func GetUserPlaylistIDsByUserID(
 	ctx context.Context,
 	db *database.Queries,
-	userId uuid.UUID,
+	userID uuid.UUID,
 ) (uuid.UUIDs, error) {
-	playlistIds, err := db.GetUserPlaylistIDsByUserID(ctx, userId)
+	playlistIDs, err := db.GetUserPlaylistIDsByUserID(ctx, userID)
 
 	if err != nil {
-		log.Println("Error getting user playlist ids:", err)
+		log.Println("Error getting user playlist IDs:", err)
 	}
 
-	return playlistIds, err
+	return playlistIDs, err
 }
 
 func GetUserPlaylistUserIDsByPlaylistID(
 	ctx context.Context,
 	db *database.Queries,
-	playlistId uuid.UUID,
+	playlistID uuid.UUID,
 ) (uuid.UUIDs, error) {
-	userIds, err := db.GetUserPlaylistUserIDsByPlaylistID(ctx, playlistId)
+	userIDs, err := db.GetUserPlaylistUserIDsByPlaylistID(ctx, playlistID)
 
 	if err != nil {
-		log.Println("Error getting user playlist user ids:", err)
+		log.Println("Error getting user playlist user IDs:", err)
 	}
 
-	return userIds, err
+	return userIDs, err
 }

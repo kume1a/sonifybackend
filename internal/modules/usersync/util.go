@@ -6,7 +6,7 @@ import (
 	"github.com/kume1a/sonifybackend/internal/database"
 )
 
-func userSyncDatumEntityToDTO(entity *database.UserSyncDatum) userSyncDatumDTO {
+func UserSyncDatumEntityToDTO(entity *database.UserSyncDatum) userSyncDatumDTO {
 	var spotifyLastSyncedAt *time.Time = nil
 	if entity.SpotifyLastSyncedAt.Valid {
 		spotifyLastSyncedAt = &entity.SpotifyLastSyncedAt.Time

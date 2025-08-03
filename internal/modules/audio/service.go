@@ -38,7 +38,7 @@ func CreateAudio(
 		return nil, shared.InternalServerErrorDef()
 	}
 
-	return &entity, err
+	return &entity, nil
 }
 
 func UpdateAudioByID(
@@ -49,7 +49,7 @@ func UpdateAudioByID(
 	entity, err := db.UpdateAudioByID(ctx, params)
 
 	if err != nil {
-		log.Println("Error updating audio by id:", err)
+		log.Println("Error updating audio by ID:", err)
 
 		if shared.IsDBErrorNotFound(err) {
 			return nil, shared.NotFound(shared.ErrAudioNotFound)
@@ -80,7 +80,7 @@ func DeleteAudioByID(
 	return nil
 }
 
-func DoesAudioExistByLocalId(
+func DoesAudioExistByLocalID(
 	ctx context.Context,
 	db *database.Queries,
 	userID uuid.UUID,
@@ -95,41 +95,41 @@ func DoesAudioExistByLocalId(
 	)
 
 	if err != nil {
-		log.Println("Error counting user audio by local id: ", err)
+		log.Println("Error counting user audio by local ID: ", err)
 		return false, shared.InternalServerErrorDef()
 	}
 
 	return count > 0, nil
 }
 
-func GetAudioSpotifyIdsBySpotifyIds(
+func GetAudioSpotifyIDsBySpotifyIDs(
 	ctx context.Context,
 	db *database.Queries,
-	spotifyIds []string,
+	spotifyIDs []string,
 ) ([]database.GetAudioSpotifyIDsBySpotifyIDsRow, error) {
-	ids, err := db.GetAudioSpotifyIDsBySpotifyIDs(ctx, spotifyIds)
+	ids, err := db.GetAudioSpotifyIDsBySpotifyIDs(ctx, spotifyIDs)
 
 	if err != nil {
-		log.Println("Error getting audios spotify ids by spotify ids: ", err)
+		log.Println("Error getting audios spotify IDs by spotify IDs: ", err)
 		return nil, shared.InternalServerErrorDef()
 	}
 
-	return ids, err
+	return ids, nil
 }
 
 func GetAudioIDsBySpotifyIDs(
 	ctx context.Context,
 	db *database.Queries,
-	spotifyIds []string,
+	spotifyIDs []string,
 ) (uuid.UUIDs, error) {
-	ids, err := db.GetAudioIDsBySpotifyIDs(ctx, spotifyIds)
+	ids, err := db.GetAudioIDsBySpotifyIDs(ctx, spotifyIDs)
 
 	if err != nil {
-		log.Println("Error getting audio ids by spotify ids: ", err)
+		log.Println("Error getting audio IDs by spotify IDs: ", err)
 		return nil, shared.InternalServerErrorDef()
 	}
 
-	return ids, err
+	return ids, nil
 }
 
 func GetAllAudioIDs(
@@ -139,11 +139,11 @@ func GetAllAudioIDs(
 	ids, err := db.GetAllAudioIDs(ctx)
 
 	if err != nil {
-		log.Println("Error getting all audio ids: ", err)
+		log.Println("Error getting all audio IDs: ", err)
 		return nil, shared.InternalServerErrorDef()
 	}
 
-	return ids, err
+	return ids, nil
 }
 
 func GetUnusedAudios(
@@ -168,7 +168,7 @@ func AudioExistsByYoutubeVideoID(
 	row, err := db.AudioExistsByYoutubeVideoID(ctx, youtubeVideoID)
 
 	if err != nil {
-		log.Println("Error checking if audio exists by youtube video id: ", err)
+		log.Println("Error checking if audio exists by youtube video ID: ", err)
 	}
 
 	return row, err
@@ -182,7 +182,7 @@ func GetAudioByYoutubeVideoID(
 	audio, err := db.GetAudioByYoutubeVideoID(ctx, youtubeVideoID)
 
 	if err != nil {
-		log.Println("Error getting audio by youtube video id: ", err)
+		log.Println("Error getting audio by youtube video ID: ", err)
 	}
 
 	return &audio, err

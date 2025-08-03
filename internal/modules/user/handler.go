@@ -35,7 +35,7 @@ func handleUpdateUser(apiCfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		shared.ResOK(w, UserEntityToDto(user))
+		shared.ResOK(w, UserEntityToDTO(user))
 	}
 }
 
@@ -53,6 +53,6 @@ func handleGetAuthUser(apiCfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		shared.ResOK(w, UserEntityToDto(user))
+		shared.ResOK(w, UserEntityToDTO(user))
 	}
 }

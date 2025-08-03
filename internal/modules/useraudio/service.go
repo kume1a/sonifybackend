@@ -102,7 +102,7 @@ func GetUserAudioIDs(
 	ids, err := db.GetUserAudioIDs(ctx, userId)
 
 	if err != nil {
-		log.Println("Error getting user audio ids: ", err)
+		log.Println("Error getting user audio IDs: ", err)
 	}
 
 	return ids, err
@@ -120,7 +120,7 @@ func GetUserAudiosByAudioIDs(
 	audios, err := db.GetUserAudiosByAudioIds(ctx, params)
 
 	if err != nil {
-		log.Println("Error getting audios by ids: ", err)
+		log.Println("Error getting audios by IDs: ", err)
 	}
 
 	return audios, err

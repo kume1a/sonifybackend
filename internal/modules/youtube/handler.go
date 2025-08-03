@@ -58,7 +58,7 @@ func handleDownloadYoutubeAudioToUserLibrary(apiCfg *config.ApiConfig) http.Hand
 
 		res := sharedmodule.UserAudioWithRelDTO{
 			UserAudioDTO: sharedmodule.UserAudioEntityToDTO(userAudioWithAudio.UserAudio),
-			Audio:        sharedmodule.AudioEntityToDto(userAudioWithAudio.Audio),
+			Audio:        sharedmodule.AudioEntityToDTO(userAudioWithAudio.Audio),
 		}
 
 		shared.ResCreated(w, res)
@@ -95,7 +95,7 @@ func handleDownloadYoutubeAudioPlaylist(apiCfg *config.ApiConfig) http.HandlerFu
 
 		res := sharedmodule.PlaylistAudioWithRelDTO{
 			PlaylistAudioDTO: sharedmodule.PlaylistAudioEntityToDTO(playlistAudioWithAudio.PlaylistAudio),
-			Audio:            sharedmodule.AudioEntityToDto(playlistAudioWithAudio.Audio),
+			Audio:            sharedmodule.AudioEntityToDTO(playlistAudioWithAudio.Audio),
 		}
 
 		shared.ResCreated(w, res)

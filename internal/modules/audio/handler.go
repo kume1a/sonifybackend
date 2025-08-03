@@ -26,7 +26,7 @@ func handleUploadUserLocalMusic(apiCfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		audioExists, err := DoesAudioExistByLocalId(r.Context(), apiCfg.DB, authPayload.UserID, form.LocalID)
+		audioExists, err := DoesAudioExistByLocalID(r.Context(), apiCfg.DB, authPayload.UserID, form.LocalID)
 		if err != nil {
 			shared.ResInternalServerErrorDef(w)
 			return
@@ -60,7 +60,7 @@ func handleUploadUserLocalMusic(apiCfg *config.ApiConfig) http.HandlerFunc {
 
 		res := sharedmodule.UserAudioWithRelDTO{
 			UserAudioDTO: sharedmodule.UserAudioEntityToDTO(userAudioWithAudio.UserAudio),
-			Audio:        sharedmodule.AudioEntityToDto(userAudioWithAudio.Audio),
+			Audio:        sharedmodule.AudioEntityToDTO(userAudioWithAudio.Audio),
 		}
 
 		shared.ResCreated(w, res)

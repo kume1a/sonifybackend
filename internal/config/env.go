@@ -38,7 +38,7 @@ type EnvVariables struct {
 	GoogleClientKey      string
 	AccessTokenSecret    string
 	AccessTokenExpMillis int64
-	PublicDIr            string
+	PublicDir            string
 	MaxUploadSizeBytes   int64
 	SpotifyClientID      string
 	SpotifyClientSecret  string
@@ -121,7 +121,7 @@ func ParseEnv() (*EnvVariables, error) {
 		GoogleClientKey:      googleClientKey,
 		AccessTokenSecret:    accessTokenSecret,
 		AccessTokenExpMillis: accessTokenExpMillis,
-		PublicDIr:            publicDir,
+		PublicDir:            publicDir,
 		MaxUploadSizeBytes:   maxUploadSizeBytes,
 		SpotifyClientID:      spotifyClientID,
 		SpotifyClientSecret:  spotifyClientSecret,
