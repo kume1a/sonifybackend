@@ -33,7 +33,7 @@ func handleDownloadYoutubeAudioToUserLibrary(apiCfg *config.ApiConfig) http.Hand
 	return func(w http.ResponseWriter, r *http.Request) {
 		authPayload, err := shared.GetAuthPayload(r)
 		if err != nil {
-			shared.ResUnauthorized(w, err.Error())
+			shared.ResUnauthorized(w, shared.ErrUnauthorized)
 			return
 		}
 
@@ -69,7 +69,7 @@ func handleDownloadYoutubeAudioPlaylist(apiCfg *config.ApiConfig) http.HandlerFu
 	return func(w http.ResponseWriter, r *http.Request) {
 		authPayload, err := shared.GetAuthPayload(r)
 		if err != nil {
-			shared.ResUnauthorized(w, err.Error())
+			shared.ResUnauthorized(w, shared.ErrUnauthorized)
 			return
 		}
 

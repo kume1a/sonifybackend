@@ -11,7 +11,7 @@ func Router(apiCfg *config.ApiConfig, router *mux.Router) *mux.Router {
 
 	r.HandleFunc("/myhiddenuseraudios", shared.AuthMW(handleGetHiddenUserAudiosByAuthUser(apiCfg))).Methods("GET")
 
-	r.HandleFunc("/hideForAuthUser", shared.AuthMW(handleHideUserAudio(apiCfg))).Methods("POST")
+	r.HandleFunc("/hideForAuthUser", shared.AuthMW(handleCreateHiddenUserAudio(apiCfg))).Methods("POST")
 	r.HandleFunc("/unhideForAuthUser", shared.AuthMW(handleUnhideUserAudio(apiCfg))).Methods("POST")
 
 	return r

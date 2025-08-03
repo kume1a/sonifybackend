@@ -14,7 +14,7 @@ func handleUpdateUser(apiCfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tokenPayload, err := shared.GetAuthPayload(r)
 		if err != nil {
-			shared.ResUnauthorized(w, err.Error())
+			shared.ResUnauthorized(w, shared.ErrUnauthorized)
 			return
 		}
 
@@ -43,7 +43,7 @@ func handleGetAuthUser(apiCfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tokenPayload, err := shared.GetAuthPayload(r)
 		if err != nil {
-			shared.ResUnauthorized(w, err.Error())
+			shared.ResUnauthorized(w, shared.ErrUnauthorized)
 			return
 		}
 

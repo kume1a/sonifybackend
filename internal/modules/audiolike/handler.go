@@ -14,7 +14,7 @@ func handleLikeAudio(apiCfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authPayload, err := shared.GetAuthPayload(r)
 		if err != nil {
-			shared.ResUnauthorized(w, err.Error())
+			shared.ResUnauthorized(w, shared.ErrUnauthorized)
 			return
 		}
 
@@ -49,7 +49,7 @@ func handleUnlikeAudio(apiCfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authPayload, err := shared.GetAuthPayload(r)
 		if err != nil {
-			shared.ResUnauthorized(w, err.Error())
+			shared.ResUnauthorized(w, shared.ErrUnauthorized)
 			return
 		}
 
@@ -82,7 +82,7 @@ func handleGetAuthUserAudioLikes(apiCfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authPayload, err := shared.GetAuthPayload(r)
 		if err != nil {
-			shared.ResUnauthorized(w, err.Error())
+			shared.ResUnauthorized(w, shared.ErrUnauthorized)
 			return
 		}
 

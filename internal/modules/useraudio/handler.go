@@ -14,7 +14,7 @@ func handleCreateUserAudiosForAuthUser(apiCfg *config.ApiConfig) http.HandlerFun
 	return func(w http.ResponseWriter, r *http.Request) {
 		authUser, err := shared.GetAuthPayload(r)
 		if err != nil {
-			shared.ResUnauthorized(w, err.Error())
+			shared.ResUnauthorized(w, shared.ErrUnauthorized)
 			return
 		}
 
@@ -48,7 +48,7 @@ func handleDeleteUserAudioForAuthUser(apiCfg *config.ApiConfig) http.HandlerFunc
 	return func(w http.ResponseWriter, r *http.Request) {
 		authUser, err := shared.GetAuthPayload(r)
 		if err != nil {
-			shared.ResUnauthorized(w, err.Error())
+			shared.ResUnauthorized(w, shared.ErrUnauthorized)
 			return
 		}
 
@@ -84,7 +84,7 @@ func handleGetAuthUserAudioIDs(apiCfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authPayload, err := shared.GetAuthPayload(r)
 		if err != nil {
-			shared.ResUnauthorized(w, err.Error())
+			shared.ResUnauthorized(w, shared.ErrUnauthorized)
 			return
 		}
 
@@ -102,7 +102,7 @@ func handleGetAuthUserUserAudiosByAudioIDs(apiCfg *config.ApiConfig) http.Handle
 	return func(w http.ResponseWriter, r *http.Request) {
 		authPayload, err := shared.GetAuthPayload(r)
 		if err != nil {
-			shared.ResUnauthorized(w, err.Error())
+			shared.ResUnauthorized(w, shared.ErrUnauthorized)
 			return
 		}
 

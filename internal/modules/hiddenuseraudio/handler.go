@@ -9,11 +9,11 @@ import (
 	"github.com/kume1a/sonifybackend/internal/shared"
 )
 
-func handleHideUserAudio(apiCfg *config.ApiConfig) http.HandlerFunc {
+func handleCreateHiddenUserAudio(apiCfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authPayload, err := shared.GetAuthPayload(r)
 		if err != nil {
-			shared.ResUnauthorized(w, err.Error())
+			shared.ResUnauthorized(w, shared.ErrUnauthorized)
 			return
 		}
 
@@ -52,7 +52,7 @@ func handleUnhideUserAudio(apiCfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authPayload, err := shared.GetAuthPayload(r)
 		if err != nil {
-			shared.ResUnauthorized(w, err.Error())
+			shared.ResUnauthorized(w, shared.ErrUnauthorized)
 			return
 		}
 
@@ -85,7 +85,7 @@ func handleGetHiddenUserAudiosByAuthUser(apiCfg *config.ApiConfig) http.HandlerF
 	return func(w http.ResponseWriter, r *http.Request) {
 		authPayload, err := shared.GetAuthPayload(r)
 		if err != nil {
-			shared.ResUnauthorized(w, err.Error())
+			shared.ResUnauthorized(w, shared.ErrUnauthorized)
 			return
 		}
 

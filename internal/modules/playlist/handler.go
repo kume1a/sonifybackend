@@ -13,7 +13,7 @@ import (
 
 func handleGetPlaylistFull(apiCfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		authPaylad, err := shared.GetAuthPayload(r)
+		authPayload, err := shared.GetAuthPayload(r)
 		if err != nil {
 			shared.ResUnauthorized(w, shared.ErrUnauthorized)
 			return
@@ -37,7 +37,7 @@ func handleGetPlaylistFull(apiCfg *config.ApiConfig) http.HandlerFunc {
 			ctx, apiCfg.DB,
 			database.GetPlaylistAudiosParams{
 				PlaylistIds: []uuid.UUID{playlistIDDTO.PlaylistID},
-				UserID:      authPaylad.UserID,
+				UserID:      authPayload.UserID,
 				Ids:         nil,
 			},
 		)
