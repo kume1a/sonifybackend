@@ -40,7 +40,7 @@ func ResJson(w http.ResponseWriter, res *HttpRes) {
 
 func ResError(w http.ResponseWriter, code int, msg string) {
 	if code > 499 {
-		log.Printf("Responsing with 500 error, code(%v) %v", code, msg)
+		log.Printf("Responding with 500 error, code(%v) %v", code, msg)
 	}
 
 	ResJson(

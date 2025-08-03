@@ -106,7 +106,7 @@ func handleGetAuthUserUserAudiosByAudioIDs(apiCfg *config.ApiConfig) http.Handle
 			return
 		}
 
-		// user body for big payload
+		// using body for big payload
 		body, err := shared.GetRequestBody[*shared.AudioIDsDTO](r)
 		if err != nil {
 			shared.ResBadRequest(w, err.Error())

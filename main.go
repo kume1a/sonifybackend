@@ -22,7 +22,7 @@ func main() {
 
 	envVars, err := config.ParseEnv()
 	if err != nil {
-		log.Fatal("Coultn't parse env vars, returning")
+		log.Fatal("Couldn't parse env vars, returning")
 		return
 	}
 

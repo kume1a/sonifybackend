@@ -89,7 +89,7 @@ func handleGetHiddenUserAudiosByAuthUser(apiCfg *config.ApiConfig) http.HandlerF
 			return
 		}
 
-		// user body for big payload
+		// using body for big payload
 		body, err := shared.ValidateRequestBody[*shared.OptionalIDsDTO](r)
 		if err != nil {
 			shared.ResBadRequest(w, err.Error())
